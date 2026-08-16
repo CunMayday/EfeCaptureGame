@@ -343,11 +343,36 @@
       display: none;
       pointer-events: none;
       z-index: 3;
+      opacity: 0;
       filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
     }
 
     .call-sign-icon.visible {
       display: block;
+      animation: objective-noise-rise 0.9s ease-out infinite;
+    }
+
+    .objective-noise-icon {
+      position: absolute;
+      width: 30px;
+      height: auto;
+      display: none;
+      pointer-events: none;
+      z-index: 3;
+      opacity: 0;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    }
+
+    .objective-noise-icon.playing {
+      display: block;
+      animation: objective-noise-rise 1.4s ease-out forwards;
+    }
+
+    @keyframes objective-noise-rise {
+      0% { opacity: 0; transform: translateY(0); }
+      18% { opacity: 1; transform: translateY(-10px); }
+      55% { opacity: 1; transform: translateY(-16px); }
+      100% { opacity: 0; transform: translateY(-30px); }
     }
 
     .hud-overlay {
@@ -1112,6 +1137,7 @@
       <img id="doorOpenFxIntro" class="door-open-fx" src="Cf_gate_closed.png" alt="">
       <img id="doorOpenFxMedic" class="door-open-fx" src="Cf_gate_closed.png" alt="">
       <img id="callSignIcon" class="call-sign-icon" src="Spy_sign_noise.png" alt="">
+      <img id="objectiveNoiseIcon" class="objective-noise-icon" src="Spy_sign_noise.png" alt="">
       <div id="deathScreen" class="death-screen"></div>
       <div id="deathFlash" class="death-flash"></div>
       <div id="hudOverlay" class="hud-overlay">
@@ -1562,6 +1588,43 @@
     const nodesText = document.getElementById("nodesText");
     const sprintBarFillEl = document.getElementById("sprintBarFill");
     const callSignIconEl = document.getElementById("callSignIcon");
+    const objectiveNoiseIconEl = document.getElementById("objectiveNoiseIcon");
+    let objectiveNoiseX = 0;
+    let objectiveNoiseY = 0;
+    let objectiveNoiseTimer = 0;
+
+    function showObjectiveNoiseIcon(worldX, worldY, icon) {
+      objectiveNoiseX = worldX;
+      objectiveNoiseY = worldY;
+      objectiveNoiseTimer = 1.4;
+      objectiveNoiseIconEl.src = icon || "Spy_sign_noise.png";
+      objectiveNoiseIconEl.classList.remove("playing");
+      void objectiveNoiseIconEl.offsetWidth;
+      objectiveNoiseIconEl.classList.add("playing");
+    }
+
+    function updateObjectiveNoiseIcon(dt) {
+      if (objectiveNoiseTimer <= 0) {
+        return;
+      }
+      objectiveNoiseTimer = Math.max(0, objectiveNoiseTimer - dt);
+      if (objectiveNoiseTimer <= 0 || jumpscare.classList.contains("visible") ||
+        (game.state !== "playing" && game.state !== "intro")) {
+        objectiveNoiseIconEl.classList.remove("playing");
+        return;
+      }
+      const drawWidth = 30;
+      const drawHeight = 30;
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const screenX = (objectiveNoiseX - game.camera.x - drawWidth / 2) * scaleX;
+      const screenY = (objectiveNoiseY - game.camera.y - drawHeight - 14) * scaleY;
+      objectiveNoiseIconEl.style.width = `${drawWidth * scaleX}px`;
+      objectiveNoiseIconEl.style.height = `${drawHeight * scaleY}px`;
+      objectiveNoiseIconEl.style.left = `${canvas.offsetLeft + screenX}px`;
+      objectiveNoiseIconEl.style.top = `${canvas.offsetTop + screenY}px`;
+    }
     let masterVolume = 1;
     let masterMuted = false;
     const audioBaseVolumes = new WeakMap();
@@ -2097,7 +2160,8 @@
       patrolIdleCooldown: 6 + Math.random() * 8,
       spriteIsMoving: false,
       idleHoldTimer: 0,
-      investigateArrived: false
+      investigateArrived: false,
+      deliberatelyIdle: false
     };
 
     const introMedic = {
@@ -2259,6 +2323,8 @@
       player.footstepTimer = 0;
       callCooldown = 0;
       callSignTimer = 0;
+      objectiveNoiseTimer = 0;
+      objectiveNoiseIconEl.classList.remove("playing");
       runWasChased = false;
       runCalledForMedic = false;
       enemy.mode = "patrol";
@@ -2746,6 +2812,7 @@
           introDoorOpenTimer = gateOpeningDuration;
           playObjectiveInteractSound();
           playDoorOpenSound();
+          showObjectiveNoiseIcon(introConsole.x, introConsole.y, "console_interact_icon.png");
           introDoorSolids.forEach((rect) => {
             const idx = solids.indexOf(rect);
             if (idx !== -1) {
@@ -2771,6 +2838,7 @@
             player.nodesActive += 1;
             playObjectiveInteractSound();
             playObjectiveCue("power");
+            showObjectiveNoiseIcon(item.x, item.y);
             alertEnemyToSound(item.x, item.y);
           }
         }
@@ -3011,6 +3079,7 @@
         if (enemy.mode !== "chase" || enemy.isLured) {
           playEnemySpotSound(distToPlayer);
           playEnemyDetectedSound();
+          showObjectiveNoiseIcon(player.x, player.y, "footstep_heard_icon.png");
         }
         enemy.mode = "chase";
         enemy.chasingBySound = true;
@@ -3059,6 +3128,7 @@
         enemy.moveX = 0;
         enemy.moveY = 0;
         enemy.stuckTimer = 0;
+        enemy.deliberatelyIdle = true;
         syncEnemyWalkAudio(0);
         return;
       }
@@ -3067,6 +3137,7 @@
         enemy.moveX = 0;
         enemy.moveY = 0;
         enemy.stuckTimer = 0;
+        enemy.deliberatelyIdle = true;
         syncEnemyWalkAudio(0);
         return;
       }
@@ -3124,6 +3195,7 @@
         enemy.moveX = 0;
         enemy.moveY = 0;
         enemy.stuckTimer = 0;
+        enemy.deliberatelyIdle = true;
         syncEnemyWalkAudio(0);
         return;
       }
@@ -3140,6 +3212,7 @@
         waypoint = { x: targetX, y: targetY };
       }
 
+      enemy.deliberatelyIdle = false;
       const dx = waypoint.x - enemy.x;
       const dy = waypoint.y - enemy.y;
       const len = Math.hypot(dx, dy) || 1;
@@ -3201,12 +3274,25 @@
         if (!jumpscareVideo.currentSrc.endsWith(jumpscareSrc)) {
           jumpscareVideo.src = jumpscareSrc;
         }
+        if (audioContext && audioContext.state === "suspended") {
+          audioContext.resume().catch(() => {});
+        }
         jumpscareVideo.currentTime = 0;
         jumpscareVideo.muted = false;
-        jumpscareVideo.play().catch(() => {
-          jumpscareVideo.muted = true;
-          jumpscareVideo.play().catch(() => {});
-        });
+        jumpscareVideo.volume = 1;
+        const attemptJumpscarePlay = () => {
+          jumpscareVideo.muted = false;
+          jumpscareVideo.play().catch(() => {
+            jumpscareVideo.muted = true;
+            jumpscareVideo.play().catch(() => {});
+          });
+        };
+        attemptJumpscarePlay();
+        setTimeout(() => {
+          if (jumpscareVideo.muted || jumpscareVideo.paused) {
+            attemptJumpscarePlay();
+          }
+        }, 120);
 
         const runDeathSequence = () => {
           jumpscareGifTimer = null;
@@ -3543,6 +3629,9 @@
       if (rawMoving) {
         enemy.spriteIsMoving = true;
         enemy.idleHoldTimer = 0.25;
+      } else if (enemy.deliberatelyIdle) {
+        enemy.spriteIsMoving = false;
+        enemy.idleHoldTimer = 0;
       } else if (enemy.idleHoldTimer > 0) {
         enemy.idleHoldTimer -= dt;
         if (enemy.idleHoldTimer <= 0) {
@@ -3656,14 +3745,9 @@
 
     function updateCallSignIcon() {
       if (callSignTimer <= 0 || jumpscare.classList.contains("visible") || game.state !== "playing") {
-        callSignIconEl.style.display = "none";
+        callSignIconEl.classList.remove("visible");
         return;
       }
-
-      const blinkOn = Math.floor(callSignTimer * 4) % 2 === 0;
-      const fadeIn = clamp((2.6 - callSignTimer) / 0.2, 0, 1);
-      const fadeOut = clamp(callSignTimer / 0.4, 0, 1);
-      const opacity = blinkOn ? Math.min(fadeIn, fadeOut) : 0;
 
       const drawWidth = 34;
       const drawHeight = 34;
@@ -3673,12 +3757,11 @@
       const screenX = (callSignX - game.camera.x - drawWidth / 2) * scaleX;
       const screenY = (callSignY - game.camera.y - drawHeight - 16) * scaleY;
 
-      callSignIconEl.style.display = "block";
+      callSignIconEl.classList.add("visible");
       callSignIconEl.style.width = `${drawWidth * scaleX}px`;
       callSignIconEl.style.height = `${drawHeight * scaleY}px`;
       callSignIconEl.style.left = `${canvas.offsetLeft + screenX}px`;
       callSignIconEl.style.top = `${canvas.offsetTop + screenY}px`;
-      callSignIconEl.style.opacity = String(opacity);
     }
 
     function positionDoorOpenFx(el, worldX, worldY, visible, brightness) {
@@ -3900,6 +3983,7 @@
         updatePlayerSpriteElement();
         updateDoorGifElements(dt);
         updateCallSignIcon();
+        updateObjectiveNoiseIcon(dt);
         updateHud();
       }
       requestAnimationFrame(loop);
