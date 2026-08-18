@@ -303,6 +303,51 @@
       background: transparent;
     }
 
+    .pyro-sprite {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      display: block;
+      pointer-events: none;
+      transform-origin: center;
+      z-index: 2;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    .pyro-shadow-sprite {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      display: none;
+      pointer-events: none;
+      transform-origin: center;
+      z-index: 2;
+      object-fit: contain;
+      background: transparent;
+      opacity: 0.85;
+    }
+
+    .pyro-fx {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      display: none;
+      pointer-events: none;
+      z-index: 2;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    .pyro-fx.playing {
+      display: block;
+    }
+
+    .pyro-fx.pyro-trail {
+      z-index: 1;
+      opacity: 0.88;
+    }
+
     .player-sprite {
       position: absolute;
       width: 30px;
@@ -605,6 +650,95 @@
       display: none;
     }
 
+    .dev-console {
+      position: absolute;
+      inset: 14px;
+      z-index: 50;
+      background: rgba(4, 9, 13, 0.94);
+      border: 1px solid rgba(141, 224, 194, 0.4);
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      font-family: "Consolas", "Menlo", monospace;
+      font-size: 0.8rem;
+    }
+
+    .dev-console.hidden {
+      display: none;
+    }
+
+    .dev-console-log {
+      flex: 1;
+      overflow-y: auto;
+      color: #8de0c2;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .dev-console-log .log-line.error {
+      color: #ff6b6b;
+    }
+
+    .dev-console-log .log-line.ok {
+      color: #ffd37e;
+    }
+
+    .dev-console-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(141, 224, 194, 0.25);
+      padding-top: 8px;
+    }
+
+    .dev-console-prompt {
+      color: #8de0c2;
+    }
+
+    .dev-console-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #eef7f7;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .dev-console-button-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .dev-console-button {
+      flex: 1;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid rgba(141, 224, 194, 0.4);
+      background: rgba(141, 224, 194, 0.08);
+      color: #eef7f7;
+      cursor: pointer;
+    }
+
+    .dev-console-button.apply {
+      border-color: rgba(141, 224, 194, 0.6);
+      color: #8de0c2;
+    }
+
+    .dev-console-button.discard {
+      border-color: rgba(255, 107, 107, 0.5);
+      color: #ff8f8f;
+    }
+
+    .dev-console-button:hover {
+      background: rgba(141, 224, 194, 0.18);
+    }
+
     .achievement-icon img {
       width: 100%;
       height: 100%;
@@ -665,6 +799,94 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--accent);
+    }
+
+    .keycard-hud {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .keycard-hud.hidden {
+      display: none;
+    }
+
+    .keycard-hud-icon {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .keycard-hud span {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #ffd37e;
+    }
+
+    .keycard-pickup-icon {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 44px;
+      height: auto;
+      z-index: 3;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7));
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .keycard-pickup-icon.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .keycard-pickup-icon.hidden {
+      display: none;
+    }
+
+    .room-timer-text {
+      margin: 6px 0 0;
+      font-size: 0.78rem;
+      font-weight: bold;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8de0c2;
+      transition: color 0.25s ease, font-size 0.25s ease;
+    }
+
+    .room-timer-text.low {
+      color: #ff5555;
+      font-size: 1.1rem;
+      animation: roomTimerPulse 0.6s ease-in-out infinite;
+    }
+
+    @keyframes roomTimerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .room-timer-text.hidden {
+      display: none;
+    }
+
+    .pyro-bonus-time-fx {
+      position: absolute;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #8de0c2;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      pointer-events: none;
+      z-index: 6;
+      transition: left 0.7s cubic-bezier(0.3, 0, 0.2, 1), top 0.7s cubic-bezier(0.3, 0, 0.2, 1), opacity 0.7s ease-in;
+      opacity: 1;
+    }
+
+    .pyro-bonus-time-fx.flying {
+      opacity: 0.15;
     }
 
     .sprint-bar-wrap {
@@ -878,6 +1100,14 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--text);
+    }
+
+    .title-version {
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      vertical-align: middle;
+      opacity: 0.75;
     }
 
     .title-heading p {
@@ -1125,6 +1355,7 @@
       <img id="heavySpriteUp" class="enemy-sprite" src="Heavy_move_u.gif" alt="">
       <img id="heavySpriteDown" class="enemy-sprite" src="Heavy_move_d.gif" alt="">
       <img id="heavySpriteSide" class="enemy-sprite" src="Heavy_move_s.gif" alt="">
+      <div id="pyroLayer"></div>
       <img id="playerSpriteIdleDown" class="player-sprite" src="Spy_idle_d.gif" alt="">
       <img id="playerSpriteIdleUp" class="player-sprite" src="Spy_idle_u.gif" alt="">
       <img id="playerSpriteIdleSide" class="player-sprite" src="Spy_idle_s.gif" alt="">
@@ -1133,17 +1364,24 @@
       <img id="playerSpriteMoveSide" class="player-sprite" src="Spy_move_s.gif" alt="">
       <div id="jumpscare" class="jumpscare">
         <video id="jumpscareVideo" src="medicjumpscare.mp4" playsinline preload="auto" muted></video>
+        <img id="jumpscareGif" src="120px-Pyro_jump.gif" alt="" style="display: none;">
       </div>
       <img id="doorOpenFxIntro" class="door-open-fx" src="Cf_gate_closed.png" alt="">
       <img id="doorOpenFxMedic" class="door-open-fx" src="Cf_gate_closed.png" alt="">
       <img id="callSignIcon" class="call-sign-icon" src="Spy_sign_noise.png" alt="">
       <img id="objectiveNoiseIcon" class="objective-noise-icon" src="Spy_sign_noise.png" alt="">
+      <img id="keycardPickupIcon" class="keycard-pickup-icon hidden" src="78px-Cf_keycard_icon.png" alt="">
       <div id="deathScreen" class="death-screen"></div>
       <div id="deathFlash" class="death-flash"></div>
       <div id="hudOverlay" class="hud-overlay">
         <div class="objective-bar">
           <p id="objectiveText" class="objective-text"></p>
           <p id="nodesText" class="objective-sub">Power Nodes 0 / 2</p>
+          <div id="keycardHud" class="keycard-hud hidden">
+            <img id="keycardHudIcon" class="keycard-hud-icon" src="78px-Cf_keycard_icon.png" alt="">
+            <span id="keycardHudText"></span>
+          </div>
+          <p id="roomTimerText" class="room-timer-text hidden"></p>
         </div>
         <div class="sprint-bar-wrap">
           <div class="sprint-bar-label">Sprint</div>
@@ -1198,7 +1436,7 @@
       <button id="settingsButton" class="settings-corner-button" type="button">Settings</button>
       <div id="titleScreen" class="title-screen">
         <div class="title-heading">
-          <h1>BadWater.exe</h1>
+          <h1>BadWater.exe <span class="title-version">v1.2</span></h1>
           <p>Choose a mode</p>
         </div>
         <div class="mode-row">
@@ -1238,7 +1476,7 @@
               <span class="mode-desc">Subject Uncatalogued.</span>
               <span class="wip-banner">Locked</span>
             </button>
-            <button class="character-card locked" type="button" data-locked="1">
+            <button id="charPyroButton" class="character-card locked" type="button" data-character="pyro" data-locked="1">
               <img src="75px-Cm_btn_pyro.png" alt="Pyro">
               <span class="mode-name">Pyro</span>
               <span class="mode-desc">Subject Uncatalogued.</span>
@@ -1283,6 +1521,17 @@
         <img id="achievementPreview" class="achievement-preview hidden" src="" alt="">
       </div>
     </section>
+    <div id="devConsole" class="dev-console hidden">
+      <div id="devConsoleLog" class="dev-console-log"></div>
+      <div class="dev-console-input-row">
+        <span class="dev-console-prompt">&gt;</span>
+        <input id="devConsoleInput" class="dev-console-input" type="text" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="dev-console-button-row">
+        <button id="devConsoleApplyButton" class="dev-console-button apply" type="button">Apply</button>
+        <button id="devConsoleDiscardButton" class="dev-console-button discard" type="button">Discard</button>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -1297,6 +1546,7 @@
     const characterSelect = document.getElementById("characterSelect");
     const charHeavyButton = document.getElementById("charHeavyButton");
     const charMedicButton = document.getElementById("charMedicButton");
+    const charPyroButton = document.getElementById("charPyroButton");
     const characterBackButton = document.getElementById("characterBackButton");
     const achievementsButton = document.getElementById("achievementsButton");
     const settingsButton = document.getElementById("settingsButton");
@@ -1320,9 +1570,10 @@
     let activeCharacter = "medic";
     const beatenCharacters = new Set();
     const UNLOCKED_BY_VICTORY = {
-      heavy: { id: "medic", name: "Medic" }
+      heavy: { id: "medic", name: "Medic" },
+      medic: { id: "pyro", name: "Pyro" }
     };
-    const PLAYABLE_CHARACTERS = ["heavy", "medic"];
+    const PLAYABLE_CHARACTERS = ["heavy", "medic", "pyro"];
     function hasBeatenFullRoster() {
       return PLAYABLE_CHARACTERS.every((id) => beatenCharacters.has(id));
     }
@@ -1390,6 +1641,10 @@
       heavy: {
         title: "Simulation Desync",
         text: "Restore all power nodes to unlock the exit gate, and survive Heavy patrolling the training corridors. He sees you plainly at range and is slow to react, but once he spots you he closes in fast and does not give up easily."
+      },
+      pyro: {
+        title: "Simulation Desync",
+        text: "Find the keycards to work through the locked rooms and reach the power station, then get to the exit. Shadows patrol the halls — if one spots and reaches you, three identical Pyros burst out and hunt you together. They're slow, but every step they take leaves fire behind them that kills on contact. Outrun them, then let their own trail box them in."
       }
     };
 
@@ -1423,25 +1678,21 @@
     const playerSpriteMoveDownEl = document.getElementById("playerSpriteMoveDown");
     const playerSpriteMoveUpEl = document.getElementById("playerSpriteMoveUp");
     const playerSpriteMoveSideEl = document.getElementById("playerSpriteMoveSide");
-    let playerSpriteAssetsOk = true;
-    [
-      playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
-      playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
-    ].forEach((el) => {
-      el.addEventListener("error", () => {
-        playerSpriteAssetsOk = false;
-      });
-      el.addEventListener("load", () => {
-        playerSpriteAssetsOk = true;
-      });
-    });
+    function playerSpriteAssetsOk() {
+      return [
+        playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
+        playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
+      ].some((el) => el.complete && el.naturalWidth > 0);
+    }
     const doorOpenFxIntroEl = document.getElementById("doorOpenFxIntro");
     const doorOpenFxMedicEl = document.getElementById("doorOpenFxMedic");
     const jumpscare = document.getElementById("jumpscare");
     const deathScreen = document.getElementById("deathScreen");
     const deathFlash = document.getElementById("deathFlash");
     const jumpscareVideo = document.getElementById("jumpscareVideo");
+    const jumpscareGifEl = document.getElementById("jumpscareGif");
     const jumpscareFallbackDuration = 1050;
+    const jumpscareGifDuration = 1400;
     let jumpscareGifTimer = null;
     const titleVideoA = document.getElementById("titleVideoA");
     const titleVideoB = document.getElementById("titleVideoB");
@@ -1586,6 +1837,19 @@
     });
     const objectiveText = document.getElementById("objectiveText");
     const nodesText = document.getElementById("nodesText");
+    const keycardHudEl = document.getElementById("keycardHud");
+    const keycardHudTextEl = document.getElementById("keycardHudText");
+    const keycardPickupIconEl = document.getElementById("keycardPickupIcon");
+    const roomTimerTextEl = document.getElementById("roomTimerText");
+
+    function showKeycardPickupIndicator() {
+      keycardPickupIconEl.classList.remove("hidden");
+      requestAnimationFrame(() => keycardPickupIconEl.classList.add("visible"));
+    }
+
+    function hideKeycardPickupIndicator() {
+      keycardPickupIconEl.classList.remove("visible");
+    }
     const sprintBarFillEl = document.getElementById("sprintBarFill");
     const callSignIconEl = document.getElementById("callSignIcon");
     const objectiveNoiseIconEl = document.getElementById("objectiveNoiseIcon");
@@ -1676,11 +1940,17 @@
     const heavyChaseMusic = new Audio("Serv_music_chase.wav");
     heavyChaseMusic.loop = true;
     heavyChaseMusic.volume = 0.34;
+    const pyroMusic = new Audio("Fac_music.wav");
+    pyroMusic.loop = true;
+    pyroMusic.volume = 0.28;
+    const pyroChaseMusic = new Audio("Fac_music_chase.wav");
+    pyroChaseMusic.loop = true;
+    pyroChaseMusic.volume = 0.34;
     const menuMusic = new Audio("Gm_music.wav");
     menuMusic.loop = true;
     menuMusic.volume = 0.3;
 
-    [music, chaseMusic, heavyMusic, heavyChaseMusic, menuMusic].forEach((track) => {
+    [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, menuMusic].forEach((track) => {
       track.preload = "auto";
       track.load();
     });
@@ -1690,6 +1960,8 @@
       [chaseMusic, 0.34],
       [heavyMusic, 0.28],
       [heavyChaseMusic, 0.34],
+      [pyroMusic, 0.28],
+      [pyroChaseMusic, 0.34],
       [menuMusic, 0.3]
     ]);
     const musicFadeTimers = new Map();
@@ -1720,11 +1992,15 @@
     }
 
     function ambientMusicTrack() {
-      return activeCharacter === "heavy" ? heavyMusic : music;
+      if (activeCharacter === "heavy") { return heavyMusic; }
+      if (activeCharacter === "pyro") { return pyroMusic; }
+      return music;
     }
 
     function chaseMusicTrack() {
-      return activeCharacter === "heavy" ? heavyChaseMusic : chaseMusic;
+      if (activeCharacter === "heavy") { return heavyChaseMusic; }
+      if (activeCharacter === "pyro") { return pyroChaseMusic; }
+      return chaseMusic;
     }
 
     function playAmbientMusic() {
@@ -1740,7 +2016,7 @@
     }
 
     function pauseAmbientMusic(fadeMs) {
-      [music, heavyMusic].forEach((track) => {
+      [music, heavyMusic, pyroMusic].forEach((track) => {
         if (track.paused) {
           return;
         }
@@ -1770,7 +2046,7 @@
     }
 
     function pauseChaseMusic(fadeMs) {
-      [chaseMusic, heavyChaseMusic].forEach((track) => {
+      [chaseMusic, heavyChaseMusic, pyroChaseMusic].forEach((track) => {
         if (track.paused) {
           return;
         }
@@ -1897,7 +2173,7 @@
     const enemyFootstepInterval = 0.33;
     const enemySightDistance = 38;
     const enemyHearRadius = 260;
-    const heavySightDistance = 190;
+    const heavySightDistance = 260;
 
     function distanceVolumeScale(dist, hearStart, hearFull) {
       if (dist == null) {
@@ -2032,31 +2308,99 @@
     ];
 
     const HEAVY_LEVEL_MAP = [
+      "############################################################",
+      "############################################################",
+      "##S.....##..............##......................##........##",
+      "##......##..............##......................##........##",
+      "##..##......######..##..##..##########..........##..####..##",
+      "##..##......######..##..##..##########..........##..####..##",
+      "##..##......##......##..##......................##..####..##",
+      "##..##......##......##..##......................##..####..##",
+      "##..##......##..######..##..##########..........##..####..##",
+      "##..##......##..######..##..##########..........##..####..##",
+      "##......##..##..##......##..##..........##..##..##........##",
+      "##......##..##..##......##..##..........##..##..##........##",
+      "######..##..##..##..######..##..######..##..##..############",
+      "######..##..##..##..######..##..######..##..##..############",
+      "##......##..##..##..##......##..##......##..##............##",
+      "##......##..##..##..##......##..##......##..##............##",
+      "##..######..##..##..##..######..##..##########..########..##",
+      "##..######..##..##..##..######..##..##########..########..##",
+      "##..##......##..##..##..##......##..............##....P...##",
+      "##..##......##..##..##..##......##..............##........##",
+      "##..##..######..##..##..........##############..########..##",
+      "##..##..######..##..##..........##############..########..##",
+      "##..##..........##..........................##........##..##",
+      "##..##..........##..........................##........##..##",
+      "##..##########..########........##########..########..##..##",
+      "##..##########..########........##########..########..##..##",
+      "##..........##..........................##..##........##..##",
+      "##..........##..........................##..##........##..##",
+      "##########..##..######################..##..##..########..##",
+      "##########..##..######################..##..##..########..##",
+      "##P.........##..##..................##......##............##",
+      "##..........##..##..................##......##............##",
+      "##..##..........##..##############..##########..########..##",
+      "##..##..........##..##############..##########..########..##",
+      "##..##..........##..##..........##..............##....P...##",
+      "##..##..........##..##..........##..............##........##",
+      "##..##........####..##..######..##################..####..##",
+      "##..##........####..##..######..##################..####..##",
+      "##..##..............##..##..##......................####..##",
+      "##..##..............##..##..##......................####..##",
+      "##..##..##..##########..##..##..##################..####..##",
+      "##..##..##..##########..##..##..##################..####..##",
+      "##......##..............##..##..................##........##",
+      "##......##..............##..##..................##........##",
+      "##V.######################..##################..########..##",
+      "##..######################..##################..########..##",
+      "##..........................................P...........H.##",
+      "##........................................................##",
+      "##E.########################################################",
+      "##..########################################################",
+      "############################################################",
+      "############################################################"
+    ];
+
+    const PYRO_LEVEL_MAP = [
       "##############################",
       "#............................#",
-      "#....S...................P...#",
-      "#............................#",
-      "#..####....####....####......#",
-      "#..#..#....#..#....#..#......#",
-      "#..#..#....#..#....#..#......#",
-      "#..####....####....####......#",
+      "#....S...................1...#",
       "#............................#",
       "#............................#",
-      "#....P..................P....#",
+      "#....B..................B....#",
       "#............................#",
-      "#..####....####....####......#",
-      "#..#..#....#..#....#..#......#",
-      "#..#..#....#..#....#..#......#",
-      "#..####....####....####......#",
+      "############K#################",
+      "#.......B............B.......#",
+      "#..............B.............#",
+      "#............................#",
+      "#......2.....................#",
+      "#............................#",
+      "#.....................B......#",
+      "#..........B.......B.........#",
+      "############K#################",
+      "#........B..........B........#",
       "#............................#",
       "#............................#",
-      "#..V.................H.......#",
+      "#.....................3......#",
       "#............................#",
-      "#..####....####....####......#",
-      "#..#..#....#..#....#..#......#",
-      "#..#..#....#..#....#..#......#",
-      "#..####....####....####......#",
-      "#....P..........E............#",
+      "#.....B.................B....#",
+      "#............................#",
+      "############K#################",
+      "#.........B........B.........#",
+      "#............................#",
+      "#......G.....................#",
+      "#............................#",
+      "#......................B.....#",
+      "#............................#",
+      "############.#################",
+      "#........B..........B........#",
+      "#............................#",
+      "#............................#",
+      "#.............E..............#",
+      "#............................#",
+      "#............................#",
+      "#............................#",
       "##############################"
     ];
 
@@ -2077,6 +2421,17 @@
     fuseOffImg.src = "Tm_fuse_off.png";
     const fuseOnImg = new Image();
     fuseOnImg.src = "Tm_fuse_on.png";
+
+    const keycardImg = new Image();
+    keycardImg.src = "Cf_keycard.png";
+
+    const keycardPickSound = new Audio("Cf_keycard_pick.wav");
+    keycardPickSound.volume = 0.6;
+    keycardPickSound.preload = "auto";
+    keycardPickSound.load();
+
+    const debrisImg = new Image();
+    debrisImg.src = "120px-Bomb_debris.png";
 
     const TILESET = {
       wall: [48, 16],
@@ -2116,6 +2471,7 @@
       sightRange: TILE * 4.8,
       nodesActive: 0,
       nodesRequired: 2,
+      carriedKeycard: null,
       facing: "down",
       moveX: 0,
       moveY: 0,
@@ -2164,6 +2520,849 @@
       deliberatelyIdle: false
     };
 
+    const pyroLayerEl = document.getElementById("pyroLayer");
+    const pyroMoveDownSrc = "Pyro_move_d.gif";
+    const pyroMoveUpSrc = "Pyro_move_u.gif";
+    const pyroMoveSideSrc = "Pyro_move_s.gif";
+    const pyroFootstepSounds = [new Audio("Pyro_fs_1.wav"), new Audio("Pyro_fs_2.wav")];
+    pyroFootstepSounds.forEach((sound) => {
+      sound.volume = 0.5;
+      sound.preload = "auto";
+      sound.load();
+    });
+
+    const PYRO_BURST_DURATION = 12;
+    const PYRO_CHASE_SPEED = 46;
+    const PYRO_SPAWN_RADIUS_MIN = 90;
+    const PYRO_SPAWN_RADIUS_MAX = 170;
+    const PYRO_RADIUS = 10;
+    const PYRO_COUNT = 3;
+    const PYRO_TRAIL_INTERVAL = 0.45;
+    const PYRO_TRAIL_LIFETIME_MIN = 10;
+    const PYRO_TRAIL_LIFETIME_MAX = 20;
+    const PYRO_TRAIL_RADIUS = 13;
+
+    let pyroInstances = [];
+    let pyroNextId = 1;
+    let pyroFireTrail = [];
+
+    function clearPyroInstances() {
+      pyroInstances.forEach((inst) => {
+        if (inst.el && inst.el.parentNode) {
+          inst.el.parentNode.removeChild(inst.el);
+        }
+      });
+      pyroInstances = [];
+      pyroFireTrail.forEach((patch) => {
+        if (patch.el && patch.el.parentNode) {
+          patch.el.parentNode.removeChild(patch.el);
+        }
+      });
+      pyroFireTrail = [];
+      pyroTransientFx.forEach((entry) => {
+        if (entry.el && entry.el.parentNode) {
+          entry.el.parentNode.removeChild(entry.el);
+        }
+      });
+      pyroTransientFx = [];
+      pyroPendingSpawns = [];
+    }
+
+    function resetPyroState() {
+      clearPyroInstances();
+      clearPyroShadows();
+      buildPyroShadows();
+      clearPyroReaper();
+      pyroHighestRoomIndex = 0;
+      pyroRunTimer = PYRO_RUN_TIME_LIMIT;
+      pyroRunExpired = false;
+      pyroWasThreatened = false;
+      clearPyroBonusFx();
+      hideKeycardPickupIndicator();
+      pyroFireAmbienceSound.pause();
+      pyroFireAmbienceSound.currentTime = 0;
+      pyroFireAmbienceSound.volume = 0;
+    }
+
+
+    function clearPyroBonusFx() {
+      pyroBonusTimeFx.forEach((entry) => {
+        if (entry.el && entry.el.parentNode) {
+          entry.el.parentNode.removeChild(entry.el);
+        }
+      });
+      pyroBonusTimeFx = [];
+    }
+
+    let pyroTransientFx = [];
+
+    function spawnPyroFx(x, y, src, durationMs) {
+      const el = document.createElement("img");
+      el.src = src;
+      el.className = "pyro-fx";
+      el.alt = "";
+      pyroLayerEl.appendChild(el);
+      const entry = { x, y, el, expiresAt: performance.now() + durationMs };
+      pyroTransientFx.push(entry);
+      positionPyroFxElement(entry);
+      requestAnimationFrame(() => el.classList.add("playing"));
+      setTimeout(() => {
+        pyroTransientFx = pyroTransientFx.filter((other) => other !== entry);
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      }, durationMs);
+    }
+
+    function positionPyroFxElement(entry) {
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const drawSize = entry.isGate ? TILE * 1.6 : 44;
+      const screenX = (entry.x - game.camera.x - drawSize / 2) * scaleX;
+      const screenY = (entry.y - game.camera.y - drawSize / 2) * scaleY;
+      entry.el.style.width = `${drawSize * scaleX}px`;
+      entry.el.style.height = `${drawSize * scaleY}px`;
+      entry.el.style.left = `${canvas.offsetLeft + screenX}px`;
+      entry.el.style.top = `${canvas.offsetTop + screenY}px`;
+    }
+
+    function updatePyroTransientFx() {
+      pyroTransientFx.forEach((entry) => positionPyroFxElement(entry));
+    }
+
+    function playPyroDoorOpenFx(door) {
+      if (!door.tiles || !door.tiles[0]) {
+        return;
+      }
+      const tile = door.tiles[0];
+      const worldX = tile.x + tile.w / 2;
+      const worldY = tile.y + tile.h / 2;
+      const el = document.createElement("img");
+      el.src = "Cf_gate_closed.png";
+      el.className = "door-open-fx";
+      el.alt = "";
+      pyroLayerEl.appendChild(el);
+      const entry = { x: worldX, y: worldY, el, expiresAt: performance.now() + 900, isGate: true };
+      pyroTransientFx.push(entry);
+      positionPyroFxElement(entry);
+      requestAnimationFrame(() => el.classList.add("opening"));
+      setTimeout(() => {
+        pyroTransientFx = pyroTransientFx.filter((other) => other !== entry);
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      }, 900);
+    }
+
+    function pickPyroSpawnPoint(originX, originY) {
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = PYRO_SPAWN_RADIUS_MIN + Math.random() * (PYRO_SPAWN_RADIUS_MAX - PYRO_SPAWN_RADIUS_MIN);
+        const x = originX + Math.cos(angle) * dist;
+        const y = originY + Math.sin(angle) * dist;
+        if (x < TILE || y < TILE || x > world.width - TILE || y > world.height - TILE) {
+          continue;
+        }
+        if (positionCollidesWithSolids(x, y, PYRO_RADIUS)) {
+          continue;
+        }
+        if (!hasLineOfSight(x, y, originX, originY)) {
+          continue;
+        }
+        return { x, y };
+      }
+      return null;
+    }
+
+    let pyroPendingSpawns = [];
+
+    function spawnOnePyroInstance(point) {
+      const el = document.createElement("img");
+      el.src = pyroMoveDownSrc;
+      el.className = "pyro-sprite";
+      el.alt = "";
+      pyroLayerEl.appendChild(el);
+      const flankSlot = pyroInstances.length % 3;
+      const flankAngle = flankSlot === 0 ? 0 : (flankSlot === 1 ? (Math.PI * 2 / 3) : -(Math.PI * 2 / 3));
+      pyroInstances.push({
+        id: pyroNextId++,
+        x: point.x,
+        y: point.y,
+        radius: PYRO_RADIUS,
+        facing: "down",
+        moveX: 0,
+        moveY: 0,
+        burstTimer: PYRO_BURST_DURATION,
+        footstepTimer: 0,
+        trailTimer: PYRO_TRAIL_INTERVAL,
+        path: [],
+        pathIndex: 0,
+        repathTimer: 0,
+        targetKey: "",
+        mode: "chase",
+        flankAngle,
+        el
+      });
+      spawnPyroFx(point.x, point.y, "Wicker_fire.gif", 700);
+      playEnemyDetectedSound();
+      const appearSound = pyroAppearSounds[Math.floor(Math.random() * pyroAppearSounds.length)];
+      appearSound.currentTime = 0;
+      appearSound.play().catch(() => {});
+    }
+
+    function emergePyroAt(originX, originY) {
+      if (pyroInstances.length > 0 || pyroPendingSpawns.length > 0) {
+        return;
+      }
+      const points = [];
+      for (let i = 0; i < PYRO_COUNT; i += 1) {
+        const point = pickPyroSpawnPoint(originX, originY);
+        if (point) {
+          points.push(point);
+        }
+      }
+      if (points.length === 0) {
+        return;
+      }
+
+      spawnOnePyroInstance(points[0]);
+
+      let delay = 0;
+      for (let i = 1; i < points.length; i += 1) {
+        delay += i === 1 ? (1 + Math.random()) : (2 + Math.random() * 2);
+        pyroPendingSpawns.push({ point: points[i], delay });
+      }
+    }
+
+    function updatePyroPendingSpawns(dt) {
+      if (pyroPendingSpawns.length === 0) {
+        return;
+      }
+      pyroPendingSpawns.forEach((pending) => {
+        pending.delay -= dt;
+      });
+      const ready = pyroPendingSpawns.filter((pending) => pending.delay <= 0);
+      pyroPendingSpawns = pyroPendingSpawns.filter((pending) => pending.delay > 0);
+      ready.forEach((pending) => spawnOnePyroInstance(pending.point));
+    }
+
+    function despawnPyroInstance(inst) {
+      spawnPyroFx(inst.x, inst.y, "Wicker_smoke.gif", 700);
+      const disappearSound = pyroAppearSounds[Math.floor(Math.random() * pyroAppearSounds.length)];
+      disappearSound.currentTime = 0;
+      disappearSound.play().catch(() => {});
+      if (inst.el && inst.el.parentNode) {
+        inst.el.parentNode.removeChild(inst.el);
+      }
+      pyroInstances = pyroInstances.filter((other) => other !== inst);
+    }
+
+    function dropPyroFireTrail(x, y) {
+      const el = document.createElement("img");
+      el.src = "Wicker_fire.gif";
+      el.className = "pyro-fx playing pyro-trail";
+      el.alt = "";
+      pyroLayerEl.appendChild(el);
+      pyroFireTrail.push({
+        x, y,
+        radius: PYRO_TRAIL_RADIUS,
+        expiresAt: performance.now() + (PYRO_TRAIL_LIFETIME_MIN + Math.random() * (PYRO_TRAIL_LIFETIME_MAX - PYRO_TRAIL_LIFETIME_MIN)) * 1000,
+        el
+      });
+    }
+
+    function updatePyroFireTrail() {
+      const now = performance.now();
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const drawSize = 30;
+      pyroFireTrail = pyroFireTrail.filter((patch) => {
+        if (now >= patch.expiresAt) {
+          if (patch.el && patch.el.parentNode) {
+            patch.el.parentNode.removeChild(patch.el);
+          }
+          return false;
+        }
+        const screenX = (patch.x - game.camera.x - drawSize / 2) * scaleX;
+        const screenY = (patch.y - game.camera.y - drawSize / 2) * scaleY;
+        patch.el.style.width = `${drawSize * scaleX}px`;
+        patch.el.style.height = `${drawSize * scaleY}px`;
+        patch.el.style.left = `${canvas.offsetLeft + screenX}px`;
+        patch.el.style.top = `${canvas.offsetTop + screenY}px`;
+        return true;
+      });
+    }
+
+    let pyroWasThreatened = false;
+
+    function updatePyroThreatMusic() {
+      const threatened = pyroInstances.length > 0 || pyroPendingSpawns.length > 0 || !!pyroReaper ||
+        pyroShadows.some((shadow) => shadow.mode === "chase");
+      if (threatened && !pyroWasThreatened) {
+        pauseAmbientMusic();
+        playChaseMusic();
+      } else if (!threatened && pyroWasThreatened) {
+        pauseChaseMusic();
+        if (game.state === "playing") {
+          playAmbientMusic();
+        }
+      }
+      pyroWasThreatened = threatened;
+    }
+
+    function updatePyroFireAmbience(dt) {
+      if (pyroFireTrail.length === 0) {
+        if (!pyroFireAmbienceSound.paused) {
+          pyroFireAmbienceSound.pause();
+        }
+        return;
+      }
+      if (pyroFireAmbienceSound.paused) {
+        pyroFireAmbienceSound.currentTime = 0;
+        pyroFireAmbienceSound.play().catch(() => {});
+      }
+      const burstActive = pyroInstances.length > 0 || pyroPendingSpawns.length > 0;
+      const target = burstActive ? PYRO_FIRE_AMBIENCE_QUIET : PYRO_FIRE_AMBIENCE_LOUD;
+      const rate = 1 - Math.exp(-2.5 * dt);
+      pyroFireAmbienceSound.volume += (target - pyroFireAmbienceSound.volume) * rate;
+    }
+
+    function updatePyro(dt) {
+      if (activeCharacter !== "pyro" || game.state !== "playing") {
+        return;
+      }
+
+      updatePyroFireTrail();
+      updatePyroShadows(dt);
+      updatePyroRoomTimers(dt);
+      updatePyroPendingSpawns(dt);
+      updatePyroThreatMusic();
+      updatePyroFireAmbience(dt);
+
+      for (const patch of pyroFireTrail) {
+        if (distance(patch.x, patch.y, player.x, player.y) < patch.radius + player.radius) {
+          triggerPlayerDeath("fire");
+          return;
+        }
+      }
+
+      if (pyroInstances.length === 0) {
+        return;
+      }
+
+      const toDespawn = [];
+      pyroInstances.forEach((inst) => {
+        inst.burstTimer -= dt;
+        if (inst.burstTimer <= 0) {
+          toDespawn.push(inst);
+          return;
+        }
+
+        inst.repathTimer = Math.max(0, (inst.repathTimer || 0) - dt);
+        inst.mode = "chase";
+
+        const distToPlayer = distance(inst.x, inst.y, player.x, player.y);
+        const flankRadius = Math.min(70, distToPlayer * 0.6);
+        const targetX = distToPlayer > 24 ? player.x + Math.cos(inst.flankAngle || 0) * flankRadius : player.x;
+        const targetY = distToPlayer > 24 ? player.y + Math.sin(inst.flankAngle || 0) * flankRadius : player.y;
+        const safeTarget = positionCollidesWithSolids(targetX, targetY, inst.radius)
+          ? { x: player.x, y: player.y }
+          : { x: targetX, y: targetY };
+
+        const hasPath = refreshPyroShadowPath(inst, safeTarget.x, safeTarget.y);
+        let waypoint = inst.path && inst.path[inst.pathIndex];
+        if (!waypoint && hasPath) {
+          waypoint = safeTarget;
+        }
+        if (!waypoint) {
+          waypoint = safeTarget;
+        }
+        if (distance(inst.x, inst.y, waypoint.x, waypoint.y) < 6 && inst.pathIndex < inst.path.length - 1) {
+          inst.pathIndex += 1;
+          waypoint = inst.path[inst.pathIndex];
+        }
+        if (inst.pathIndex >= inst.path.length - 1 && distance(waypoint.x, waypoint.y, safeTarget.x, safeTarget.y) > 1) {
+          waypoint = safeTarget;
+        }
+
+        const dx = waypoint.x - inst.x;
+        const dy = waypoint.y - inst.y;
+        const len = Math.hypot(dx, dy) || 1;
+        inst.moveX = dx / len;
+        inst.moveY = dy / len;
+        if (Math.abs(inst.moveX) > Math.abs(inst.moveY)) {
+          inst.facing = inst.moveX >= 0 ? "right" : "left";
+        } else {
+          inst.facing = inst.moveY >= 0 ? "down" : "up";
+        }
+        moveWithCollision(inst, inst.moveX * PYRO_CHASE_SPEED * dt, inst.moveY * PYRO_CHASE_SPEED * dt);
+
+        inst.trailTimer -= dt;
+        if (inst.trailTimer <= 0) {
+          dropPyroFireTrail(inst.x, inst.y);
+          inst.trailTimer = PYRO_TRAIL_INTERVAL;
+        }
+
+        inst.footstepTimer -= dt;
+        if (inst.footstepTimer <= 0) {
+          const step = pyroFootstepSounds[Math.floor(Math.random() * pyroFootstepSounds.length)];
+          step.currentTime = 0;
+          step.play().catch(() => {});
+          inst.footstepTimer = 0.33;
+        }
+
+        if (distance(inst.x, inst.y, player.x, player.y) < inst.radius + player.radius) {
+          triggerPlayerDeath();
+        }
+      });
+
+      toDespawn.forEach((inst) => despawnPyroInstance(inst));
+    }
+
+    function updatePyroSpriteElements() {
+      if (activeCharacter !== "pyro") {
+        return;
+      }
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const drawWidth = 34;
+      const drawHeight = 34;
+      pyroInstances.forEach((inst) => {
+        let src = pyroMoveDownSrc;
+        let flip = 1;
+        if (inst.facing === "up") {
+          src = pyroMoveUpSrc;
+        } else if (inst.facing === "left") {
+          src = pyroMoveSideSrc;
+          flip = -1;
+        } else if (inst.facing === "right") {
+          src = pyroMoveSideSrc;
+        }
+        if (!inst.el.src.endsWith(src)) {
+          inst.el.src = src;
+        }
+        const screenX = (inst.x - game.camera.x - drawWidth / 2) * scaleX;
+        const screenY = (inst.y - game.camera.y - drawHeight / 2 - 2) * scaleY;
+        inst.el.style.width = `${drawWidth * scaleX}px`;
+        inst.el.style.height = `${drawHeight * scaleY}px`;
+        inst.el.style.left = `${canvas.offsetLeft + screenX}px`;
+        inst.el.style.top = `${canvas.offsetTop + screenY}px`;
+        inst.el.style.transform = `scaleX(${flip})`;
+      });
+    }
+
+    const PYRO_SHADOW_SIGHT_DISTANCE = 170;
+    const PYRO_SHADOW_LOSE_SIGHT_GRACE = 3.5;
+    const PYRO_SHADOW_PATROL_SPEED = 42;
+    const PYRO_SHADOW_CHASE_SPEED = 118;
+    const PYRO_SHADOW_EMERGE_RANGE = 34;
+    const PYRO_SHADOW_EMERGE_COOLDOWN = 8;
+    const PYRO_SHADOW_RADIUS = 9;
+    let pyroShadows = [];
+
+    const pyroAppearSounds = [new Audio("Scout_fs_1.wav")];
+    const pyroTauntSound = new Audio("Wicker_taunt_fire.wav");
+    pyroTauntSound.volume = 0.7;
+    [...pyroAppearSounds, pyroTauntSound].forEach((sound) => {
+      sound.volume = sound.volume || 0.55;
+      sound.preload = "auto";
+      sound.load();
+    });
+
+    const pyroFireAmbienceSound = new Audio("fire_burning.mp3");
+    pyroFireAmbienceSound.loop = true;
+    pyroFireAmbienceSound.volume = 0;
+    pyroFireAmbienceSound.preload = "auto";
+    pyroFireAmbienceSound.load();
+    const PYRO_FIRE_AMBIENCE_QUIET = 0.12;
+    const PYRO_FIRE_AMBIENCE_LOUD = 0.4;
+
+    function buildPyroShadows() {
+      pyroShadows = [];
+      const basePoints = [
+        { x: TILE * 24, y: TILE * 11 },
+        { x: TILE * 6, y: TILE * 19 },
+        { x: TILE * 24, y: TILE * 19 },
+        { x: TILE * 6, y: TILE * 27 },
+        { x: TILE * 24, y: TILE * 35 }
+      ];
+      for (let i = 0; i < 3; i += 1) {
+        const el = document.createElement("img");
+        el.src = "Enemy_shadow.png";
+        el.className = "pyro-shadow-sprite";
+        el.alt = "";
+        pyroLayerEl.appendChild(el);
+        const startPoint = basePoints[(i * 2) % basePoints.length];
+        const safeStart = findNearestOpenPosition(startPoint.x, startPoint.y, PYRO_SHADOW_RADIUS);
+        pyroShadows.push({
+          x: safeStart.x,
+          y: safeStart.y,
+          radius: PYRO_SHADOW_RADIUS,
+          mode: "patrol",
+          patrolIndex: (i * 2) % basePoints.length,
+          patrolPoints: basePoints,
+          loseSightTimer: 0,
+          path: [],
+          pathIndex: 0,
+          repathTimer: 0,
+          targetKey: "",
+          el
+        });
+      }
+    }
+
+    function clearPyroShadows() {
+      pyroShadows.forEach((shadow) => {
+        if (shadow.el && shadow.el.parentNode) {
+          shadow.el.parentNode.removeChild(shadow.el);
+        }
+      });
+      pyroShadows = [];
+    }
+
+    function refreshPyroShadowPath(shadow, targetX, targetY) {
+      const targetTile = worldToTile(targetX, targetY);
+      const nextKey = `${targetTile.tx},${targetTile.ty}`;
+      if (shadow.repathTimer > 0 && shadow.targetKey === nextKey && shadow.path.length) {
+        return shadow.path.length > 0;
+      }
+      shadow.targetKey = nextKey;
+      shadow.path = findPath(shadow.x, shadow.y, targetX, targetY);
+      shadow.pathIndex = 0;
+      shadow.repathTimer = shadow.mode === "chase" ? 0.25 : 0.5;
+      return shadow.path.length > 0;
+    }
+
+    function updatePyroShadows(dt) {
+      if (activeCharacter !== "pyro" || game.state !== "playing") {
+        return;
+      }
+      if (pyroInstances.length > 0 || pyroPendingSpawns.length > 0) {
+        return;
+      }
+
+      pyroShadows.forEach((shadow) => {
+        shadow.repathTimer = Math.max(0, shadow.repathTimer - dt);
+        shadow.emergeCooldown = Math.max(0, (shadow.emergeCooldown || 0) - dt);
+        const distToPlayer = distance(shadow.x, shadow.y, player.x, player.y);
+        const seesPlayer = distToPlayer < PYRO_SHADOW_SIGHT_DISTANCE && hasLineOfSight(shadow.x, shadow.y, player.x, player.y);
+
+        if (shadow.emergeCooldown > 0) {
+          shadow.mode = "patrol";
+        } else if (seesPlayer) {
+          shadow.mode = "chase";
+          shadow.loseSightTimer = PYRO_SHADOW_LOSE_SIGHT_GRACE;
+        } else if (shadow.mode === "chase") {
+          shadow.loseSightTimer -= dt;
+          if (shadow.loseSightTimer <= 0) {
+            shadow.mode = "patrol";
+          }
+        }
+
+        let targetX;
+        let targetY;
+        let speed;
+        if (shadow.mode === "chase") {
+          targetX = player.x;
+          targetY = player.y;
+          speed = PYRO_SHADOW_CHASE_SPEED;
+        } else {
+          const patrolTarget = shadow.patrolPoints[shadow.patrolIndex];
+          targetX = patrolTarget.x;
+          targetY = patrolTarget.y;
+          speed = PYRO_SHADOW_PATROL_SPEED;
+          if (distance(shadow.x, shadow.y, targetX, targetY) < 8) {
+            shadow.patrolIndex = (shadow.patrolIndex + 1) % shadow.patrolPoints.length;
+          }
+        }
+
+        const hasPath = refreshPyroShadowPath(shadow, targetX, targetY);
+        let waypoint = shadow.path[shadow.pathIndex];
+        if (!waypoint && hasPath) {
+          waypoint = { x: targetX, y: targetY };
+        }
+        if (!waypoint) {
+          return;
+        }
+        if (distance(shadow.x, shadow.y, waypoint.x, waypoint.y) < 6 && shadow.pathIndex < shadow.path.length - 1) {
+          shadow.pathIndex += 1;
+          waypoint = shadow.path[shadow.pathIndex];
+        }
+        if (shadow.pathIndex >= shadow.path.length - 1 && distance(waypoint.x, waypoint.y, targetX, targetY) > 1) {
+          waypoint = { x: targetX, y: targetY };
+        }
+
+        const dx = waypoint.x - shadow.x;
+        const dy = waypoint.y - shadow.y;
+        const len = Math.hypot(dx, dy) || 1;
+        moveWithCollision(shadow, (dx / len) * speed * dt, (dy / len) * speed * dt);
+
+        if (shadow.mode === "chase" && shadow.emergeCooldown <= 0 && distance(shadow.x, shadow.y, player.x, player.y) <= PYRO_SHADOW_EMERGE_RANGE) {
+          spawnPyroFx(shadow.x, shadow.y, "Wicker_smoke.gif", 700);
+          emergePyroAt(shadow.x, shadow.y);
+          shadow.mode = "patrol";
+          shadow.loseSightTimer = 0;
+          shadow.emergeCooldown = PYRO_SHADOW_EMERGE_COOLDOWN;
+          const respawnPoint = findNearestOpenPosition(
+            shadow.patrolPoints[shadow.patrolIndex].x,
+            shadow.patrolPoints[shadow.patrolIndex].y,
+            shadow.radius
+          );
+          shadow.x = respawnPoint.x;
+          shadow.y = respawnPoint.y;
+          shadow.path = [];
+          shadow.pathIndex = 0;
+          shadow.repathTimer = 0;
+        }
+      });
+    }
+
+    function currentPyroRoom() {
+      return pyroRooms.find((room) => player.y >= room.top && player.y < room.bottom) || null;
+    }
+
+    function currentPyroRoomIndex() {
+      return pyroRooms.findIndex((room) => player.y >= room.top && player.y < room.bottom);
+    }
+
+    let pyroHighestRoomIndex = 0;
+
+    function lockPyroDoor(door) {
+      if (!door || door.locked) {
+        return;
+      }
+      door.locked = true;
+      door.sealed = true;
+      door.tiles.forEach((tile) => {
+        const exists = solids.some((rect) => rect.x === tile.x && rect.y === tile.y);
+        if (!exists) {
+          solids.push({ x: tile.x, y: tile.y, w: tile.w, h: tile.h });
+        }
+      });
+    }
+
+    function pickOffScreenPointInRoom(room) {
+      const viewMinX = game.camera.x - 40;
+      const viewMaxX = game.camera.x + canvas.width + 40;
+      const viewMinY = game.camera.y - 40;
+      const viewMaxY = game.camera.y + canvas.height + 40;
+      const candidates = [];
+      for (let attempt = 0; attempt < 24; attempt += 1) {
+        const x = TILE + Math.random() * (world.width - TILE * 2);
+        const y = room.top + TILE + Math.random() * Math.max(TILE, room.bottom - room.top - TILE * 2);
+        const offScreen = x < viewMinX || x > viewMaxX || y < viewMinY || y > viewMaxY;
+        if (!offScreen) {
+          continue;
+        }
+        if (positionCollidesWithSolids(x, y, 8)) {
+          continue;
+        }
+        candidates.push({ x, y });
+        break;
+      }
+      if (candidates.length > 0) {
+        return candidates[0];
+      }
+      const fallbackX = clamp(player.x + (Math.random() < 0.5 ? -1 : 1) * TILE * 6, TILE, world.width - TILE);
+      const fallbackY = clamp((room.top + room.bottom) / 2, room.top + TILE, room.bottom - TILE);
+      return findNearestOpenPosition(fallbackX, fallbackY, 8);
+    }
+
+    function spawnPyroReaper(room) {
+      const spawnPoint = pickOffScreenPointInRoom(room);
+      pyroReaper = {
+        x: spawnPoint.x,
+        y: spawnPoint.y,
+        radius: 8,
+        speed: 118,
+        facing: "down",
+        footstepTimer: 0,
+        path: [],
+        pathIndex: 0,
+        repathTimer: 0,
+        targetKey: "",
+        mode: "chase"
+      };
+      enemySpotSound.currentTime = 0;
+      enemySpotSound.play().catch(() => {});
+    }
+
+    function updatePyroRoomTimers(dt) {
+      if (activeCharacter !== "pyro" || game.state !== "playing") {
+        return;
+      }
+      const roomIndex = currentPyroRoomIndex();
+      if (roomIndex > pyroHighestRoomIndex) {
+        const previousRoom = pyroRooms[pyroHighestRoomIndex];
+        const doorToLock = previousRoom ? previousRoom.exitDoor : null;
+        const doorCenterX = doorToLock ? doorToLock.x + doorToLock.w / 2 : 0;
+        const doorCenterY = doorToLock ? doorToLock.y + doorToLock.h / 2 : 0;
+        const clearOfDoor = !doorToLock || distance(player.x, player.y, doorCenterX, doorCenterY) >= PYRO_DOOR_LOCK_CLEARANCE;
+        if (clearOfDoor) {
+          lockPyroDoor(doorToLock);
+          pyroHighestRoomIndex = roomIndex;
+        }
+      }
+
+      if (!pyroRunExpired) {
+        pyroRunTimer = Math.max(0, pyroRunTimer - dt);
+        if (pyroRunTimer <= 0) {
+          pyroRunExpired = true;
+          const room = currentPyroRoom();
+          if (room) {
+            lockPyroDoor(room.entryDoor);
+            lockPyroDoor(room.exitDoor);
+            spawnPyroReaper(room);
+          }
+        }
+      }
+
+      if (pyroReaper) {
+        pyroReaper.repathTimer = Math.max(0, pyroReaper.repathTimer - dt);
+        const hasPath = refreshPyroShadowPath(pyroReaper, player.x, player.y);
+        let waypoint = pyroReaper.path[pyroReaper.pathIndex];
+        if (!waypoint && hasPath) {
+          waypoint = { x: player.x, y: player.y };
+        }
+        if (waypoint) {
+          if (distance(pyroReaper.x, pyroReaper.y, waypoint.x, waypoint.y) < 6 && pyroReaper.pathIndex < pyroReaper.path.length - 1) {
+            pyroReaper.pathIndex += 1;
+            waypoint = pyroReaper.path[pyroReaper.pathIndex];
+          }
+          if (pyroReaper.pathIndex >= pyroReaper.path.length - 1 && distance(waypoint.x, waypoint.y, player.x, player.y) > 1) {
+            waypoint = { x: player.x, y: player.y };
+          }
+          const dx = waypoint.x - pyroReaper.x;
+          const dy = waypoint.y - pyroReaper.y;
+          const len = Math.hypot(dx, dy) || 1;
+          if (Math.abs(dx) > Math.abs(dy)) {
+            pyroReaper.facing = dx >= 0 ? "right" : "left";
+          } else {
+            pyroReaper.facing = dy >= 0 ? "down" : "up";
+          }
+          moveWithCollision(pyroReaper, (dx / len) * pyroReaper.speed * dt, (dy / len) * pyroReaper.speed * dt);
+        }
+        pyroReaper.footstepTimer -= dt;
+        if (pyroReaper.footstepTimer <= 0) {
+          const step = heavyFootstepSounds[Math.floor(Math.random() * heavyFootstepSounds.length)];
+          step.currentTime = 0;
+          step.play().catch(() => {});
+          pyroReaper.footstepTimer = 0.35;
+        }
+        if (distance(pyroReaper.x, pyroReaper.y, player.x, player.y) < pyroReaper.radius + player.radius) {
+          triggerPlayerDeath("reaper");
+        }
+      }
+    }
+
+    function clearPyroReaper() {
+      pyroReaper = null;
+    }
+
+    function spawnPyroBonusTimeFx(worldX, worldY) {
+      pyroRunTimer += PYRO_DOOR_BONUS_TIME;
+      pyroRunExpired = false;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const screenX = canvas.offsetLeft + (worldX - game.camera.x) * scaleX;
+      const screenY = canvas.offsetTop + (worldY - game.camera.y) * scaleY;
+
+      const el = document.createElement("div");
+      el.className = "pyro-bonus-time-fx";
+      el.textContent = `+${PYRO_DOOR_BONUS_TIME}s`;
+      el.style.left = `${screenX}px`;
+      el.style.top = `${screenY}px`;
+      document.querySelector(".viewport").appendChild(el);
+
+      requestAnimationFrame(() => {
+        const targetRect = roomTimerTextEl.getBoundingClientRect();
+        const viewportRect = document.querySelector(".viewport").getBoundingClientRect();
+        el.style.left = `${targetRect.left - viewportRect.left + targetRect.width / 2}px`;
+        el.style.top = `${targetRect.top - viewportRect.top}px`;
+        el.classList.add("flying");
+      });
+
+      setTimeout(() => {
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      }, 750);
+    }
+
+    function updatePyroReaperSpriteElements() {
+      if (activeCharacter !== "pyro") {
+        return;
+      }
+      if (!pyroReaper) {
+        allEnemySpriteEls().forEach((el) => { el.style.display = "none"; });
+        return;
+      }
+      const pool = ENEMY_SPRITE_POOLS.medic;
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const drawWidth = 34;
+      const drawHeight = 34;
+      let activeEl = pool.down;
+      let flip = 1;
+      if (pyroReaper.facing === "up") {
+        activeEl = pool.up;
+      } else if (pyroReaper.facing === "left") {
+        activeEl = pool.side;
+        flip = -1;
+      } else if (pyroReaper.facing === "right") {
+        activeEl = pool.side;
+      }
+      allEnemySpriteEls().forEach((el) => {
+        if (el !== activeEl) {
+          el.style.display = "none";
+        }
+      });
+      const screenX = (pyroReaper.x - game.camera.x - drawWidth / 2) * scaleX;
+      const screenY = (pyroReaper.y - game.camera.y - drawHeight / 2 - 2) * scaleY;
+      activeEl.style.display = "block";
+      activeEl.style.width = `${drawWidth * scaleX}px`;
+      activeEl.style.height = `${drawHeight * scaleY}px`;
+      activeEl.style.left = `${canvas.offsetLeft + screenX}px`;
+      activeEl.style.top = `${canvas.offsetTop + screenY}px`;
+      activeEl.style.transform = `scaleX(${flip})`;
+    }
+
+    function updatePyroShadowSpriteElements() {
+      if (activeCharacter !== "pyro") {
+        return;
+      }
+      if (pyroInstances.length > 0 || pyroPendingSpawns.length > 0) {
+        pyroShadows.forEach((shadow) => { shadow.el.style.display = "none"; });
+        return;
+      }
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const drawWidth = 30;
+      const drawHeight = 30;
+      pyroShadows.forEach((shadow) => {
+        const dist = distance(player.x, player.y, shadow.x, shadow.y);
+        const visible = dist <= player.sightRange && hasLineOfSight(player.x, player.y, shadow.x, shadow.y);
+        if (!visible) {
+          shadow.el.style.display = "none";
+          return;
+        }
+        const screenX = (shadow.x - game.camera.x - drawWidth / 2) * scaleX;
+        const screenY = (shadow.y - game.camera.y - drawHeight / 2 - 2) * scaleY;
+        shadow.el.style.display = "block";
+        shadow.el.style.width = `${drawWidth * scaleX}px`;
+        shadow.el.style.height = `${drawHeight * scaleY}px`;
+        shadow.el.style.left = `${canvas.offsetLeft + screenX}px`;
+        shadow.el.style.top = `${canvas.offsetTop + screenY}px`;
+      });
+    }
+
     const introMedic = {
       phase: "waiting",
       x: 0,
@@ -2183,11 +3382,23 @@
     let medicSpawnPoint = { x: 0, y: 0 };
     let medicConsole = { x: 0, y: 0, r: 12, active: false };
     let medicDoor = { x: 0, y: 0, w: TILE, h: TILE, locked: true, tiles: [], playedOpenGif: false, lightBrightness: 0.3 };
+    let pyroPowerConsole = { x: 0, y: 0, r: 12, active: false };
     const solids = [];
     const introDoorSolids = [];
     const medicDoorSolids = [];
     const interactables = [];
     const decor = [];
+    const keycardPickups = [];
+    const pyroKeycardDoors = [];
+    const pyroDebris = [];
+    const pyroRooms = [];
+    const PYRO_RUN_TIME_LIMIT = 60;
+    const PYRO_DOOR_BONUS_TIME = 20;
+    const PYRO_DOOR_LOCK_CLEARANCE = TILE * 1.5;
+    let pyroRunTimer = PYRO_RUN_TIME_LIMIT;
+    let pyroRunExpired = false;
+    let pyroReaper = null;
+    let pyroBonusTimeFx = [];
 
     function collectDoorRect(tiles) {
       const minX = Math.min(...tiles.map((t) => t.x));
@@ -2198,7 +3409,7 @@
     }
 
     function buildMap() {
-      MAP = activeCharacter === "heavy" ? HEAVY_LEVEL_MAP : LEVEL_MAP;
+      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : (activeCharacter === "heavy" ? HEAVY_LEVEL_MAP : LEVEL_MAP);
       world.width = MAP[0].length * TILE;
       world.height = MAP.length * TILE;
       solids.length = 0;
@@ -2206,8 +3417,12 @@
       medicDoorSolids.length = 0;
       interactables.length = 0;
       decor.length = 0;
+      keycardPickups.length = 0;
+      pyroKeycardDoors.length = 0;
+      pyroDebris.length = 0;
       const doorTiles = [];
       const medicDoorTiles = [];
+      const keycardDoorTilesByRow = new Map();
 
       MAP.forEach((row, y) => {
         [...row].forEach((cell, x) => {
@@ -2237,6 +3452,17 @@
           if (cell === "E") {
             exitZone = { x: px, y: py, w: TILE, h: TILE, locked: true, lightBrightness: 0.3 };
           }
+          if (cell === "B") {
+            const rect = { x: px, y: py, w: TILE, h: TILE };
+            solids.push(rect);
+            pyroDebris.push({
+              x: cx,
+              y: cy,
+              rotation: Math.floor(Math.random() * 4) * (Math.PI / 2),
+              scale: 0.85 + Math.random() * 0.35,
+              flip: Math.random() < 0.5 ? -1 : 1
+            });
+          }
           if (cell === "C") {
             introConsole = { x: cx, y: cy, r: 12, active: false };
           }
@@ -2258,6 +3484,20 @@
             solids.push(rect);
             medicDoorSolids.push(rect);
           }
+          if (cell === "K") {
+            const rect = { x: px, y: py, w: TILE, h: TILE };
+            solids.push(rect);
+            if (!keycardDoorTilesByRow.has(y)) {
+              keycardDoorTilesByRow.set(y, []);
+            }
+            keycardDoorTilesByRow.get(y).push(rect);
+          }
+          if (cell === "1" || cell === "2" || cell === "3") {
+            keycardPickups.push({ id: cell, x: cx, y: cy, r: 12, collected: false });
+          }
+          if (cell === "G") {
+            pyroPowerConsole = { x: cx, y: cy, r: 12, active: false };
+          }
         });
       });
 
@@ -2272,14 +3512,43 @@
         medicDoor = { x: 0, y: 0, w: TILE, h: TILE, locked: true, tiles: [], playedOpenGif: false, lightBrightness: 0.3 };
       }
 
+      const orderedDoorRows = [...keycardDoorTilesByRow.keys()].sort((a, b) => a - b);
+      orderedDoorRows.forEach((rowY, index) => {
+        const doorRect = collectDoorRect(keycardDoorTilesByRow.get(rowY));
+        doorRect.requiresKeycard = String(index + 1);
+        pyroKeycardDoors.push(doorRect);
+      });
+
+      if (activeCharacter === "pyro") {
+        pyroRooms.length = 0;
+        const boundaries = [0, ...orderedDoorRows.map((rowY) => rowY + 1), MAP.length];
+        for (let i = 0; i < boundaries.length - 1; i += 1) {
+          pyroRooms.push({
+            top: boundaries[i] * TILE,
+            bottom: boundaries[i + 1] * TILE,
+            entryDoor: pyroKeycardDoors[i - 1] || null,
+            exitDoor: pyroKeycardDoors[i] || null
+          });
+        }
+      }
+
       if (activeCharacter === "heavy") {
         enemy.patrolPoints = [
-          { x: TILE * 4, y: TILE * 9 },
-          { x: TILE * 15, y: TILE * 9 },
-          { x: TILE * 26, y: TILE * 9 },
-          { x: TILE * 26, y: TILE * 18 },
-          { x: TILE * 15, y: TILE * 18 },
-          { x: TILE * 4, y: TILE * 18 }
+          { x: TILE * 8.5, y: TILE * 6.5 },
+          { x: TILE * 41.5, y: TILE * 6.5 },
+          { x: TILE * 54.5, y: TILE * 10.5 },
+          { x: TILE * 27.5, y: TILE * 22.5 },
+          { x: TILE * 9.5, y: TILE * 35.5 },
+          { x: TILE * 30.5, y: TILE * 30.5 },
+          { x: TILE * 27.5, y: TILE * 47.5 }
+        ];
+      } else if (activeCharacter === "pyro") {
+        enemy.patrolPoints = [
+          { x: TILE * 24, y: TILE * 11 },
+          { x: TILE * 6, y: TILE * 19 },
+          { x: TILE * 24, y: TILE * 19 },
+          { x: TILE * 6, y: TILE * 27 },
+          { x: TILE * 24, y: TILE * 35 }
         ];
       } else {
         enemy.patrolPoints = [
@@ -2309,7 +3578,8 @@
 
     const CHARACTER_STATS = {
       medic: { speed: 76, chaseSpeed: 128, chargeSpeed: 210 },
-      heavy: { speed: 58, chaseSpeed: 150, chargeSpeed: 150 }
+      heavy: { speed: 78, chaseSpeed: 138, chargeSpeed: 185 },
+      pyro: { speed: 0, chaseSpeed: 0, chargeSpeed: 0 }
     };
 
     function resetGame() {
@@ -2320,7 +3590,9 @@
       placeActorsAtSafeStarts();
       player.sprint = player.sprintMax;
       player.nodesActive = 0;
+      player.carriedKeycard = null;
       player.footstepTimer = 0;
+      pyroPowerConsole.active = false;
       callCooldown = 0;
       callSignTimer = 0;
       objectiveNoiseTimer = 0;
@@ -2352,7 +3624,9 @@
       introMedic.idleTimer = 0;
       introTriggered = false;
 
-      if (activeCharacter === "heavy") {
+      resetPyroState();
+
+      if (activeCharacter === "heavy" || activeCharacter === "pyro") {
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
@@ -2383,6 +3657,13 @@
       }
       jumpscareVideo.pause();
       jumpscareVideo.currentTime = 0;
+      jumpscareVideo.style.display = "";
+      jumpscareGifEl.style.display = "none";
+      jumpscareGifEl.src = "";
+      [
+        playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
+        playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
+      ].forEach((el) => { el.style.display = "none"; });
       syncEnemyWalkAudio(0, true);
       enemySpotSound.pause();
       enemySpotSound.currentTime = 0;
@@ -2392,6 +3673,7 @@
       });
       enemy.wasChasing = false;
       pendingDeathOverlay = false;
+      lastDeathCause = null;
       updateHud();
     }
 
@@ -2501,10 +3783,21 @@
     }
 
     function playKillTaunt() {
+      if (lastDeathCause === "reaper") {
+        killTauntSound.currentTime = 0;
+        killTauntSound.play().catch(() => {});
+        return;
+      }
       if (activeCharacter === "heavy") {
         const sound = heavyTauntSounds[Math.floor(Math.random() * heavyTauntSounds.length)];
         sound.currentTime = 0;
         sound.play().catch(() => {});
+      } else if (activeCharacter === "pyro") {
+        if (lastDeathCause === "fire") {
+          return;
+        }
+        pyroTauntSound.currentTime = 0;
+        pyroTauntSound.play().catch(() => {});
       } else {
         killTauntSound.currentTime = 0;
         killTauntSound.play().catch(() => {});
@@ -2512,6 +3805,11 @@
     }
 
     function playDeathFlashPunchSound() {
+      if (lastDeathCause === "fire") {
+        pyroTauntSound.currentTime = 0;
+        pyroTauntSound.play().catch(() => {});
+        return;
+      }
       const sound = deathFlashPunchSounds[Math.floor(Math.random() * deathFlashPunchSounds.length)];
       sound.currentTime = 0;
       sound.play().catch(() => {});
@@ -2591,7 +3889,22 @@
     }
 
     function isWalkableTile(tx, ty) {
-      return tileAt(tx, ty) !== "#";
+      const cell = tileAt(tx, ty);
+      if (cell === "#" || cell === "B") {
+        return false;
+      }
+      if (cell === "K") {
+        const px = tx * TILE + TILE / 2;
+        const py = ty * TILE + TILE / 2;
+        const blockingDoor = pyroKeycardDoors.some((door) => {
+          if (!door.locked) {
+            return false;
+          }
+          return door.tiles.some((tile) => Math.abs(tile.x + tile.w / 2 - px) < 1 && Math.abs(tile.y + tile.h / 2 - py) < 1);
+        });
+        return !blockingDoor;
+      }
+      return true;
     }
 
     function worldToTile(x, y) {
@@ -2778,6 +4091,25 @@
         }
         return "Walk the corridor and activate the power console at the end.";
       }
+      if (activeCharacter === "pyro") {
+        if (pyroRunExpired) {
+          return "Out of time.";
+        }
+        if (!pyroPowerConsole.active) {
+          const lockedDoor = pyroKeycardDoors.find((door) => door.locked);
+          if (lockedDoor && player.carriedKeycard !== lockedDoor.requiresKeycard) {
+            return `Find keycard ${lockedDoor.requiresKeycard} to open the next door.`;
+          }
+          if (lockedDoor) {
+            return `Use keycard ${lockedDoor.requiresKeycard} at the locked door ahead.`;
+          }
+          return "Reach the power station and bring it online.";
+        }
+        if (exitZone.locked) {
+          return "Power station online. Reach the exit gate.";
+        }
+        return "The gate is open. Reach it before the fire catches you.";
+      }
       if (player.nodesActive < player.nodesRequired) {
         return `Restore all ${player.nodesRequired} power nodes to unlock the exit.`;
       }
@@ -2794,8 +4126,28 @@
       objectiveText.textContent = currentObjective();
       if (game.state === "intro") {
         nodesText.textContent = `Power Console ${introConsole.active ? 1 : 0} / 1`;
+        keycardHudEl.classList.add("hidden");
+        roomTimerTextEl.classList.add("hidden");
+      } else if (activeCharacter === "pyro") {
+        nodesText.textContent = "";
+        keycardHudEl.classList.toggle("hidden", !player.carriedKeycard);
+        keycardHudTextEl.textContent = player.carriedKeycard ? `Keycard ${player.carriedKeycard}` : "";
+        if (game.state === "playing" && !pyroRunExpired) {
+          const seconds = Math.ceil(pyroRunTimer);
+          roomTimerTextEl.classList.remove("hidden");
+          roomTimerTextEl.classList.toggle("low", seconds <= 10);
+          roomTimerTextEl.textContent = `Time left: ${seconds}s`;
+        } else if (game.state === "playing" && pyroRunExpired) {
+          roomTimerTextEl.classList.remove("hidden");
+          roomTimerTextEl.classList.add("low");
+          roomTimerTextEl.textContent = "Doors sealed - survive!";
+        } else {
+          roomTimerTextEl.classList.add("hidden");
+        }
       } else {
         nodesText.textContent = `Power Nodes ${player.nodesActive} / ${player.nodesRequired}`;
+        keycardHudEl.classList.add("hidden");
+        roomTimerTextEl.classList.add("hidden");
       }
 
       const sprintPct = clamp(player.sprint / player.sprintMax, 0, 1);
@@ -2842,6 +4194,68 @@
             alertEnemyToSound(item.x, item.y);
           }
         }
+      }
+
+      if (activeCharacter === "pyro") {
+        for (const card of keycardPickups) {
+          if (card.collected) {
+            continue;
+          }
+          if (distance(player.x, player.y, card.x, card.y) <= player.radius + card.r + 10) {
+            card.collected = true;
+            player.carriedKeycard = card.id;
+            keycardPickSound.currentTime = 0;
+            keycardPickSound.play().catch(() => {});
+            showKeycardPickupIndicator();
+          }
+        }
+
+        for (const door of pyroKeycardDoors) {
+          if (!door.locked) {
+            continue;
+          }
+          const centerX = door.x + door.w / 2;
+          const centerY = door.y + door.h / 2;
+          if (distance(player.x, player.y, centerX, centerY) <= 30 && player.carriedKeycard === door.requiresKeycard) {
+            door.locked = false;
+            door.playedOpenGif = false;
+            door.tiles.forEach((tile) => {
+              const idx = solids.findIndex((rect) => rect.x === tile.x && rect.y === tile.y);
+              if (idx !== -1) {
+                solids.splice(idx, 1);
+              }
+            });
+            player.carriedKeycard = null;
+            hideKeycardPickupIndicator();
+            playObjectiveInteractSound();
+            playDoorOpenSound();
+            playPyroDoorOpenFx(door);
+            spawnPyroBonusTimeFx(centerX, centerY);
+          }
+        }
+
+        if (!pyroPowerConsole.active && distance(player.x, player.y, pyroPowerConsole.x, pyroPowerConsole.y) <= player.radius + pyroPowerConsole.r + 10) {
+          pyroPowerConsole.active = true;
+          playObjectiveInteractSound();
+          playObjectiveCue("power");
+          showObjectiveNoiseIcon(pyroPowerConsole.x, pyroPowerConsole.y);
+          alertEnemyToSound(pyroPowerConsole.x, pyroPowerConsole.y);
+        }
+
+        if (pyroPowerConsole.active && exitZone.locked) {
+          const centerX = exitZone.x + exitZone.w / 2;
+          const centerY = exitZone.y + exitZone.h / 2;
+          if (distance(player.x, player.y, centerX, centerY) <= 26) {
+            exitZone.locked = false;
+            gateOpeningTimer = gateOpeningDuration;
+            playObjectiveInteractSound();
+            playDoorOpenSound();
+            playObjectiveCue("card");
+          }
+        }
+
+        updateHud();
+        return;
       }
 
       if (player.nodesActive >= player.nodesRequired && exitZone.locked) {
@@ -3043,6 +4457,112 @@
       updateHud();
     }
 
+    const JUMPSCARE_SRC_BY_CHARACTER = {
+      heavy: "heavyjumpscare.mp4",
+      medic: "medicjumpscare.mp4",
+      pyro: "120px-Pyro_jump.gif"
+    };
+
+    let lastDeathCause = null;
+
+    function triggerPlayerDeath(cause) {
+      if (game.state === "dead") {
+        return;
+      }
+      lastDeathCause = cause || null;
+      game.state = "dead";
+      keys.clear();
+      pauseAmbientMusic();
+      pauseChaseMusic();
+      syncEnemyWalkAudio(0, true);
+      if (activeCharacter === "pyro") {
+        clearPyroInstances();
+        clearPyroReaper();
+        pyroFireAmbienceSound.pause();
+      }
+      pendingDeathOverlay = true;
+      jumpscare.classList.add("visible");
+      [
+        playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
+        playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
+      ].forEach((el) => { el.style.display = "none"; });
+      deathCount += 1;
+      if (deathCount >= 5) {
+        grantAchievement("persistent");
+      }
+      const jumpscareSrc = cause === "reaper" ? "medicjumpscare.mp4" : (JUMPSCARE_SRC_BY_CHARACTER[activeCharacter] || "medicjumpscare.mp4");
+      const useGif = jumpscareSrc.endsWith(".gif");
+
+      const runDeathSequence = () => {
+        jumpscareGifTimer = null;
+        if (!pendingDeathOverlay) {
+          return;
+        }
+        pendingDeathOverlay = false;
+        deathFlash.classList.remove("visible", "fading");
+        void deathFlash.offsetWidth;
+        deathFlash.classList.add("visible");
+        jumpscare.classList.remove("visible");
+        playDeathFlashPunchSound();
+        setTimeout(() => {
+          playKillTaunt();
+        }, 1000);
+        setTimeout(() => {
+          showDeathScreen();
+          deathFlash.classList.add("fading");
+          setTimeout(() => {
+            deathFlash.classList.remove("visible", "fading");
+          }, 340);
+        }, 1300);
+      };
+
+      if (useGif) {
+        jumpscareVideo.style.display = "none";
+        jumpscareVideo.pause();
+        jumpscareGifEl.style.display = "";
+        if (!jumpscareGifEl.src.endsWith(jumpscareSrc)) {
+          jumpscareGifEl.src = jumpscareSrc;
+        } else {
+          const refreshSrc = jumpscareGifEl.src;
+          jumpscareGifEl.src = "";
+          jumpscareGifEl.src = refreshSrc;
+        }
+        jumpscareGifTimer = setTimeout(runDeathSequence, jumpscareGifDuration);
+      } else {
+        jumpscareGifEl.style.display = "none";
+        jumpscareVideo.style.display = "";
+        if (!jumpscareVideo.currentSrc.endsWith(jumpscareSrc)) {
+          jumpscareVideo.src = jumpscareSrc;
+        }
+        if (audioContext && audioContext.state === "suspended") {
+          audioContext.resume().catch(() => {});
+        }
+        jumpscareVideo.currentTime = 0;
+        jumpscareVideo.muted = false;
+        jumpscareVideo.volume = 1;
+        const attemptJumpscarePlay = () => {
+          jumpscareVideo.muted = false;
+          jumpscareVideo.play().catch(() => {
+            jumpscareVideo.muted = true;
+            jumpscareVideo.play().catch(() => {});
+          });
+        };
+        attemptJumpscarePlay();
+        setTimeout(() => {
+          if (jumpscareVideo.muted || jumpscareVideo.paused) {
+            attemptJumpscarePlay();
+          }
+        }, 120);
+
+        const videoDuration = jumpscareVideo.duration;
+        if (videoDuration && isFinite(videoDuration)) {
+          jumpscareGifTimer = setTimeout(runDeathSequence, videoDuration * 1000);
+        } else {
+          jumpscareGifTimer = setTimeout(runDeathSequence, jumpscareFallbackDuration);
+        }
+      }
+    }
+
     function updateEnemy(dt) {
       const isHeavy = activeCharacter === "heavy";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
@@ -3072,7 +4592,7 @@
         enemy.chasingBySound = false;
         enemy.isLured = false;
         enemy.loseTargetSoundTimer = 0;
-        enemy.alertTimer = isHeavy ? 3.2 : 2.4;
+        enemy.alertTimer = isHeavy ? 3 : 2.4;
         enemy.lastKnownX = player.x;
         enemy.lastKnownY = player.y;
       } else if (heardPlayer) {
@@ -3259,70 +4779,7 @@
       syncEnemyWalkAudio(walkLoopVolume);
 
       if (distance(enemy.x, enemy.y, player.x, player.y) < enemy.radius + player.radius) {
-        game.state = "dead";
-        keys.clear();
-        pauseAmbientMusic();
-        pauseChaseMusic();
-        syncEnemyWalkAudio(0, true);
-        pendingDeathOverlay = true;
-        jumpscare.classList.add("visible");
-        deathCount += 1;
-        if (deathCount >= 5) {
-          grantAchievement("persistent");
-        }
-        const jumpscareSrc = activeCharacter === "heavy" ? "heavyjumpscare.mp4" : "medicjumpscare.mp4";
-        if (!jumpscareVideo.currentSrc.endsWith(jumpscareSrc)) {
-          jumpscareVideo.src = jumpscareSrc;
-        }
-        if (audioContext && audioContext.state === "suspended") {
-          audioContext.resume().catch(() => {});
-        }
-        jumpscareVideo.currentTime = 0;
-        jumpscareVideo.muted = false;
-        jumpscareVideo.volume = 1;
-        const attemptJumpscarePlay = () => {
-          jumpscareVideo.muted = false;
-          jumpscareVideo.play().catch(() => {
-            jumpscareVideo.muted = true;
-            jumpscareVideo.play().catch(() => {});
-          });
-        };
-        attemptJumpscarePlay();
-        setTimeout(() => {
-          if (jumpscareVideo.muted || jumpscareVideo.paused) {
-            attemptJumpscarePlay();
-          }
-        }, 120);
-
-        const runDeathSequence = () => {
-          jumpscareGifTimer = null;
-          if (!pendingDeathOverlay) {
-            return;
-          }
-          pendingDeathOverlay = false;
-          deathFlash.classList.remove("visible", "fading");
-          void deathFlash.offsetWidth;
-          deathFlash.classList.add("visible");
-          jumpscare.classList.remove("visible");
-          playDeathFlashPunchSound();
-          setTimeout(() => {
-            playKillTaunt();
-          }, 1000);
-          setTimeout(() => {
-            showDeathScreen();
-            deathFlash.classList.add("fading");
-            setTimeout(() => {
-              deathFlash.classList.remove("visible", "fading");
-            }, 340);
-          }, 1300);
-        };
-
-        const videoDuration = jumpscareVideo.duration;
-        if (videoDuration && isFinite(videoDuration)) {
-          jumpscareGifTimer = setTimeout(runDeathSequence, videoDuration * 1000);
-        } else {
-          jumpscareGifTimer = setTimeout(runDeathSequence, jumpscareFallbackDuration);
-        }
+        triggerPlayerDeath();
       }
 
       enemy.hadSightLastFrame = seesPlayer;
@@ -3358,6 +4815,63 @@
           return { x: introConsole.x, y: introConsole.y, prompt: "Access power console" };
         }
         return null;
+      }
+
+      if (activeCharacter === "pyro") {
+        let bestPyro = null;
+        let bestPyroDist = Infinity;
+
+        for (const card of keycardPickups) {
+          if (card.collected) {
+            continue;
+          }
+          const d = distance(player.x, player.y, card.x, card.y);
+          if (d < bestPyroDist && d <= player.radius + card.r + 10) {
+            bestPyroDist = d;
+            bestPyro = { x: card.x, y: card.y, prompt: `Pick up keycard ${card.id}` };
+          }
+        }
+
+        for (const door of pyroKeycardDoors) {
+          if (!door.locked) {
+            continue;
+          }
+          const centerX = door.x + door.w / 2;
+          const centerY = door.y + door.h / 2;
+          const d = distance(player.x, player.y, centerX, centerY);
+          if (d < bestPyroDist && d <= 30) {
+            bestPyroDist = d;
+            let promptText;
+            if (door.sealed) {
+              promptText = "It's locked from the outside.";
+            } else if (player.carriedKeycard === door.requiresKeycard) {
+              promptText = `Use keycard ${door.requiresKeycard}`;
+            } else {
+              promptText = `Locked - needs keycard ${door.requiresKeycard}`;
+            }
+            bestPyro = { x: centerX, y: centerY, prompt: promptText };
+          }
+        }
+
+        if (!pyroPowerConsole.active) {
+          const d = distance(player.x, player.y, pyroPowerConsole.x, pyroPowerConsole.y);
+          if (d < bestPyroDist && d <= player.radius + pyroPowerConsole.r + 10) {
+            bestPyroDist = d;
+            bestPyro = { x: pyroPowerConsole.x, y: pyroPowerConsole.y, prompt: "Activate power station" };
+          }
+        }
+
+        if (pyroPowerConsole.active && exitZone.locked) {
+          const ex = exitZone.x + exitZone.w / 2;
+          const ey = exitZone.y + exitZone.h / 2;
+          const d = distance(player.x, player.y, ex, ey);
+          if (d < bestPyroDist && d <= 26) {
+            bestPyroDist = d;
+            bestPyro = { x: ex, y: ey, prompt: "Unlock exit gate" };
+          }
+        }
+
+        return bestPyro;
       }
 
       let closest = null;
@@ -3505,7 +5019,7 @@
     }
 
     function drawIntroScene() {
-      if (activeCharacter === "heavy") {
+      if (activeCharacter === "heavy" || activeCharacter === "pyro") {
         return;
       }
       drawSpawnTunnelExit();
@@ -3513,6 +5027,50 @@
       drawConsole(introConsole);
       drawDoorTiles(medicDoor);
       drawConsole(medicConsole);
+    }
+
+    function drawPyroScene() {
+      if (activeCharacter !== "pyro") {
+        return;
+      }
+      pyroKeycardDoors.forEach((door) => drawDoorTiles(door));
+      drawConsole(pyroPowerConsole);
+      keycardPickups.forEach((card) => {
+        if (card.collected) {
+          return;
+        }
+        ctx.beginPath();
+        ctx.arc(card.x, card.y, card.r + 6, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 211, 126, 0.16)";
+        ctx.fill();
+        const cardSize = TILE * 0.8;
+        if (keycardImg.complete && keycardImg.naturalWidth) {
+          ctx.drawImage(keycardImg, card.x - cardSize / 2, card.y - cardSize / 2, cardSize, cardSize);
+        } else {
+          ctx.fillStyle = "#ffd37e";
+          ctx.fillRect(card.x - 9, card.y - 6, 18, 12);
+        }
+        ctx.fillStyle = "#eef7f7";
+        ctx.font = "bold 11px Trebuchet MS";
+        ctx.textAlign = "center";
+        ctx.fillText(card.id, card.x, card.y - cardSize / 2 - 4);
+      });
+
+      pyroDebris.forEach((rock) => {
+        const size = TILE * 1.1 * (rock.scale || 1);
+        ctx.save();
+        ctx.translate(rock.x, rock.y);
+        ctx.rotate(rock.rotation || 0);
+        ctx.scale(rock.flip || 1, 1);
+        if (debrisImg.complete && debrisImg.naturalWidth) {
+          ctx.drawImage(debrisImg, -size / 2, -size / 2, size, size);
+        } else {
+          ctx.fillStyle = "#3a332c";
+          ctx.fillRect(-size / 2, -size / 2, size, size);
+        }
+        ctx.restore();
+      });
+
     }
 
     function drawWorld() {
@@ -3528,6 +5086,7 @@
 
       drawExitDoor(exitZone.x, exitZone.y, exitZone.locked);
       drawIntroScene();
+      drawPyroScene();
 
       for (const item of interactables) {
         ctx.beginPath();
@@ -3553,7 +5112,7 @@
       ctx.arc(player.x, player.y, player.sightRange, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(166, 255, 240, 0.05)";
       ctx.fill();
-      if (!playerSpriteAssetsOk) {
+      if (!playerSpriteAssetsOk()) {
         ctx.beginPath();
         ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
         ctx.fillStyle = "#a6fff0";
@@ -3584,7 +5143,7 @@
     }
 
     function updateEnemySpriteElement(dt) {
-      if (jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped") {
+      if (activeCharacter === "pyro" || jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped") {
         allEnemySpriteEls().forEach((el) => {
           el.style.display = "none";
         });
@@ -3697,7 +5256,7 @@
         playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
         playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
       ];
-      if (jumpscare.classList.contains("visible") || game.state === "dead" || !playerSpriteAssetsOk) {
+      if (jumpscare.classList.contains("visible") || game.state === "dead" || !playerSpriteAssetsOk()) {
         allPlayerSprites.forEach((el) => {
           el.style.display = "none";
         });
@@ -3901,6 +5460,13 @@
         name: "Heavy",
         bio: "Heavy sees you plainly at range and does not need sound to notice you. He is slow to react, taking a moment to lock on once he spots you, but once he commits he closes distance fast and rarely loses interest. Break line of sight the instant you're spotted, before he finishes reacting.",
         lore: "Subject designation: Heavy. Former facility security unit, repurposed by the corrupted simulation core. Optical sensors remain fully intact. Reaction time is not a weakness you can rely on twice."
+      },
+      pyro: {
+        render: "200px-Pyro_render.png",
+        portrait: "75px-Cm_btn_pyro.png",
+        name: "Pyro",
+        bio: "Pyro does not patrol. He waits inside the fire itself and erupts without warning, sometimes alongside decoys of himself. Only one is ever real, and he moves the instant he appears. Learn the tell, or keep your distance from every fire you see.",
+        lore: "Subject designation: Pyro. Origin unconfirmed. Does not register on thermal or motion sensors between appearances. Facility fire-suppression logs show no correlation with his emergence. Do not approach lit fixtures to test this."
       }
     };
 
@@ -3964,7 +5530,11 @@
         syncEnemyWalkAudio(0, true);
       } else if (game.state === "playing") {
         updatePlayer(dt);
-        updateEnemy(dt);
+        if (activeCharacter === "pyro") {
+          updatePyro(dt);
+        } else {
+          updateEnemy(dt);
+        }
         updatePlayerFootstepAudio(dt);
       } else if (game.state === "intro") {
         updateIntro(dt);
@@ -3980,6 +5550,10 @@
         updateCamera();
         drawWorld();
         updateEnemySpriteElement(dt);
+        updatePyroSpriteElements();
+        updatePyroShadowSpriteElements();
+        updatePyroReaperSpriteElements();
+        updatePyroTransientFx();
         updatePlayerSpriteElement();
         updateDoorGifElements(dt);
         updateCallSignIcon();
@@ -4132,17 +5706,49 @@
       }
       selectCharacter("medic");
     });
+    charPyroButton.addEventListener("click", () => {
+      if (charPyroButton.classList.contains("locked")) {
+        return;
+      }
+      selectCharacter("pyro");
+    });
+
+    const CHARACTER_UNLOCK_BUTTONS = {
+      medic: () => charMedicButton,
+      pyro: () => charPyroButton
+    };
+    const CHARACTER_UNLOCKED_DESC = {
+      medic: "Nearly blind. Reacts instantly to any noise you make.",
+      pyro: "Shadows patrol the dark. Get spotted and three of him hunt you at once."
+    };
+
+    function unlockCharacterButton(characterId) {
+      const getButton = CHARACTER_UNLOCK_BUTTONS[characterId];
+      const button = getButton ? getButton() : null;
+      if (!button) {
+        return false;
+      }
+      const wasLocked = button.classList.contains("locked");
+      button.classList.remove("locked");
+      button.removeAttribute("data-locked");
+      const desc = CHARACTER_UNLOCKED_DESC[characterId];
+      if (desc) {
+        button.querySelector(".mode-desc").textContent = desc;
+      }
+      const banner = button.querySelector(".wip-banner");
+      if (banner) {
+        banner.remove();
+      }
+      return wasLocked;
+    }
 
     function refreshCharacterUnlocks() {
-      if (beatenCharacters.has("heavy")) {
-        charMedicButton.classList.remove("locked");
-        charMedicButton.removeAttribute("data-locked");
-        charMedicButton.querySelector(".mode-desc").textContent = "Nearly blind. Reacts instantly to any noise you make.";
-        const banner = charMedicButton.querySelector(".wip-banner");
-        if (banner) {
-          banner.remove();
+      Object.entries(UNLOCKED_BY_VICTORY).forEach(([requiredVictory, unlock]) => {
+        if (!beatenCharacters.has(requiredVictory)) {
+          return;
         }
-      }
+        unlockCharacterButton(unlock.id);
+      });
     }
     refreshCharacterUnlocks();
     refreshAchievementsScreen();
@@ -4152,6 +5758,177 @@
     });
     characterScrollRight.addEventListener("click", () => {
       characterRow.scrollBy({ left: 190, behavior: "smooth" });
+    });
+
+    const devConsoleEl = document.getElementById("devConsole");
+    const devConsoleLogEl = document.getElementById("devConsoleLog");
+    const devConsoleInputEl = document.getElementById("devConsoleInput");
+
+    const devConsoleFailSound = new Audio("Serv_server_interactable_shut.wav");
+    devConsoleFailSound.volume = 0.55;
+    const devConsoleSuccessSound = new Audio("button.mp3");
+    devConsoleSuccessSound.volume = 0.55;
+    const devConsoleSuccessRareSound = new Audio("button_rare.mp3");
+    devConsoleSuccessRareSound.volume = 0.55;
+    [devConsoleFailSound, devConsoleSuccessSound, devConsoleSuccessRareSound].forEach((sound) => {
+      sound.preload = "auto";
+      sound.load();
+    });
+
+    function playDevConsoleResultSound(success) {
+      if (!success) {
+        devConsoleFailSound.currentTime = 0;
+        devConsoleFailSound.play().catch(() => {});
+        return;
+      }
+      const useRare = Math.random() < 0.12;
+      const sound = useRare ? devConsoleSuccessRareSound : devConsoleSuccessSound;
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    }
+
+    const DEV_CONSOLE_TYPING_SLICE_DURATION = 0.14;
+    let devConsoleTypingDuration = null;
+    const devConsoleTypingProbe = new Audio("typing.mp3");
+    devConsoleTypingProbe.preload = "auto";
+    devConsoleTypingProbe.addEventListener("loadedmetadata", () => {
+      if (isFinite(devConsoleTypingProbe.duration)) {
+        devConsoleTypingDuration = devConsoleTypingProbe.duration;
+      }
+    });
+    devConsoleTypingProbe.load();
+    const DEV_CONSOLE_TYPING_VOICES = 4;
+    const devConsoleTypingPool = Array.from({ length: DEV_CONSOLE_TYPING_VOICES }, () => {
+      const audio = new Audio("typing.mp3");
+      audio.preload = "auto";
+      audio.volume = 0.4;
+      audio.load();
+      return audio;
+    });
+    let devConsoleTypingVoiceIndex = 0;
+
+    function playDevConsoleTypingSound() {
+      const duration = devConsoleTypingDuration || 3;
+      const maxStart = Math.max(0, duration - DEV_CONSOLE_TYPING_SLICE_DURATION);
+      const start = Math.random() * maxStart;
+      const audio = devConsoleTypingPool[devConsoleTypingVoiceIndex];
+      devConsoleTypingVoiceIndex = (devConsoleTypingVoiceIndex + 1) % devConsoleTypingPool.length;
+      audio.pause();
+      audio.currentTime = start;
+      audio.play().catch(() => {});
+      setTimeout(() => {
+        if (!audio.paused) {
+          audio.pause();
+        }
+      }, DEV_CONSOLE_TYPING_SLICE_DURATION * 1000);
+    }
+
+    function devConsoleLog(text, type) {
+      const line = document.createElement("div");
+      line.className = "log-line" + (type ? ` ${type}` : "");
+      line.textContent = text;
+      devConsoleLogEl.appendChild(line);
+      devConsoleLogEl.scrollTop = devConsoleLogEl.scrollHeight;
+    }
+
+    function openDevConsole() {
+      devConsoleEl.classList.remove("hidden");
+      devConsoleLogEl.innerHTML = "";
+      devConsoleLog("BadWater.exe dev console. Type a command and press Enter.", "ok");
+      setTimeout(() => {
+        devConsoleInputEl.value = "";
+        devConsoleInputEl.focus();
+      }, 0);
+    }
+
+    function closeDevConsole() {
+      devConsoleEl.classList.add("hidden");
+      devConsoleInputEl.blur();
+    }
+
+    const DEV_UNLOCK_COMMANDS = {
+      "/ulockheavy": "heavy",
+      "/ulockmedic": "medic",
+      "/ulockpyro": "pyro"
+    };
+
+    function runDevCommand(raw) {
+      const command = raw.trim().toLowerCase();
+      if (!command) {
+        return;
+      }
+      devConsoleLog("> " + raw);
+      if (command === "?cmnds") {
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulockall /close");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/close" || command === "/exit") {
+        closeDevConsole();
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/ulockall") {
+        Object.values(DEV_UNLOCK_COMMANDS).forEach((id) => unlockCharacterButton(id));
+        devConsoleLog("all characters unlocked.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (DEV_UNLOCK_COMMANDS[command]) {
+        const characterId = DEV_UNLOCK_COMMANDS[command];
+        const wasLocked = unlockCharacterButton(characterId);
+        devConsoleLog(wasLocked ? `${characterId} unlocked.` : `${characterId} was already unlocked.`, "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      devConsoleLog(`unknown command: ${raw}`, "error");
+      playDevConsoleResultSound(false);
+    }
+
+    function applyDevConsoleInput() {
+      const value = devConsoleInputEl.value;
+      devConsoleInputEl.value = "";
+      runDevCommand(value);
+    }
+
+    function discardDevConsoleInput() {
+      devConsoleInputEl.value = "";
+      closeDevConsole();
+    }
+
+    devConsoleInputEl.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        applyDevConsoleInput();
+      } else if (event.key === "Escape") {
+        discardDevConsoleInput();
+      } else if (event.key.length === 1) {
+        playDevConsoleTypingSound();
+      }
+    });
+    devConsoleInputEl.addEventListener("keyup", (event) => event.stopPropagation());
+
+    const devConsoleApplyButton = document.getElementById("devConsoleApplyButton");
+    const devConsoleDiscardButton = document.getElementById("devConsoleDiscardButton");
+    devConsoleApplyButton.addEventListener("click", () => {
+      applyDevConsoleInput();
+      devConsoleInputEl.focus();
+    });
+    devConsoleDiscardButton.addEventListener("click", discardDevConsoleInput);
+
+    let cheatBuffer = "";
+    window.addEventListener("keydown", (event) => {
+      if (devConsoleEl && !devConsoleEl.classList.contains("hidden")) {
+        return;
+      }
+      if (event.key.length === 1) {
+        cheatBuffer = (cheatBuffer + event.key.toLowerCase()).slice(-20);
+        if (cheatBuffer.endsWith("?cmnds")) {
+          cheatBuffer = "";
+          event.preventDefault();
+          openDevConsole();
+        }
+      }
     });
 
     function openPauseMenu() {
