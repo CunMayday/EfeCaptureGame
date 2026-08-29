@@ -1777,10 +1777,10 @@
             <span class="mode-name">Simulation Desync</span>
             <span class="mode-desc">Restore the power nodes and escape Medic.</span>
           </button>
-          <button class="mode-card locked" type="button" data-locked="1">
-            <span class="mode-name">Signal Hunt</span>
-            <span class="mode-desc">A second training scenario.</span>
-            <span class="wip-banner">Work In Progress</span>
+          <button id="modeBadwater2Button" class="mode-card locked" type="button" data-locked="1">
+            <span class="mode-name">Bad Water 2</span>
+            <span class="mode-desc">Access Restricted.</span>
+            <span class="wip-banner">Locked</span>
           </button>
           <button class="mode-card locked" type="button" data-locked="1">
             <span class="mode-name">Blackout</span>
@@ -1921,6 +1921,7 @@
     const titleBgLayer = document.getElementById("titleBgLayer");
     const titleScreen = document.getElementById("titleScreen");
     const modeMainButton = document.getElementById("modeMainButton");
+    const modeBadwater2Button = document.getElementById("modeBadwater2Button");
     const characterSelect = document.getElementById("characterSelect");
     const charHeavyButton = document.getElementById("charHeavyButton");
     const charMedicButton = document.getElementById("charMedicButton");
@@ -6834,7 +6835,9 @@
       corruptedBgCycleActive = false;
     }
 
+    let corruptedRoomOpenedFrom = characterSelect;
     function showCorruptedReadyRoom() {
+      corruptedRoomOpenedFrom = titleScreen.classList.contains("hidden") ? characterSelect : titleScreen;
       characterSelect.classList.add("hidden");
       titleScreen.classList.add("hidden");
       corruptedReadyRoom.classList.remove("hidden");
@@ -6869,8 +6872,10 @@
       pauseBadwater2Music(800);
       playMenuMusic();
       corruptedReadyRoom.classList.add("hidden");
-      characterSelect.classList.remove("hidden");
-      corruptRemainingLockedCards();
+      corruptedRoomOpenedFrom.classList.remove("hidden");
+      if (corruptedRoomOpenedFrom === characterSelect) {
+        corruptRemainingLockedCards();
+      }
     });
 
     function unlockPwrButton() {
@@ -6884,8 +6889,22 @@
       if (banner) {
         banner.remove();
       }
+      modeBadwater2Button.classList.remove("locked");
+      modeBadwater2Button.removeAttribute("data-locked");
+      modeBadwater2Button.querySelector(".mode-desc").textContent = "A second signal answers.";
+      const mainBanner = modeBadwater2Button.querySelector(".wip-banner");
+      if (mainBanner) {
+        mainBanner.remove();
+      }
       return wasLocked;
     }
+
+    modeBadwater2Button.addEventListener("click", () => {
+      if (modeBadwater2Button.classList.contains("locked")) {
+        return;
+      }
+      startGlitchSequence(700, () => showCorruptedReadyRoom());
+    });
 
     charPwrButton.addEventListener("click", () => {
       if (charPwrButton.classList.contains("locked")) {
