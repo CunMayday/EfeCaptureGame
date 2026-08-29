@@ -5140,7 +5140,7 @@
     const JUMPSCARE_SRC_BY_CHARACTER = {
       heavy: "heavyjumpscare.mp4",
       medic: "medicjumpscare.mp4",
-      pyro: "120px-Pyro_jump.gif",
+      pyro: "pyrojumpscare.mp4",
       soldier: "soldier jumpscare v2.mp4"
     };
 
@@ -5187,7 +5187,7 @@
       }
       const jumpscareSrc = cause === "reaper" ? "medicjumpscare.mp4" : (JUMPSCARE_SRC_BY_CHARACTER[activeCharacter] || "medicjumpscare.mp4");
       const useGif = jumpscareSrc.endsWith(".gif");
-      jumpscare.classList.toggle("fullscreen", cause !== "reaper" && activeCharacter === "soldier");
+      jumpscare.classList.toggle("fullscreen", cause !== "reaper" && (activeCharacter === "soldier" || activeCharacter === "pyro"));
 
       const runDeathSequence = () => {
         jumpscareGifTimer = null;
