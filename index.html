@@ -2822,19 +2822,6 @@
     let medicDoorOpenTimer = 0;
     const keys = new Set();
     const audioContext = window.AudioContext ? new AudioContext() : null;
-    let jumpscareVideoGainNode = null;
-    function boostJumpscareVideoVolume(video, gainValue) {
-      if (!audioContext) {
-        return;
-      }
-      if (!jumpscareVideoGainNode) {
-        const source = audioContext.createMediaElementSource(video);
-        jumpscareVideoGainNode = audioContext.createGain();
-        source.connect(jumpscareVideoGainNode);
-        jumpscareVideoGainNode.connect(audioContext.destination);
-      }
-      jumpscareVideoGainNode.gain.value = gainValue;
-    }
     const SRC_TILE = 16;
     const TILE = 24;
     const LEVEL_MAP = [
@@ -5249,7 +5236,6 @@
         jumpscareVideo.currentTime = 0;
         jumpscareVideo.muted = false;
         jumpscareVideo.volume = 1;
-        boostJumpscareVideoVolume(jumpscareVideo, activeCharacter === "soldier" ? 2.2 : 1);
         const attemptJumpscarePlay = () => {
           jumpscareVideo.muted = false;
           jumpscareVideo.play().catch(() => {
