@@ -131,6 +131,17 @@
       display: flex;
     }
 
+    .jumpscare.fullscreen {
+      inset: 0;
+      border: none;
+      background: #000;
+    }
+
+    .jumpscare.fullscreen video {
+      object-fit: cover;
+      background: transparent;
+    }
+
     .death-flash {
       position: absolute;
       inset: 14px;
@@ -4433,7 +4444,8 @@
         pyroTauntSound.currentTime = 0;
         pyroTauntSound.play().catch(() => {});
       } else if (activeCharacter === "soldier") {
-        return;
+        soldierJumpScreamSound.currentTime = 0;
+        soldierJumpScreamSound.play().catch(() => {});
       } else {
         killTauntSound.currentTime = 0;
         killTauntSound.play().catch(() => {});
@@ -5129,7 +5141,7 @@
       heavy: "heavyjumpscare.mp4",
       medic: "medicjumpscare.mp4",
       pyro: "120px-Pyro_jump.gif",
-      soldier: "120px-Soldier_jump.gif"
+      soldier: "OBS 2026-08-29 16-00-09_edit.mp4"
     };
 
     let lastDeathCause = null;
@@ -5175,6 +5187,7 @@
       }
       const jumpscareSrc = cause === "reaper" ? "medicjumpscare.mp4" : (JUMPSCARE_SRC_BY_CHARACTER[activeCharacter] || "medicjumpscare.mp4");
       const useGif = jumpscareSrc.endsWith(".gif");
+      jumpscare.classList.toggle("fullscreen", cause !== "reaper" && activeCharacter === "soldier");
 
       const runDeathSequence = () => {
         jumpscareGifTimer = null;
@@ -5237,9 +5250,19 @@
           }
         }, 120);
 
+        jumpscareVideo.onended = null;
+        jumpscareVideo.onended = () => {
+          jumpscareVideo.onended = null;
+          if (jumpscareGifTimer) {
+            clearTimeout(jumpscareGifTimer);
+            jumpscareGifTimer = null;
+          }
+          runDeathSequence();
+        };
+
         const videoDuration = jumpscareVideo.duration;
         if (videoDuration && isFinite(videoDuration)) {
-          jumpscareGifTimer = setTimeout(runDeathSequence, videoDuration * 1000);
+          jumpscareGifTimer = setTimeout(runDeathSequence, videoDuration * 1000 + 150);
         } else {
           jumpscareGifTimer = setTimeout(runDeathSequence, jumpscareFallbackDuration);
         }
