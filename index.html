@@ -154,6 +154,296 @@
       100% { opacity: 0; }
     }
 
+    .alarm-vignette {
+      position: absolute;
+      inset: 14px;
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(200, 28, 44, 0.55) 100%);
+      transition: opacity 900ms ease;
+    }
+
+    .alarm-vignette.pulsing {
+      opacity: 1;
+      animation: alarm-vignette-pulse 1.1s ease-in-out infinite;
+    }
+
+    @keyframes alarm-vignette-pulse {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 1; }
+    }
+
+    .distortion-fx {
+      position: absolute;
+      inset: 14px;
+      width: calc(100% - 28px);
+      height: calc(100% - 28px);
+      object-fit: cover;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      filter: drop-shadow(0 0 18px rgba(255, 47, 63, 0.7));
+      transition: opacity 260ms ease;
+    }
+
+    .distortion-fx.visible {
+      opacity: 0.5;
+    }
+
+    .glitch-overlay {
+      position: absolute;
+      inset: 14px;
+      display: none;
+      background: #000;
+      z-index: 9;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .glitch-overlay.visible {
+      display: block;
+    }
+
+    .glitch-overlay.gameplay {
+      background: transparent;
+      z-index: 4;
+    }
+
+    .glitch-overlay.flash {
+      animation: glitch-flash 260ms steps(2, end) 3;
+    }
+
+    @keyframes glitch-flash {
+      0%, 100% { background: #000; }
+      50% { background: #c81c2c; }
+    }
+
+    .glitch-lines {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 260px;
+      max-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      font-family: Consolas, monospace;
+      color: #ff2f3f;
+      font-size: 0.68rem;
+      line-height: 1.4;
+      opacity: 0.8;
+      text-shadow: 0 0 5px rgba(255, 47, 63, 0.5);
+    }
+
+    .glitch-lines.ambient {
+      z-index: -1;
+      opacity: 0.32;
+      pointer-events: none;
+    }
+
+    .glitch-line {
+      white-space: nowrap;
+      animation: glitch-line-in 220ms ease-out, glitch-line-fade 3.2s ease-in forwards;
+    }
+
+    @keyframes glitch-line-in {
+      0% { opacity: 0; transform: translateX(-6px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes glitch-line-fade {
+      0%, 70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .code-transmission {
+      position: absolute;
+      inset: 14px;
+      display: none;
+      background: #000;
+      z-index: 11;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .code-transmission.visible {
+      display: block;
+    }
+
+    .code-transmission-lines {
+      position: absolute;
+      inset: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow: hidden;
+      font-family: Consolas, monospace;
+      color: #ff2f3f;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      text-shadow: 0 0 5px rgba(255, 47, 63, 0.5);
+    }
+
+    .code-transmission-line {
+      white-space: pre;
+      overflow: hidden;
+      border-right: 2px solid rgba(255, 47, 63, 0.8);
+      width: 0;
+      animation: code-line-type 700ms steps(40, end) forwards;
+    }
+
+    .code-transmission-line.error-line {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes code-line-type {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+
+    .white-flash {
+      position: absolute;
+      inset: 14px;
+      display: none;
+      background: #fff;
+      z-index: 12;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .white-flash.visible {
+      display: block;
+    }
+
+    .white-flash.fading-in {
+      animation: white-flash-in 1400ms ease-in forwards;
+    }
+
+    .white-flash.fading-out {
+      animation: white-flash-out 600ms ease-out forwards;
+    }
+
+    @keyframes white-flash-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes white-flash-out {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .corrupted-room {
+      background: #0a0304;
+      border-color: rgba(255, 47, 63, 0.35);
+    }
+
+    .corrupted-bg-layer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .corrupted-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transform-origin: top left;
+      opacity: 0;
+      filter: brightness(0.4) saturate(0.7);
+      animation: corrupted-bg-zoom 22s ease-in-out infinite alternate;
+    }
+
+    .corrupted-bg-img.visible {
+      opacity: 1;
+    }
+
+    .corrupted-bg-img.fading-out {
+      animation: corrupted-bg-zoom 22s ease-in-out infinite alternate, corrupted-bg-fade-out 1.6s ease forwards;
+    }
+
+    .corrupted-bg-img.fading-in {
+      animation: corrupted-bg-zoom 22s ease-in-out infinite alternate, corrupted-bg-fade-in 1.6s ease forwards;
+    }
+
+    @keyframes corrupted-bg-zoom {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.22) translate(-3%, -3%); }
+    }
+
+    @keyframes corrupted-bg-fade-out {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes corrupted-bg-fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .corrupted-bg-logo-mask {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 34%;
+      height: 34%;
+      background: radial-gradient(circle at 78% 78%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 45%, transparent 72%);
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 1.6s ease;
+    }
+
+    .corrupted-bg-logo-mask.visible {
+      opacity: 1;
+    }
+
+    .corrupted-bg-scrim {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(90, 10, 16, 0.35), transparent 60%), rgba(5, 2, 3, 0.55);
+      z-index: 2;
+    }
+
+    .corrupted-room .title-heading,
+    .corrupted-room .character-scroll-wrap,
+    .corrupted-room #corruptedBackButton,
+    .corrupted-room .glitch-lines.ambient {
+      z-index: 3;
+    }
+
+    .corrupted-room h1 {
+      color: #ff2f3f;
+      text-shadow: 0 0 10px rgba(255, 47, 63, 0.5);
+    }
+
+    .corrupted-card {
+      border-color: rgba(255, 47, 63, 0.3);
+      background: rgba(255, 47, 63, 0.06);
+    }
+
+    .corrupted-card:hover {
+      background: rgba(255, 47, 63, 0.12);
+    }
+
+    .scroll-arrow.corrupted {
+      border-color: rgba(255, 47, 63, 0.3);
+      background: rgba(255, 47, 63, 0.06);
+      color: #ff2f3f;
+    }
+
+    .scroll-arrow.corrupted:hover {
+      background: rgba(255, 47, 63, 0.12);
+    }
+
     .jumpscare img,
     .jumpscare video {
       width: 100%;
@@ -472,6 +762,8 @@
 
     .pause-menu-card {
       width: min(90%, 360px);
+      max-height: 100%;
+      overflow-y: auto;
       padding: 28px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: var(--panel);
@@ -1355,6 +1647,11 @@
       <img id="heavySpriteUp" class="enemy-sprite" src="Heavy_move_u.gif" alt="">
       <img id="heavySpriteDown" class="enemy-sprite" src="Heavy_move_d.gif" alt="">
       <img id="heavySpriteSide" class="enemy-sprite" src="Heavy_move_s.gif" alt="">
+      <img id="soldierSpriteIdle" class="enemy-sprite" src="Soldier_move_d.gif" alt="">
+      <img id="soldierSpriteUp" class="enemy-sprite" src="Soldier_move_u.gif" alt="">
+      <img id="soldierSpriteDown" class="enemy-sprite" src="Soldier_move_d.gif" alt="">
+      <img id="soldierSpriteSide" class="enemy-sprite" src="Soldier_move_s.gif" alt="">
+      <img id="soldierSpriteStunned" class="enemy-sprite" src="Soldier_stunned.png" alt="">
       <div id="pyroLayer"></div>
       <img id="playerSpriteIdleDown" class="player-sprite" src="Spy_idle_d.gif" alt="">
       <img id="playerSpriteIdleUp" class="player-sprite" src="Spy_idle_u.gif" alt="">
@@ -1373,6 +1670,15 @@
       <img id="keycardPickupIcon" class="keycard-pickup-icon hidden" src="78px-Cf_keycard_icon.png" alt="">
       <div id="deathScreen" class="death-screen"></div>
       <div id="deathFlash" class="death-flash"></div>
+      <div id="alarmFlash" class="alarm-vignette"></div>
+      <img id="distortionFx" class="distortion-fx" src="120px-Engie_distortion.gif" alt="">
+      <div id="glitchOverlay" class="glitch-overlay">
+        <div id="glitchLines" class="glitch-lines"></div>
+      </div>
+      <div id="codeTransmission" class="code-transmission">
+        <div id="codeTransmissionLines" class="code-transmission-lines"></div>
+      </div>
+      <div id="whiteFlash" class="white-flash"></div>
       <div id="hudOverlay" class="hud-overlay">
         <div class="objective-bar">
           <p id="objectiveText" class="objective-text"></p>
@@ -1401,6 +1707,22 @@
           <div class="pause-setting-row">
             <label for="muteToggle">Mute</label>
             <input id="muteToggle" type="checkbox">
+          </div>
+          <div class="pause-setting-row">
+            <label for="musicVolumeSlider">Music</label>
+            <input id="musicVolumeSlider" type="range" min="0" max="100" value="100">
+          </div>
+          <div class="pause-setting-row">
+            <label for="musicMuteToggle">Mute Music</label>
+            <input id="musicMuteToggle" type="checkbox">
+          </div>
+          <div class="pause-setting-row">
+            <label for="sfxVolumeSlider">Sound Effects</label>
+            <input id="sfxVolumeSlider" type="range" min="0" max="100" value="100">
+          </div>
+          <div class="pause-setting-row">
+            <label for="sfxMuteToggle">Mute Sound Effects</label>
+            <input id="sfxMuteToggle" type="checkbox">
           </div>
           <div id="pauseMenuGameButtons" class="overlay-button-row">
             <button id="resumeButton" class="button" type="button">Resume</button>
@@ -1482,6 +1804,12 @@
               <span class="mode-desc">Subject Uncatalogued.</span>
               <span class="wip-banner">Locked</span>
             </button>
+            <button id="charSoldierButton" class="character-card locked" type="button" data-character="soldier" data-locked="1">
+              <img src="75px-Cm_btn_soldier.png" alt="Soldier">
+              <span class="mode-name">Soldier</span>
+              <span class="mode-desc">Subject Uncatalogued.</span>
+              <span class="wip-banner">Locked</span>
+            </button>
             <button class="character-card locked" type="button" data-locked="1">
               <img src="75px-Cm_btn_scout.png" alt="Scout">
               <span class="mode-name">Scout</span>
@@ -1506,10 +1834,49 @@
               <span class="mode-desc">Subject Uncatalogued.</span>
               <span class="wip-banner">Locked</span>
             </button>
+            <button id="charPwrButton" class="character-card locked" type="button" data-character="pwr" data-locked="1">
+              <img src="Tm_hint_engie.png" alt="???">
+              <span class="mode-name">???</span>
+              <span class="mode-desc">Access Restricted.</span>
+              <span class="wip-banner">Locked</span>
+            </button>
           </div>
           <button id="characterScrollRight" class="scroll-arrow" type="button" aria-label="Scroll right">&#10095;</button>
         </div>
         <button id="characterBackButton" class="button" type="button">Back</button>
+      </div>
+      <div id="corruptedReadyRoom" class="title-screen corrupted-room hidden">
+        <div class="corrupted-bg-layer">
+          <img id="corruptedBg0" class="corrupted-bg-img visible" src="g2wAJZG.jpg" alt="">
+          <img id="corruptedBg1" class="corrupted-bg-img" src="525389-Half-Life-video_games-Half-Life_2-748x468.jpg" alt="">
+          <img id="corruptedBg2" class="corrupted-bg-img" src="half-life-43265-2560x1600.jpg" alt="">
+          <div id="corruptedBgLogoMask" class="corrupted-bg-logo-mask visible"></div>
+          <div class="corrupted-bg-scrim"></div>
+        </div>
+        <div class="title-heading">
+          <h1>&#9888; BAD WATER 2 &#9888;</h1>
+          <p>UNAUTHORIZED ACCESS — SELECT CONFIGURATION</p>
+        </div>
+        <div class="character-scroll-wrap">
+          <button id="corruptedScrollLeft" class="scroll-arrow corrupted" type="button" aria-label="Scroll left">&#10094;</button>
+          <div id="corruptedRow" class="character-row">
+            <button id="tagTeamCardButton" class="character-card locked corrupted-card" type="button" data-locked="1">
+              <img src="50px-Tm_hint_wicker.png" alt="Badwater2">
+              <span class="mode-name">Badwater2</span>
+              <span class="mode-desc">Welcome to the big leagues</span>
+              <span class="wip-banner">Work In Progress</span>
+            </button>
+            <button id="badwater2Stage2CardButton" class="character-card locked corrupted-card" type="button" data-locked="1">
+              <img src="50px-Uc_hint_dman.png" alt="Floor 42">
+              <span class="mode-name">Floor 42</span>
+              <span class="mode-desc">It's a long way down</span>
+              <span class="wip-banner">Work In Progress</span>
+            </button>
+          </div>
+          <button id="corruptedScrollRight" class="scroll-arrow corrupted" type="button" aria-label="Scroll right">&#10095;</button>
+        </div>
+        <button id="corruptedBackButton" class="button" type="button">Back</button>
+        <div id="corruptedGlitchAmbient" class="glitch-lines ambient"></div>
       </div>
       <div id="achievementsScreen" class="title-screen hidden">
         <div class="title-heading">
@@ -1547,7 +1914,24 @@
     const charHeavyButton = document.getElementById("charHeavyButton");
     const charMedicButton = document.getElementById("charMedicButton");
     const charPyroButton = document.getElementById("charPyroButton");
+    const charSoldierButton = document.getElementById("charSoldierButton");
+    const charPwrButton = document.getElementById("charPwrButton");
     const characterBackButton = document.getElementById("characterBackButton");
+    const corruptedReadyRoom = document.getElementById("corruptedReadyRoom");
+    const corruptedRow = document.getElementById("corruptedRow");
+    const corruptedScrollLeft = document.getElementById("corruptedScrollLeft");
+    const corruptedScrollRight = document.getElementById("corruptedScrollRight");
+    const corruptedBackButton = document.getElementById("corruptedBackButton");
+    const corruptedGlitchAmbient = document.getElementById("corruptedGlitchAmbient");
+    const corruptedBg0 = document.getElementById("corruptedBg0");
+    const corruptedBg1 = document.getElementById("corruptedBg1");
+    const corruptedBg2 = document.getElementById("corruptedBg2");
+    const corruptedBgLogoMask = document.getElementById("corruptedBgLogoMask");
+    const glitchOverlayEl = document.getElementById("glitchOverlay");
+    const glitchLinesEl = document.getElementById("glitchLines");
+    const codeTransmissionEl = document.getElementById("codeTransmission");
+    const codeTransmissionLinesEl = document.getElementById("codeTransmissionLines");
+    const whiteFlashEl = document.getElementById("whiteFlash");
     const achievementsButton = document.getElementById("achievementsButton");
     const settingsButton = document.getElementById("settingsButton");
     const pauseMenuHeading = document.getElementById("pauseMenuHeading");
@@ -1569,11 +1953,14 @@
     const characterScrollRight = document.getElementById("characterScrollRight");
     let activeCharacter = "medic";
     const beatenCharacters = new Set();
+    let pwrUnlocked = false;
+    let soldierCutsceneShown = false;
     const UNLOCKED_BY_VICTORY = {
       heavy: { id: "medic", name: "Medic" },
-      medic: { id: "pyro", name: "Pyro" }
+      medic: { id: "pyro", name: "Pyro" },
+      pyro: { id: "soldier", name: "Soldier" }
     };
-    const PLAYABLE_CHARACTERS = ["heavy", "medic", "pyro"];
+    const PLAYABLE_CHARACTERS = ["heavy", "medic", "pyro", "soldier"];
     function hasBeatenFullRoster() {
       return PLAYABLE_CHARACTERS.every((id) => beatenCharacters.has(id));
     }
@@ -1590,6 +1977,18 @@
         name: "Extraction Complete",
         desc: "Escape the training gate while Medic hunts you.",
         icon: "achievement_escape_medic.png"
+      },
+      {
+        id: "escape_pyro",
+        name: "Playing With Fire",
+        desc: "Escape the training gate while Pyro hunts you.",
+        icon: "achievement_close_call.png"
+      },
+      {
+        id: "escape_soldier",
+        name: "Outpaced",
+        desc: "Escape the training gate while Soldier hunts you.",
+        icon: "achievement_close_call.png"
       },
       {
         id: "sound_discipline",
@@ -1645,6 +2044,10 @@
       pyro: {
         title: "Simulation Desync",
         text: "Find the keycards to work through the locked rooms and reach the power station, then get to the exit. Shadows patrol the halls — if one spots and reaches you, three identical Pyros burst out and hunt you together. They're slow, but every step they take leaves fire behind them that kills on contact. Outrun them, then let their own trail box them in."
+      },
+      soldier: {
+        title: "Simulation Desync",
+        text: "Restore all power nodes to unlock the exit gate, and survive Soldier stalking the training corridors. He sees you from anywhere and never loses your trail. Once he locks on he charges immediately and only gets faster the longer it goes on — the only way to stop him is to startle him with your call sign while he's charging and close."
       }
     };
 
@@ -1656,6 +2059,11 @@
     const heavySpriteUpEl = document.getElementById("heavySpriteUp");
     const heavySpriteDownEl = document.getElementById("heavySpriteDown");
     const heavySpriteSideEl = document.getElementById("heavySpriteSide");
+    const soldierSpriteIdleEl = document.getElementById("soldierSpriteIdle");
+    const soldierSpriteUpEl = document.getElementById("soldierSpriteUp");
+    const soldierSpriteDownEl = document.getElementById("soldierSpriteDown");
+    const soldierSpriteSideEl = document.getElementById("soldierSpriteSide");
+    const soldierSpriteStunnedEl = document.getElementById("soldierSpriteStunned");
 
     const ENEMY_SPRITE_POOLS = {
       medic: {
@@ -1663,13 +2071,18 @@
       },
       heavy: {
         idle: heavySpriteIdleEl, up: heavySpriteUpEl, down: heavySpriteDownEl, side: heavySpriteSideEl
+      },
+      soldier: {
+        idle: soldierSpriteIdleEl, up: soldierSpriteUpEl, down: soldierSpriteDownEl, side: soldierSpriteSideEl,
+        stunned: soldierSpriteStunnedEl
       }
     };
 
     function allEnemySpriteEls() {
       return [
         enemySpriteIdleEl, enemySpriteUpEl, enemySpriteDownEl, enemySpriteSideEl,
-        heavySpriteIdleEl, heavySpriteUpEl, heavySpriteDownEl, heavySpriteSideEl
+        heavySpriteIdleEl, heavySpriteUpEl, heavySpriteDownEl, heavySpriteSideEl,
+        soldierSpriteIdleEl, soldierSpriteUpEl, soldierSpriteDownEl, soldierSpriteSideEl, soldierSpriteStunnedEl
       ];
     }
     const playerSpriteIdleDownEl = document.getElementById("playerSpriteIdleDown");
@@ -1689,6 +2102,8 @@
     const jumpscare = document.getElementById("jumpscare");
     const deathScreen = document.getElementById("deathScreen");
     const deathFlash = document.getElementById("deathFlash");
+    const alarmFlashEl = document.getElementById("alarmFlash");
+    const distortionFxEl = document.getElementById("distortionFx");
     const jumpscareVideo = document.getElementById("jumpscareVideo");
     const jumpscareGifEl = document.getElementById("jumpscareGif");
     const jumpscareFallbackDuration = 1050;
@@ -1702,6 +2117,10 @@
     const pauseMenu = document.getElementById("pauseMenu");
     const volumeSlider = document.getElementById("volumeSlider");
     const muteToggle = document.getElementById("muteToggle");
+    const musicVolumeSlider = document.getElementById("musicVolumeSlider");
+    const musicMuteToggle = document.getElementById("musicMuteToggle");
+    const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
+    const sfxMuteToggle = document.getElementById("sfxMuteToggle");
     const resumeButton = document.getElementById("resumeButton");
     const mainMenuButton = document.getElementById("mainMenuButton");
     let gamePaused = false;
@@ -1891,10 +2310,22 @@
     }
     let masterVolume = 1;
     let masterMuted = false;
+    let musicVolume = 1;
+    let musicMuted = false;
+    let sfxVolume = 1;
+    let sfxMuted = false;
     const audioBaseVolumes = new WeakMap();
+    const audioCategories = new WeakMap();
     const allTrackedAudio = new Set();
     const audioProto = HTMLMediaElement.prototype;
     const nativeVolumeDescriptor = Object.getOwnPropertyDescriptor(audioProto, "volume");
+    function categoryVolumeFor(el) {
+      const category = audioCategories.get(el) || "sfx";
+      if (category === "music") {
+        return musicMuted ? 0 : musicVolume;
+      }
+      return sfxMuted ? 0 : sfxVolume;
+    }
     Object.defineProperty(audioProto, "volume", {
       configurable: true,
       get() {
@@ -1903,7 +2334,7 @@
       set(value) {
         audioBaseVolumes.set(this, value);
         allTrackedAudio.add(this);
-        const effective = masterMuted ? 0 : value * masterVolume;
+        const effective = masterMuted ? 0 : value * masterVolume * categoryVolumeFor(this);
         nativeVolumeDescriptor.set.call(this, Math.max(0, Math.min(1, effective)));
       }
     });
@@ -1911,7 +2342,7 @@
     function applyMasterVolumeToAllAudio() {
       allTrackedAudio.forEach((el) => {
         const base = audioBaseVolumes.get(el);
-        const effective = masterMuted ? 0 : base * masterVolume;
+        const effective = masterMuted ? 0 : base * masterVolume * categoryVolumeFor(el);
         nativeVolumeDescriptor.set.call(el, Math.max(0, Math.min(1, effective)));
       });
     }
@@ -1925,6 +2356,26 @@
 
     function setMasterMuted(muted) {
       masterMuted = muted;
+      applyMasterVolumeToAllAudio();
+    }
+
+    function setMusicVolume(value) {
+      musicVolume = Math.max(0, Math.min(1, value));
+      applyMasterVolumeToAllAudio();
+    }
+
+    function setMusicMuted(muted) {
+      musicMuted = muted;
+      applyMasterVolumeToAllAudio();
+    }
+
+    function setSfxVolume(value) {
+      sfxVolume = Math.max(0, Math.min(1, value));
+      applyMasterVolumeToAllAudio();
+    }
+
+    function setSfxMuted(muted) {
+      sfxMuted = muted;
       applyMasterVolumeToAllAudio();
     }
 
@@ -1946,11 +2397,17 @@
     const pyroChaseMusic = new Audio("Fac_music_chase.wav");
     pyroChaseMusic.loop = true;
     pyroChaseMusic.volume = 0.34;
+    const soldierMusic = new Audio("Sanct_music_boss_engie.wav");
+    soldierMusic.loop = true;
+    soldierMusic.volume = 0.28;
     const menuMusic = new Audio("Gm_music.wav");
     menuMusic.loop = true;
     menuMusic.volume = 0.3;
+    const badwater2Music = new Audio("FORSAKEN OST - Milestone 4 Noli Chase Theme (SCRAPPED).mp3");
+    badwater2Music.loop = true;
+    badwater2Music.volume = 0.3;
 
-    [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, menuMusic].forEach((track) => {
+    [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, soldierMusic, menuMusic, badwater2Music].forEach((track) => {
       track.preload = "auto";
       track.load();
     });
@@ -1962,8 +2419,11 @@
       [heavyChaseMusic, 0.34],
       [pyroMusic, 0.28],
       [pyroChaseMusic, 0.34],
-      [menuMusic, 0.3]
+      [soldierMusic, 0.28],
+      [menuMusic, 0.3],
+      [badwater2Music, 0.3]
     ]);
+    musicFullVolume.forEach((_, track) => audioCategories.set(track, "music"));
     const musicFadeTimers = new Map();
 
     function fadeMusicTrack(track, targetVolume, durationMs, onComplete) {
@@ -1992,12 +2452,14 @@
     }
 
     function ambientMusicTrack() {
+      if (activeCharacter === "soldier") { return soldierMusic; }
       if (activeCharacter === "heavy") { return heavyMusic; }
       if (activeCharacter === "pyro") { return pyroMusic; }
       return music;
     }
 
     function chaseMusicTrack() {
+      if (activeCharacter === "soldier") { return soldierMusic; }
       if (activeCharacter === "heavy") { return heavyChaseMusic; }
       if (activeCharacter === "pyro") { return pyroChaseMusic; }
       return chaseMusic;
@@ -2016,7 +2478,7 @@
     }
 
     function pauseAmbientMusic(fadeMs) {
-      [music, heavyMusic, pyroMusic].forEach((track) => {
+      [music, heavyMusic, pyroMusic, soldierMusic].forEach((track) => {
         if (track.paused) {
           return;
         }
@@ -2091,6 +2553,35 @@
         menuMusic.pause();
       }
     }
+
+    function playBadwater2Music() {
+      const existingTimer = musicFadeTimers.get(badwater2Music);
+      if (existingTimer) {
+        clearInterval(existingTimer);
+        musicFadeTimers.delete(badwater2Music);
+      }
+      if (badwater2Music.paused) {
+        badwater2Music.currentTime = 0;
+      }
+      badwater2Music.volume = musicFullVolume.get(badwater2Music);
+      badwater2Music.play().catch(() => {});
+    }
+
+    function pauseBadwater2Music(fadeMs) {
+      if (badwater2Music.paused) {
+        return;
+      }
+      if (fadeMs) {
+        fadeMusicTrack(badwater2Music, 0, fadeMs, () => badwater2Music.pause());
+      } else {
+        const existingTimer = musicFadeTimers.get(badwater2Music);
+        if (existingTimer) {
+          clearInterval(existingTimer);
+          musicFadeTimers.delete(badwater2Music);
+        }
+        badwater2Music.pause();
+      }
+    }
     const enemySpotSound = new Audio("Medic_agg.wav");
     enemySpotSound.volume = 0.55;
     const enemyDetectedSound = new Audio("Spy_found.wav");
@@ -2157,7 +2648,64 @@
     });
 
     function activeFootstepSounds() {
-      return activeCharacter === "heavy" ? heavyFootstepSounds : enemyFootstepSounds;
+      return (activeCharacter === "heavy" || activeCharacter === "soldier") ? heavyFootstepSounds : enemyFootstepSounds;
+    }
+
+    const soldierAggSound = new Audio("Soldier_agg.wav");
+    soldierAggSound.volume = 0.85;
+    const soldierBarkSound = new Audio("Soldier_bark.wav");
+    soldierBarkSound.volume = 1.0;
+    const soldierJumpScreamSound = new Audio("Soldier_jump_scream.wav");
+    soldierJumpScreamSound.volume = 0.9;
+    const soldierAlarmSound = new Audio("Black Ops Zombies_ Five alarm sound.mp3");
+    soldierAlarmSound.volume = 0.7;
+    soldierAlarmSound.loop = true;
+    const SOLDIER_ALARM_EFFECT_DURATION = 4000;
+    const engieDistortionSound = new Audio("Engie_distortion_sound.wav");
+    engieDistortionSound.volume = 0.6;
+    engieDistortionSound.loop = true;
+    const whiteFlashSound = new Audio("half-life-2-white-flash-noise.mp3");
+    whiteFlashSound.volume = 0.7;
+    [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound].forEach((sound) => {
+      sound.preload = "auto";
+      sound.load();
+    });
+    let soldierLockdownTriggered = false;
+    let soldierLockdownSpeedBonus = 0;
+    const soldierAggSoundPool = [soldierAggSound, soldierJumpScreamSound];
+    function playSoldierAggSound() {
+      const sound = soldierAggSoundPool[Math.floor(Math.random() * soldierAggSoundPool.length)];
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    }
+    function stopSoldierVoiceSounds() {
+      [soldierAggSound, soldierBarkSound, soldierJumpScreamSound].forEach((sound) => {
+        sound.pause();
+        sound.currentTime = 0;
+      });
+    }
+    function stopAllSoldierSounds() {
+      stopSoldierVoiceSounds();
+      soldierAlarmSound.pause();
+      soldierAlarmSound.currentTime = 0;
+    }
+
+    function startAlarmVignette() {
+      alarmFlashEl.classList.add("pulsing");
+    }
+    function stopAlarmVignette() {
+      alarmFlashEl.classList.remove("pulsing");
+    }
+
+    function clearDistortionFlickers() {
+      distortionFxEl.classList.remove("visible");
+    }
+
+    function playSoldierAlarmWithEffects() {
+      soldierAlarmSound.currentTime = 0;
+      soldierAlarmSound.play().catch(() => {});
+      startAlarmVignette();
+      startCameraShake(SOLDIER_ALARM_EFFECT_DURATION);
     }
 
     const heavyAlertLineChance = 0.35;
@@ -2517,7 +3065,10 @@
       spriteIsMoving: false,
       idleHoldTimer: 0,
       investigateArrived: false,
-      deliberatelyIdle: false
+      deliberatelyIdle: false,
+      stunTimer: 0,
+      isCharging: false,
+      chargeRampSpeed: 0
     };
 
     const pyroLayerEl = document.getElementById("pyroLayer");
@@ -2533,6 +3084,7 @@
 
     const PYRO_BURST_DURATION = 12;
     const PYRO_CHASE_SPEED = 46;
+    const SOLDIER_PYRO_CHASE_SPEED = 100;
     const PYRO_SPAWN_RADIUS_MIN = 90;
     const PYRO_SPAWN_RADIUS_MAX = 170;
     const PYRO_RADIUS = 10;
@@ -2685,6 +3237,10 @@
       pyroLayerEl.appendChild(el);
       const flankSlot = pyroInstances.length % 3;
       const flankAngle = flankSlot === 0 ? 0 : (flankSlot === 1 ? (Math.PI * 2 / 3) : -(Math.PI * 2 / 3));
+      if (activeCharacter === "soldier") {
+        const ordinal = pyroInstances.length + 1;
+        showGameplayGlitchLine(`PYRO_${ordinal}... ACTIVE`);
+      }
       pyroInstances.push({
         id: pyroNextId++,
         x: point.x,
@@ -2718,6 +3274,53 @@
       const points = [];
       for (let i = 0; i < PYRO_COUNT; i += 1) {
         const point = pickPyroSpawnPoint(originX, originY);
+        if (point) {
+          points.push(point);
+        }
+      }
+      if (points.length === 0) {
+        return;
+      }
+
+      spawnOnePyroInstance(points[0]);
+
+      let delay = 0;
+      for (let i = 1; i < points.length; i += 1) {
+        delay += i === 1 ? (1 + Math.random()) : (2 + Math.random() * 2);
+        pyroPendingSpawns.push({ point: points[i], delay });
+      }
+    }
+
+    function pickSoldierPyroRegionCandidates() {
+      const w = world.width;
+      const h = world.height;
+      return [
+        { x: w * 0.1, y: h * 0.1 },
+        { x: w * 0.9, y: h * 0.1 },
+        { x: w * 0.1, y: h * 0.9 },
+        { x: w * 0.9, y: h * 0.9 },
+        { x: w * 0.5, y: h * 0.5 },
+        { x: w * 0.5, y: h * 0.15 },
+        { x: w * 0.5, y: h * 0.85 }
+      ];
+    }
+
+    function emergePyroFromMapRegions() {
+      if (pyroInstances.length > 0 || pyroPendingSpawns.length > 0) {
+        return;
+      }
+      const candidates = pickSoldierPyroRegionCandidates();
+      for (let i = candidates.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+
+      const points = [];
+      for (const candidate of candidates) {
+        if (points.length >= PYRO_COUNT) {
+          break;
+        }
+        const point = findNearestOpenPosition(candidate.x, candidate.y, PYRO_RADIUS);
         if (point) {
           points.push(point);
         }
@@ -2922,7 +3525,7 @@
     }
 
     function updatePyroSpriteElements() {
-      if (activeCharacter !== "pyro") {
+      if (activeCharacter !== "pyro" && activeCharacter !== "soldier") {
         return;
       }
       const canvasRect = canvas.getBoundingClientRect();
@@ -3393,7 +3996,7 @@
     const pyroDebris = [];
     const pyroRooms = [];
     const PYRO_RUN_TIME_LIMIT = 60;
-    const PYRO_DOOR_BONUS_TIME = 20;
+    const PYRO_DOOR_BONUS_TIME = 5;
     const PYRO_DOOR_LOCK_CLEARANCE = TILE * 1.5;
     let pyroRunTimer = PYRO_RUN_TIME_LIMIT;
     let pyroRunExpired = false;
@@ -3409,7 +4012,7 @@
     }
 
     function buildMap() {
-      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : (activeCharacter === "heavy" ? HEAVY_LEVEL_MAP : LEVEL_MAP);
+      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : ((activeCharacter === "heavy" || activeCharacter === "soldier") ? HEAVY_LEVEL_MAP : LEVEL_MAP);
       world.width = MAP[0].length * TILE;
       world.height = MAP.length * TILE;
       solids.length = 0;
@@ -3532,7 +4135,7 @@
         }
       }
 
-      if (activeCharacter === "heavy") {
+      if (activeCharacter === "heavy" || activeCharacter === "soldier") {
         enemy.patrolPoints = [
           { x: TILE * 8.5, y: TILE * 6.5 },
           { x: TILE * 41.5, y: TILE * 6.5 },
@@ -3579,8 +4182,16 @@
     const CHARACTER_STATS = {
       medic: { speed: 76, chaseSpeed: 128, chargeSpeed: 210 },
       heavy: { speed: 78, chaseSpeed: 138, chargeSpeed: 185 },
-      pyro: { speed: 0, chaseSpeed: 0, chargeSpeed: 0 }
+      pyro: { speed: 0, chaseSpeed: 0, chargeSpeed: 0 },
+      soldier: { speed: 58, chaseSpeed: 100, chargeSpeed: 900 }
     };
+
+    const SOLDIER_AGGRO_RANGE = 140;
+    const SOLDIER_BURST_SPEED = TILE * 9;
+    const SOLDIER_CHARGE_RAMP_RATE = 6;
+    const SOLDIER_STUN_DURATION = 5;
+    const SOLDIER_STUN_RANGE = 100;
+    const SOLDIER_LOCKDOWN_SPEED_BOOST = TILE * 5;
 
     function resetGame() {
       keys.clear();
@@ -3610,6 +4221,17 @@
       enemy.chasingBySound = false;
       enemy.patrolIdleTimer = 0;
       enemy.patrolIdleCooldown = 6 + Math.random() * 8;
+      enemy.stunTimer = 0;
+      enemy.isCharging = false;
+      enemy.chargeRampSpeed = 0;
+      soldierLockdownTriggered = false;
+      soldierLockdownSpeedBonus = 0;
+      cameraShakeTimer = 0;
+      clearDistortionFlickers();
+      stopAlarmVignette();
+      stopAllSoldierSounds();
+      clearPyroInstances();
+      pyroFireAmbienceSound.pause();
 
       const stats = CHARACTER_STATS[activeCharacter] || CHARACTER_STATS.medic;
       enemy.speed = stats.speed;
@@ -3626,7 +4248,7 @@
 
       resetPyroState();
 
-      if (activeCharacter === "heavy" || activeCharacter === "pyro") {
+      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier") {
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
@@ -3779,6 +4401,18 @@
       const voice = callVoiceSounds[Math.floor(Math.random() * callVoiceSounds.length)];
       voice.currentTime = 0;
       voice.play().catch(() => {});
+
+      if (activeCharacter === "soldier") {
+        const distToSoldier = distance(player.x, player.y, enemy.x, enemy.y);
+        if (enemy.isCharging && distToSoldier <= SOLDIER_STUN_RANGE) {
+          enemy.stunTimer = SOLDIER_STUN_DURATION;
+          stopSoldierVoiceSounds();
+          soldierBarkSound.currentTime = 0;
+          soldierBarkSound.play().catch(() => {});
+        }
+        return;
+      }
+
       alertEnemyToSound(callSignX, callSignY);
     }
 
@@ -3798,6 +4432,8 @@
         }
         pyroTauntSound.currentTime = 0;
         pyroTauntSound.play().catch(() => {});
+      } else if (activeCharacter === "soldier") {
+        return;
       } else {
         killTauntSound.currentTime = 0;
         killTauntSound.play().catch(() => {});
@@ -4065,7 +4701,7 @@
       enemy.targetKey = nextKey;
       enemy.path = findPath(enemy.x, enemy.y, targetX, targetY);
       enemy.pathIndex = 0;
-      enemy.repathTimer = enemy.mode === "chase" ? 0.25 : 0.5;
+      enemy.repathTimer = (enemy.mode === "chase" || enemy.mode === "hunt") ? 0.25 : 0.5;
       return enemy.path.length > 0;
     }
 
@@ -4116,7 +4752,8 @@
       if (exitZone.locked) {
         return "All nodes are active. Reach the exit gate.";
       }
-      const hunterName = activeCharacter === "heavy" ? "Heavy" : "Medic";
+      const HUNTER_NAME_BY_CHARACTER = { heavy: "Heavy", pyro: "Pyro", soldier: "Soldier" };
+      const hunterName = HUNTER_NAME_BY_CHARACTER[activeCharacter] || "Medic";
       return `The gate is open. Reach it before ${hunterName} cuts you off.`;
     }
 
@@ -4191,7 +4828,11 @@
             playObjectiveInteractSound();
             playObjectiveCue("power");
             showObjectiveNoiseIcon(item.x, item.y);
-            alertEnemyToSound(item.x, item.y);
+            if (activeCharacter !== "soldier") {
+              alertEnemyToSound(item.x, item.y);
+            } else if (player.nodesActive >= player.nodesRequired) {
+              triggerSoldierLockdown(player.x, player.y);
+            }
           }
         }
       }
@@ -4239,7 +4880,6 @@
           playObjectiveInteractSound();
           playObjectiveCue("power");
           showObjectiveNoiseIcon(pyroPowerConsole.x, pyroPowerConsole.y);
-          alertEnemyToSound(pyroPowerConsole.x, pyroPowerConsole.y);
         }
 
         if (pyroPowerConsole.active && exitZone.locked) {
@@ -4328,6 +4968,14 @@
           keys.clear();
           pauseAmbientMusic(1800);
           pauseChaseMusic(1800);
+          if (activeCharacter === "soldier") {
+            stopAllSoldierSounds();
+            clearPyroInstances();
+            pyroFireAmbienceSound.pause();
+            cameraShakeTimer = 0;
+            clearDistortionFlickers();
+            stopAlarmVignette();
+          }
 
           const wasAlreadyBeaten = beatenCharacters.has(activeCharacter);
           beatenCharacters.add(activeCharacter);
@@ -4337,7 +4985,8 @@
             refreshCharacterUnlocks();
           }
 
-          grantAchievement(activeCharacter === "heavy" ? "escape_heavy" : "escape_medic");
+          const ESCAPE_ACHIEVEMENT_BY_CHARACTER = { heavy: "escape_heavy", medic: "escape_medic", pyro: "escape_pyro", soldier: "escape_soldier" };
+          grantAchievement(ESCAPE_ACHIEVEMENT_BY_CHARACTER[activeCharacter] || "escape_medic");
           if (activeCharacter === "medic" && !runCalledForMedic) {
             grantAchievement("sound_discipline");
           }
@@ -4348,14 +4997,33 @@
             grantAchievement("full_roster");
           }
 
+          if (activeCharacter === "soldier" && !wasAlreadyBeaten && !soldierCutsceneShown) {
+            soldierCutsceneShown = true;
+            playSoldierVictoryCutscene();
+            return;
+          }
+
+          const nextHunter = UNLOCKED_BY_VICTORY[activeCharacter];
           if (activeCharacter === "heavy") {
             showWinOverlay(
               "Extraction Complete",
               "You slipped past Heavy and made it through the gate. Another hunter is waiting in the next sector.",
-              true
+              nextHunter ? nextHunter.id : null
+            );
+          } else if (activeCharacter === "medic") {
+            showWinOverlay(
+              "Extraction Complete",
+              "You slipped past Medic and made it through the gate. A new hunter has been unlocked.",
+              nextHunter ? nextHunter.id : null
+            );
+          } else if (activeCharacter === "pyro") {
+            showWinOverlay(
+              "Extraction Complete",
+              "You slipped past Pyro and made it through the gate. A new hunter has been unlocked.",
+              nextHunter ? nextHunter.id : null
             );
           } else {
-            showWinOverlay("Extraction Complete", "You made it through the training gate. Press R to restart the run.", false);
+            showWinOverlay("Extraction Complete", "You made it through the training gate. Press R to restart the run.", null);
           }
         }
       }
@@ -4460,7 +5128,8 @@
     const JUMPSCARE_SRC_BY_CHARACTER = {
       heavy: "heavyjumpscare.mp4",
       medic: "medicjumpscare.mp4",
-      pyro: "120px-Pyro_jump.gif"
+      pyro: "120px-Pyro_jump.gif",
+      soldier: "120px-Soldier_jump.gif"
     };
 
     let lastDeathCause = null;
@@ -4480,6 +5149,20 @@
         clearPyroReaper();
         pyroFireAmbienceSound.pause();
       }
+      if (activeCharacter === "soldier") {
+        stopAllSoldierSounds();
+        clearPyroInstances();
+        pyroFireAmbienceSound.pause();
+        cameraShakeTimer = 0;
+        clearDistortionFlickers();
+        stopAlarmVignette();
+      }
+      callSound.pause();
+      callSound.currentTime = 0;
+      callVoiceSounds.forEach((sound) => {
+        sound.pause();
+        sound.currentTime = 0;
+      });
       pendingDeathOverlay = true;
       jumpscare.classList.add("visible");
       [
@@ -4563,7 +5246,238 @@
       }
     }
 
+    function updateSoldierPyroBurst(dt) {
+      updatePyroFireTrail();
+      updatePyroPendingSpawns(dt);
+      updatePyroFireAmbience(dt);
+
+      for (const patch of pyroFireTrail) {
+        if (distance(patch.x, patch.y, player.x, player.y) < patch.radius + player.radius) {
+          triggerPlayerDeath("fire");
+          return;
+        }
+      }
+
+      if (pyroInstances.length === 0) {
+        return;
+      }
+
+      const toDespawn = [];
+      pyroInstances.forEach((inst) => {
+        inst.repathTimer = Math.max(0, (inst.repathTimer || 0) - dt);
+        inst.mode = "chase";
+
+        const distToPlayer = distance(inst.x, inst.y, player.x, player.y);
+        const flankRadius = Math.min(70, distToPlayer * 0.6);
+        const targetX = distToPlayer > 24 ? player.x + Math.cos(inst.flankAngle || 0) * flankRadius : player.x;
+        const targetY = distToPlayer > 24 ? player.y + Math.sin(inst.flankAngle || 0) * flankRadius : player.y;
+        const safeTarget = positionCollidesWithSolids(targetX, targetY, inst.radius)
+          ? { x: player.x, y: player.y }
+          : { x: targetX, y: targetY };
+
+        const hasPath = refreshPyroShadowPath(inst, safeTarget.x, safeTarget.y);
+        let waypoint = inst.path && inst.path[inst.pathIndex];
+        if (!waypoint && hasPath) {
+          waypoint = safeTarget;
+        }
+        if (!waypoint) {
+          waypoint = safeTarget;
+        }
+        if (distance(inst.x, inst.y, waypoint.x, waypoint.y) < 6 && inst.pathIndex < inst.path.length - 1) {
+          inst.pathIndex += 1;
+          waypoint = inst.path[inst.pathIndex];
+        }
+        if (inst.pathIndex >= inst.path.length - 1 && distance(waypoint.x, waypoint.y, safeTarget.x, safeTarget.y) > 1) {
+          waypoint = safeTarget;
+        }
+
+        const dx = waypoint.x - inst.x;
+        const dy = waypoint.y - inst.y;
+        const len = Math.hypot(dx, dy) || 1;
+        inst.moveX = dx / len;
+        inst.moveY = dy / len;
+        if (Math.abs(inst.moveX) > Math.abs(inst.moveY)) {
+          inst.facing = inst.moveX >= 0 ? "right" : "left";
+        } else {
+          inst.facing = inst.moveY >= 0 ? "down" : "up";
+        }
+        moveWithCollision(inst, inst.moveX * SOLDIER_PYRO_CHASE_SPEED * dt, inst.moveY * SOLDIER_PYRO_CHASE_SPEED * dt);
+
+        inst.trailTimer -= dt;
+        if (inst.trailTimer <= 0) {
+          dropPyroFireTrail(inst.x, inst.y);
+          inst.trailTimer = PYRO_TRAIL_INTERVAL;
+        }
+
+        inst.footstepTimer -= dt;
+        if (inst.footstepTimer <= 0) {
+          const step = pyroFootstepSounds[Math.floor(Math.random() * pyroFootstepSounds.length)];
+          step.currentTime = 0;
+          step.play().catch(() => {});
+          inst.footstepTimer = 0.33;
+        }
+
+        if (distance(inst.x, inst.y, player.x, player.y) < inst.radius + player.radius) {
+          triggerPlayerDeath();
+        }
+      });
+
+      toDespawn.forEach((inst) => despawnPyroInstance(inst));
+    }
+
+    function triggerSoldierLockdown(x, y) {
+      if (soldierLockdownTriggered) {
+        return;
+      }
+      soldierLockdownTriggered = true;
+      playSoldierAlarmWithEffects();
+      emergePyroFromMapRegions();
+      soldierLockdownSpeedBonus = SOLDIER_LOCKDOWN_SPEED_BOOST;
+      if (enemy.isCharging) {
+        enemy.chargeRampSpeed += SOLDIER_LOCKDOWN_SPEED_BOOST;
+      } else {
+        enemy.isCharging = true;
+        enemy.chargeRampSpeed = SOLDIER_BURST_SPEED + soldierLockdownSpeedBonus;
+        playSoldierAggSound();
+      }
+    }
+
+    function updateSoldierEnemy(dt) {
+      const distToPlayer = distance(enemy.x, enemy.y, player.x, player.y);
+
+      if (enemy.stunTimer > 0) {
+        enemy.stunTimer = Math.max(0, enemy.stunTimer - dt);
+        enemy.moveX = 0;
+        enemy.moveY = 0;
+        enemy.stuckTimer = 0;
+        enemy.deliberatelyIdle = true;
+        syncEnemyWalkAudio(0);
+        if (enemy.wasChasing) {
+          pauseChaseMusic();
+          if (game.state === "playing") {
+            playAmbientMusic();
+          }
+        }
+        enemy.wasChasing = false;
+        if (enemy.stunTimer <= 0) {
+          playSoldierAggSound();
+        }
+        return;
+      }
+
+      enemy.lastKnownX = player.x;
+      enemy.lastKnownY = player.y;
+
+      if (!enemy.isCharging && distToPlayer <= SOLDIER_AGGRO_RANGE && hasLineOfSight(enemy.x, enemy.y, player.x, player.y)) {
+        enemy.isCharging = true;
+        enemy.chargeRampSpeed = SOLDIER_BURST_SPEED + soldierLockdownSpeedBonus;
+        playSoldierAggSound();
+      }
+
+      let speed = enemy.speed;
+      if (enemy.isCharging) {
+        enemy.chargeRampSpeed = Math.min(enemy.chargeSpeed, enemy.chargeRampSpeed + SOLDIER_CHARGE_RAMP_RATE * dt);
+        speed = enemy.chargeRampSpeed;
+        cameraShakeTimer = 0.2;
+      }
+
+      enemy.mode = "hunt";
+      enemy.repathTimer = Math.max(0, enemy.repathTimer - dt);
+      const targetX = player.x;
+      const targetY = player.y;
+
+      let hasPath = refreshEnemyPath(targetX, targetY);
+      if (!hasPath && hasLineOfSight(enemy.x, enemy.y, targetX, targetY)) {
+        hasPath = true;
+      }
+
+      let waypoint = enemy.path[enemy.pathIndex];
+      if (!waypoint && hasPath) {
+        waypoint = { x: targetX, y: targetY };
+      }
+
+      if (!waypoint) {
+        enemy.moveX = 0;
+        enemy.moveY = 0;
+        enemy.stuckTimer = 0;
+        enemy.deliberatelyIdle = true;
+        syncEnemyWalkAudio(0);
+        return;
+      }
+
+      if (distance(enemy.x, enemy.y, waypoint.x, waypoint.y) < 6 && enemy.pathIndex < enemy.path.length - 1) {
+        enemy.pathIndex += 1;
+        waypoint = enemy.path[enemy.pathIndex];
+      }
+
+      if (enemy.pathIndex >= enemy.path.length - 1 && distance(waypoint.x, waypoint.y, targetX, targetY) > 1) {
+        waypoint = { x: targetX, y: targetY };
+      }
+
+      enemy.deliberatelyIdle = false;
+      const dx = waypoint.x - enemy.x;
+      const dy = waypoint.y - enemy.y;
+      const len = Math.hypot(dx, dy) || 1;
+      enemy.moveX = dx / len;
+      enemy.moveY = dy / len;
+      if (Math.abs(enemy.moveX) > Math.abs(enemy.moveY)) {
+        enemy.facing = enemy.moveX >= 0 ? "right" : "left";
+      } else {
+        enemy.facing = enemy.moveY >= 0 ? "down" : "up";
+      }
+      const prevX = enemy.x;
+      const prevY = enemy.y;
+      const stepX = (dx / len) * speed * dt;
+      const stepY = (dy / len) * speed * dt;
+      moveWithCollision(enemy, stepX, stepY);
+      const actualMove = distance(prevX, prevY, enemy.x, enemy.y);
+      const intendedMove = Math.hypot(stepX, stepY);
+
+      if (intendedMove > 0.4 && actualMove < 0.15) {
+        enemy.stuckTimer += dt;
+      } else {
+        enemy.stuckTimer = 0;
+      }
+
+      if (enemy.stuckTimer > 0.3) {
+        enemy.repathTimer = 0;
+        enemy.path = [];
+        enemy.pathIndex = 0;
+        enemy.stuckTimer = 0;
+      }
+
+      let walkLoopVolume = 0;
+      if (game.state === "playing" && !jumpscare.classList.contains("visible") && Math.hypot(enemy.moveX, enemy.moveY) > 0.35) {
+        const hearStart = 220;
+        const hearFull = 90;
+        if (distToPlayer < hearStart) {
+          const blend = clamp((hearStart - distToPlayer) / (hearStart - hearFull), 0, 1);
+          walkLoopVolume = enemyWalkLoopMaxVolume * Math.sqrt(blend);
+        }
+      }
+      syncEnemyWalkAudio(walkLoopVolume);
+
+      if (distance(enemy.x, enemy.y, player.x, player.y) < enemy.radius + player.radius) {
+        triggerPlayerDeath();
+      }
+
+      if (enemy.isCharging && !enemy.wasChasing) {
+        pauseAmbientMusic();
+        playChaseMusic();
+      } else if (!enemy.isCharging && enemy.wasChasing) {
+        pauseChaseMusic();
+        if (game.state === "playing") {
+          playAmbientMusic();
+        }
+      }
+      enemy.wasChasing = enemy.isCharging;
+    }
+
     function updateEnemy(dt) {
+      if (activeCharacter === "soldier") {
+        updateSoldierEnemy(dt);
+        return;
+      }
       const isHeavy = activeCharacter === "heavy";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
       const distToPlayer = distance(enemy.x, enemy.y, player.x, player.y);
@@ -4796,7 +5710,14 @@
       enemy.wasChasing = activelyChasingPlayer;
     }
 
-    function updateCamera() {
+    let cameraShakeTimer = 0;
+    const cameraShakeStrength = 3;
+
+    function startCameraShake(durationMs) {
+      cameraShakeTimer = durationMs / 1000;
+    }
+
+    function updateCamera(dt) {
       if (world.width <= canvas.width) {
         game.camera.x = (world.width - canvas.width) / 2;
       } else {
@@ -4806,6 +5727,11 @@
         game.camera.y = (world.height - canvas.height) / 2;
       } else {
         game.camera.y = clamp(player.y - canvas.height / 2, 0, world.height - canvas.height);
+      }
+      if (cameraShakeTimer > 0) {
+        cameraShakeTimer = Math.max(0, cameraShakeTimer - dt);
+        game.camera.x += (Math.random() - 0.5) * 2 * cameraShakeStrength;
+        game.camera.y += (Math.random() - 0.5) * 2 * cameraShakeStrength;
       }
     }
 
@@ -5019,7 +5945,7 @@
     }
 
     function drawIntroScene() {
-      if (activeCharacter === "heavy" || activeCharacter === "pyro") {
+      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier") {
         return;
       }
       drawSpawnTunnelExit();
@@ -5202,7 +6128,9 @@
 
       const pool = ENEMY_SPRITE_POOLS[activeCharacter] || ENEMY_SPRITE_POOLS.medic;
       let activeEl = pool.down;
-      if (!enemy.spriteIsMoving) {
+      if (activeCharacter === "soldier" && enemy.stunTimer > 0) {
+        activeEl = pool.stunned;
+      } else if (!enemy.spriteIsMoving) {
         activeEl = pool.idle;
       } else if (enemy.facing === "up") {
         activeEl = pool.up;
@@ -5419,13 +6347,13 @@
       });
     }
 
-    function showWinOverlay(title, message, offerMoveOn) {
+    function showWinOverlay(title, message, moveOnCharacterId) {
       overlay.innerHTML = `
         <div class="overlay-card">
           <h2>${title}</h2>
           <p>${message}</p>
           <div class="overlay-button-row">
-            ${offerMoveOn ? '<button id="moveOnButton" class="button" type="button">Move On</button>' : ""}
+            ${moveOnCharacterId ? '<button id="moveOnButton" class="button" type="button">Move On</button>' : ""}
             <button id="restartRunButton" class="button" type="button">Restart Run</button>
             <button id="winMainMenuButton" class="button" type="button">Main Menu</button>
           </div>
@@ -5437,13 +6365,117 @@
         resetGame();
       });
       overlay.querySelector("#winMainMenuButton").addEventListener("click", goToMainMenu);
-      if (offerMoveOn) {
+      if (moveOnCharacterId) {
         overlay.querySelector("#moveOnButton").addEventListener("click", () => {
-          activeCharacter = "medic";
-          showBriefingOverlay("medic");
+          activeCharacter = moveOnCharacterId;
+          showBriefingOverlay(moveOnCharacterId);
         });
       }
       updateHud();
+    }
+
+    function playSoldierVictoryCutscene() {
+      gameStarted = false;
+      keys.clear();
+      jumpscare.classList.remove("visible");
+      deathScreen.classList.remove("visible");
+      deathScreen.innerHTML = "";
+      overlay.classList.remove("visible");
+      pauseMenuButton.classList.add("hidden");
+      hudOverlayEl.classList.add("hidden");
+      titleScreen.classList.add("hidden");
+      characterSelect.classList.remove("hidden");
+      titleBgLayer.classList.remove("hidden");
+      achievementsButton.classList.remove("hidden");
+      settingsButton.classList.remove("hidden");
+      playMenuMusic();
+      unlockPwrButton();
+
+      setTimeout(() => {
+        const scrollTarget = characterRow.scrollWidth - characterRow.clientWidth;
+        characterRow.scrollTo({ left: scrollTarget, behavior: "smooth" });
+      }, 400);
+
+      setTimeout(() => {
+        playCodeTransmissionSequence(() => {
+          showCorruptedReadyRoom();
+        });
+      }, 1300);
+    }
+
+    const CODE_TRANSMISSION_LINE_POOL = [
+      "0xDEADC0DE  SUBJECT_SOLDIER::CONTAINMENT_FAILURE",
+      "> tag_team_protocol.init()",
+      "ERR 0x5A: CORE DESYNC AT SECTOR 7",
+      "WARNING: SIGNAL DUPLICATION DETECTED",
+      "> access_level = OVERRIDE",
+      "MEMORY LEAK IN SIMULATION CORE",
+      "...RECALIBRATING HUNTER PROFILE...",
+      "> unauthorized_process.spawn(x2)",
+      "SUBJECT COUNT MISMATCH: EXPECTED 1, FOUND 2",
+      "TRACE//LOST",
+      "> compiling badwater2.sim...",
+      "reticulating containment splines...",
+      "0x00FF2F3F  WRITE ACCESS DENIED",
+      "> fork(subject_a, subject_b)",
+      "SYNCING DUAL HUNTER STATE...",
+      "CORE INTEGRITY: 12%"
+    ];
+
+    function typeCodeTransmissionLine(text, extraClass) {
+      const el = document.createElement("div");
+      el.className = "code-transmission-line" + (extraClass ? ` ${extraClass}` : "");
+      el.textContent = text;
+      codeTransmissionLinesEl.appendChild(el);
+      while (codeTransmissionLinesEl.childElementCount > 14) {
+        codeTransmissionLinesEl.removeChild(codeTransmissionLinesEl.firstChild);
+      }
+    }
+
+    function playCodeTransmissionSequence(onDone) {
+      codeTransmissionLinesEl.innerHTML = "";
+      codeTransmissionEl.classList.remove("hidden");
+      codeTransmissionEl.classList.add("visible");
+
+      let elapsed = 0;
+      const lineIntervalMs = 260;
+      const totalDurationMs = 4800;
+      const typeTimer = setInterval(() => {
+        elapsed += lineIntervalMs;
+        typeCodeTransmissionLine(CODE_TRANSMISSION_LINE_POOL[Math.floor(Math.random() * CODE_TRANSMISSION_LINE_POOL.length)]);
+        if (Math.random() < 0.35) {
+          engieDistortionSound.currentTime = 0;
+          engieDistortionSound.play().catch(() => {});
+          distortionFxEl.classList.add("visible");
+          setTimeout(() => distortionFxEl.classList.remove("visible"), 180 + Math.random() * 200);
+        }
+        if (elapsed >= totalDurationMs) {
+          clearInterval(typeTimer);
+          engieDistortionSound.pause();
+          engieDistortionSound.currentTime = 0;
+          typeCodeTransmissionLine("ERROR", "error-line");
+          setTimeout(() => {
+            whiteFlashEl.classList.remove("fading-in");
+            whiteFlashEl.classList.add("visible");
+            void whiteFlashEl.offsetWidth;
+            whiteFlashEl.classList.add("fading-in");
+            whiteFlashSound.currentTime = 0;
+            whiteFlashSound.play().catch(() => {});
+            setTimeout(() => {
+              codeTransmissionEl.classList.remove("visible");
+              distortionFxEl.classList.remove("visible");
+              if (onDone) {
+                onDone();
+              }
+              whiteFlashEl.classList.remove("fading-in");
+              whiteFlashEl.classList.add("fading-out");
+              setTimeout(() => {
+                whiteFlashEl.classList.remove("visible", "fading-out");
+              }, 600);
+            }, 1400);
+          }, 700);
+        }
+      }, lineIntervalMs);
     }
 
     const CHARACTER_DEATH_INFO = {
@@ -5467,13 +6499,22 @@
         name: "Pyro",
         bio: "Pyro does not patrol. He waits inside the fire itself and erupts without warning, sometimes alongside decoys of himself. Only one is ever real, and he moves the instant he appears. Learn the tell, or keep your distance from every fire you see.",
         lore: "Subject designation: Pyro. Origin unconfirmed. Does not register on thermal or motion sensors between appearances. Facility fire-suppression logs show no correlation with his emergence. Do not approach lit fixtures to test this."
+      },
+      soldier: {
+        render: "120px-Soldier_render.png",
+        renderScale: 1.7,
+        portrait: "75px-Cm_btn_soldier.png",
+        name: "Soldier",
+        bio: "Soldier sees you from anywhere on the map, and once he locks on he never lets go. He closes in fast right from the start and only gets faster the longer the chase runs. Distance alone will not save you forever — your call sign is the only thing that can stop him once he's charging.",
+        lore: "Subject designation: Soldier. Former facility response unit, repurposed by the corrupted simulation core. Tracking protocols do not decay or reset once a target is acquired. Sudden loud contact appears to trigger an old defensive reflex."
       }
     };
 
     function showDeathScreen() {
       const info = CHARACTER_DEATH_INFO[activeCharacter] || CHARACTER_DEATH_INFO.medic;
+      const renderStyle = info.renderScale ? ` style="transform: translateY(-50%) scale(${info.renderScale})"` : "";
       deathScreen.innerHTML = `
-        <img class="death-render" src="${info.render}" alt="">
+        <img class="death-render" src="${info.render}" alt=""${renderStyle}>
         <div class="death-top">
           <img class="death-portrait" src="${info.portrait}" alt="${info.name}">
           <div class="death-info">
@@ -5534,6 +6575,9 @@
           updatePyro(dt);
         } else {
           updateEnemy(dt);
+          if (activeCharacter === "soldier") {
+            updateSoldierPyroBurst(dt);
+          }
         }
         updatePlayerFootstepAudio(dt);
       } else if (game.state === "intro") {
@@ -5547,7 +6591,7 @@
       updateEnemyWalkAudio(dt);
 
       if (!jumpscare.classList.contains("visible")) {
-        updateCamera();
+        updateCamera(dt);
         drawWorld();
         updateEnemySpriteElement(dt);
         updatePyroSpriteElements();
@@ -5656,6 +6700,177 @@
       titleScreen.classList.remove("hidden");
     });
 
+    const GLITCH_LINE_POOL = [
+      "0xDEADC0DE  SUBJECT_SOLDIER::CONTAINMENT_FAILURE",
+      "> tag_team_protocol.init()",
+      "ERR 0x5A: CORE DESYNC AT SECTOR 7",
+      "WARNING: SIGNAL DUPLICATION DETECTED",
+      "> access_level = OVERRIDE",
+      "MEMORY LEAK IN SIMULATION CORE",
+      "...RECALIBRATING HUNTER PROFILE...",
+      "> unauthorized_process.spawn(x2)",
+      "SUBJECT COUNT MISMATCH: EXPECTED 1, FOUND 2",
+      "TRACE//LOST"
+    ];
+    let glitchLineTimer = null;
+    function spawnGlitchLine(container, text) {
+      const el = document.createElement("div");
+      el.className = "glitch-line";
+      el.textContent = text || GLITCH_LINE_POOL[Math.floor(Math.random() * GLITCH_LINE_POOL.length)];
+      container.appendChild(el);
+      el.addEventListener("animationend", () => el.remove());
+    }
+    function startGlitchSequence(durationMs, onDone) {
+      glitchOverlayEl.classList.remove("hidden");
+      glitchOverlayEl.classList.add("visible");
+      glitchLineTimer = setInterval(() => spawnGlitchLine(glitchLinesEl), 350);
+      setTimeout(() => {
+        glitchOverlayEl.classList.add("flash");
+        setTimeout(() => {
+          clearInterval(glitchLineTimer);
+          glitchLineTimer = null;
+          glitchLinesEl.innerHTML = "";
+          glitchOverlayEl.classList.remove("visible", "flash");
+          if (onDone) {
+            onDone();
+          }
+        }, 260);
+      }, durationMs);
+    }
+
+    let gameplayGlitchActiveCount = 0;
+    function showGameplayGlitchLine(text) {
+      gameplayGlitchActiveCount += 1;
+      glitchOverlayEl.classList.add("gameplay", "visible");
+      const el = document.createElement("div");
+      el.className = "glitch-line";
+      el.textContent = text;
+      glitchLinesEl.appendChild(el);
+      el.addEventListener("animationend", () => {
+        el.remove();
+        gameplayGlitchActiveCount = Math.max(0, gameplayGlitchActiveCount - 1);
+        if (gameplayGlitchActiveCount === 0) {
+          glitchOverlayEl.classList.remove("gameplay", "visible");
+        }
+      });
+    }
+
+    let ambientGlitchTimer = null;
+    function startAmbientGlitchLoop() {
+      stopAmbientGlitchLoop();
+      ambientGlitchTimer = setInterval(() => spawnGlitchLine(corruptedGlitchAmbient), 700);
+    }
+    function stopAmbientGlitchLoop() {
+      if (ambientGlitchTimer) {
+        clearInterval(ambientGlitchTimer);
+        ambientGlitchTimer = null;
+      }
+      corruptedGlitchAmbient.innerHTML = "";
+    }
+
+    const corruptedBgEls = [corruptedBg0, corruptedBg1, corruptedBg2];
+    const corruptedBgHoldMs = [20000, 11000, 11000];
+    const corruptedBgFadeMs = 1600;
+    let corruptedBgCycleActive = false;
+    function cycleCorruptedBg(index) {
+      if (!corruptedBgCycleActive) {
+        return;
+      }
+      const fromEl = corruptedBgEls[index];
+      const nextIndex = (index + 1) % corruptedBgEls.length;
+      const toEl = corruptedBgEls[nextIndex];
+      toEl.classList.remove("visible", "fading-in", "fading-out");
+      void toEl.offsetWidth;
+      toEl.classList.add("fading-in");
+      fromEl.classList.remove("fading-in");
+      fromEl.classList.add("fading-out");
+      corruptedBgLogoMask.classList.toggle("visible", nextIndex === 0);
+      setTimeout(() => {
+        if (!corruptedBgCycleActive) {
+          return;
+        }
+        toEl.classList.remove("fading-in");
+        toEl.classList.add("visible");
+        fromEl.classList.remove("visible", "fading-out");
+        setTimeout(() => cycleCorruptedBg(nextIndex), corruptedBgHoldMs[nextIndex] - corruptedBgFadeMs);
+      }, corruptedBgFadeMs);
+    }
+    function startCorruptedBgLoop() {
+      if (corruptedBgCycleActive) {
+        return;
+      }
+      corruptedBgCycleActive = true;
+      corruptedBgLogoMask.classList.add("visible");
+      corruptedBgEls.forEach((el, i) => {
+        el.classList.toggle("visible", i === 0);
+        el.classList.remove("fading-in", "fading-out");
+      });
+      setTimeout(() => cycleCorruptedBg(0), corruptedBgHoldMs[0]);
+    }
+    function stopCorruptedBgLoop() {
+      corruptedBgCycleActive = false;
+    }
+
+    function showCorruptedReadyRoom() {
+      characterSelect.classList.add("hidden");
+      titleScreen.classList.add("hidden");
+      corruptedReadyRoom.classList.remove("hidden");
+      startAmbientGlitchLoop();
+      startCorruptedBgLoop();
+      pauseMenuMusic();
+      playBadwater2Music();
+    }
+
+    corruptedScrollLeft.addEventListener("click", () => {
+      corruptedRow.scrollBy({ left: -190, behavior: "smooth" });
+    });
+    corruptedScrollRight.addEventListener("click", () => {
+      corruptedRow.scrollBy({ left: 190, behavior: "smooth" });
+    });
+    function corruptRemainingLockedCards() {
+      characterRow.querySelectorAll(".character-card.locked").forEach((card) => {
+        const nameEl = card.querySelector(".mode-name");
+        const descEl = card.querySelector(".mode-desc");
+        if (nameEl) {
+          nameEl.textContent = "ERROR";
+        }
+        if (descEl) {
+          descEl.textContent = "File has exported to another location";
+        }
+      });
+    }
+
+    corruptedBackButton.addEventListener("click", () => {
+      stopAmbientGlitchLoop();
+      stopCorruptedBgLoop();
+      pauseBadwater2Music(800);
+      playMenuMusic();
+      corruptedReadyRoom.classList.add("hidden");
+      characterSelect.classList.remove("hidden");
+      corruptRemainingLockedCards();
+    });
+
+    function unlockPwrButton() {
+      const wasLocked = charPwrButton.classList.contains("locked");
+      pwrUnlocked = true;
+      charPwrButton.classList.remove("locked");
+      charPwrButton.removeAttribute("data-locked");
+      charPwrButton.querySelector(".mode-name").textContent = "Badwater2";
+      charPwrButton.querySelector(".mode-desc").textContent = "A second signal answers.";
+      const banner = charPwrButton.querySelector(".wip-banner");
+      if (banner) {
+        banner.remove();
+      }
+      return wasLocked;
+    }
+
+    charPwrButton.addEventListener("click", () => {
+      if (charPwrButton.classList.contains("locked")) {
+        return;
+      }
+      startGlitchSequence(700, () => showCorruptedReadyRoom());
+    });
+
     let achievementsOpenedFrom = titleScreen;
     achievementsButton.addEventListener("click", () => {
       achievementsOpenedFrom = characterSelect.classList.contains("hidden") ? titleScreen : characterSelect;
@@ -5712,14 +6927,22 @@
       }
       selectCharacter("pyro");
     });
+    charSoldierButton.addEventListener("click", () => {
+      if (charSoldierButton.classList.contains("locked")) {
+        return;
+      }
+      selectCharacter("soldier");
+    });
 
     const CHARACTER_UNLOCK_BUTTONS = {
       medic: () => charMedicButton,
-      pyro: () => charPyroButton
+      pyro: () => charPyroButton,
+      soldier: () => charSoldierButton
     };
     const CHARACTER_UNLOCKED_DESC = {
       medic: "Nearly blind. Reacts instantly to any noise you make.",
-      pyro: "Shadows patrol the dark. Get spotted and three of him hunt you at once."
+      pyro: "Shadows patrol the dark. Get spotted and three of him hunt you at once.",
+      soldier: "Sees you from anywhere and never loses your trail. Once he charges, only your call sign can stop him."
     };
 
     function unlockCharacterButton(characterId) {
@@ -5849,7 +7072,8 @@
     const DEV_UNLOCK_COMMANDS = {
       "/ulockheavy": "heavy",
       "/ulockmedic": "medic",
-      "/ulockpyro": "pyro"
+      "/ulockpyro": "pyro",
+      "/ulocksoldier": "soldier"
     };
 
     function runDevCommand(raw) {
@@ -5859,7 +7083,14 @@
       }
       devConsoleLog("> " + raw);
       if (command === "?cmnds") {
-        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulockall /close");
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /close");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/playcutscene") {
+        closeDevConsole();
+        playSoldierVictoryCutscene();
+        devConsoleLog("playing soldier victory cutscene.", "ok");
         playDevConsoleResultSound(true);
         return;
       }
@@ -5870,7 +7101,14 @@
       }
       if (command === "/ulockall") {
         Object.values(DEV_UNLOCK_COMMANDS).forEach((id) => unlockCharacterButton(id));
+        unlockPwrButton();
         devConsoleLog("all characters unlocked.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/ulockpwr") {
+        const wasLocked = unlockPwrButton();
+        devConsoleLog(wasLocked ? "pwr unlocked." : "pwr was already unlocked.", "ok");
         playDevConsoleResultSound(true);
         return;
       }
@@ -5953,6 +7191,22 @@
 
     muteToggle.addEventListener("change", () => {
       setMasterMuted(muteToggle.checked);
+    });
+
+    musicVolumeSlider.addEventListener("input", () => {
+      setMusicVolume(Number(musicVolumeSlider.value) / 100);
+    });
+
+    musicMuteToggle.addEventListener("change", () => {
+      setMusicMuted(musicMuteToggle.checked);
+    });
+
+    sfxVolumeSlider.addEventListener("input", () => {
+      setSfxVolume(Number(sfxVolumeSlider.value) / 100);
+    });
+
+    sfxMuteToggle.addEventListener("change", () => {
+      setSfxMuted(sfxMuteToggle.checked);
     });
 
     function goToMainMenu() {
