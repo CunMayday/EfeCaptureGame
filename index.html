@@ -5251,21 +5251,21 @@
         }, 120);
 
         jumpscareVideo.onended = null;
-        jumpscareVideo.onended = () => {
+        jumpscareVideo.onerror = null;
+        const finishJumpscareVideo = () => {
           jumpscareVideo.onended = null;
+          jumpscareVideo.onerror = null;
           if (jumpscareGifTimer) {
             clearTimeout(jumpscareGifTimer);
             jumpscareGifTimer = null;
           }
           runDeathSequence();
         };
+        jumpscareVideo.onended = finishJumpscareVideo;
+        jumpscareVideo.onerror = finishJumpscareVideo;
 
-        const videoDuration = jumpscareVideo.duration;
-        if (videoDuration && isFinite(videoDuration)) {
-          jumpscareGifTimer = setTimeout(runDeathSequence, videoDuration * 1000 + 150);
-        } else {
-          jumpscareGifTimer = setTimeout(runDeathSequence, jumpscareFallbackDuration);
-        }
+        const jumpscareVideoSafetyDuration = 15000;
+        jumpscareGifTimer = setTimeout(finishJumpscareVideo, jumpscareVideoSafetyDuration);
       }
     }
 
