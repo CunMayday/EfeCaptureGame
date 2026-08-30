@@ -1757,6 +1757,7 @@
       <img id="playerSpriteMoveDown" class="player-sprite" src="Spy_move_d.gif" alt="">
       <img id="playerSpriteMoveUp" class="player-sprite" src="Spy_move_u.gif" alt="">
       <img id="playerSpriteMoveSide" class="player-sprite" src="Spy_move_s.gif" alt="">
+      <img id="playerSpriteStunned" class="player-sprite" src="Soldier_stunned.png" alt="" style="display: none;">
       <div id="jumpscare" class="jumpscare">
         <video id="jumpscareVideo" src="medicjumpscare.mp4" playsinline preload="auto" muted></video>
         <img id="jumpscareGif" src="120px-Pyro_jump.gif" alt="" style="display: none;">
@@ -2197,6 +2198,7 @@
     const playerSpriteMoveDownEl = document.getElementById("playerSpriteMoveDown");
     const playerSpriteMoveUpEl = document.getElementById("playerSpriteMoveUp");
     const playerSpriteMoveSideEl = document.getElementById("playerSpriteMoveSide");
+    const playerSpriteStunnedEl = document.getElementById("playerSpriteStunned");
     function playerSpriteAssetsOk() {
       return [
         playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
@@ -3114,9 +3116,12 @@
     };
     let gameStarted = false;
     let omegaOneActive = false;
-    let omegaOneWasMoving = false;
+    let omegaOneWasSprinting = false;
+    let omegaOneStunned = false;
+    let omegaOneStunTimer = 0;
     const OMEGA_ONE_SPEED = 130;
     const OMEGA_ONE_SPRINT_SPEED = 260;
+    const OMEGA_ONE_STUN_DURATION = 5;
 
     const player = {
       x: 0,
@@ -4310,6 +4315,9 @@
       buildMap();
       placeActorsAtSafeStarts();
       player.sprint = player.sprintMax;
+      omegaOneStunned = false;
+      omegaOneStunTimer = 0;
+      omegaOneWasSprinting = false;
       player.nodesActive = 0;
       player.carriedKeycard = null;
       player.footstepTimer = 0;
@@ -5025,6 +5033,17 @@
     }
 
     function movePlayerFromInput(dt) {
+      if (omegaOneActive && omegaOneStunned) {
+        player.moveX = 0;
+        player.moveY = 0;
+        omegaOneStunTimer = Math.max(0, omegaOneStunTimer - dt);
+        player.sprint = Math.min(player.sprintMax, player.sprint + dt * 0.55);
+        if (omegaOneStunTimer <= 0) {
+          omegaOneStunned = false;
+        }
+        return;
+      }
+
       let moveX = 0;
       let moveY = 0;
 
@@ -5059,15 +5078,23 @@
       }
 
       if (omegaOneActive) {
-        if (isMoving && !omegaOneWasMoving) {
+        if (sprinting && !omegaOneWasSprinting) {
           playSoldierAggSound();
-        } else if (!isMoving && omegaOneWasMoving) {
+        }
+        if (omegaOneWasSprinting && player.sprint <= 0) {
+          omegaOneStunned = true;
+          omegaOneStunTimer = OMEGA_ONE_STUN_DURATION;
+          player.moveX = 0;
+          player.moveY = 0;
           soldierBarkSound.currentTime = 0;
           soldierBarkSound.play().catch(() => {});
         }
-        omegaOneWasMoving = isMoving;
+        omegaOneWasSprinting = sprinting;
         if (sprinting) {
           startCameraShake(150);
+        }
+        if (omegaOneStunned) {
+          return;
         }
       }
 
@@ -6319,7 +6346,8 @@
     function updatePlayerSpriteElement() {
       const allPlayerSprites = [
         playerSpriteIdleDownEl, playerSpriteIdleUpEl, playerSpriteIdleSideEl,
-        playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl
+        playerSpriteMoveDownEl, playerSpriteMoveUpEl, playerSpriteMoveSideEl,
+        playerSpriteStunnedEl
       ];
       if (jumpscare.classList.contains("visible") || game.state === "dead" || !playerSpriteAssetsOk()) {
         allPlayerSprites.forEach((el) => {
@@ -6330,7 +6358,9 @@
 
       const isMoving = player.moveX !== 0 || player.moveY !== 0;
       let activeEl = playerSpriteIdleDownEl;
-      if (player.facing === "up") {
+      if (omegaOneActive && omegaOneStunned) {
+        activeEl = playerSpriteStunnedEl;
+      } else if (player.facing === "up") {
         activeEl = isMoving ? playerSpriteMoveUpEl : playerSpriteIdleUpEl;
       } else if (player.facing === "right" || player.facing === "left") {
         activeEl = isMoving ? playerSpriteMoveSideEl : playerSpriteIdleSideEl;
@@ -7294,10 +7324,11 @@
       }
       if (command === "/omegaone") {
         omegaOneActive = true;
-        omegaOneWasMoving = false;
-        playerSpriteIdleDownEl.src = "Soldier_move_d.gif";
-        playerSpriteIdleUpEl.src = "Soldier_move_u.gif";
-        playerSpriteIdleSideEl.src = "Soldier_move_s.gif";
+        omegaOneWasSprinting = false;
+        omegaOneStunned = false;
+        playerSpriteIdleDownEl.src = "Soldier_idle_still.png";
+        playerSpriteIdleUpEl.src = "Soldier_idle_still.png";
+        playerSpriteIdleSideEl.src = "Soldier_idle_still.png";
         playerSpriteMoveDownEl.src = "Soldier_move_d.gif";
         playerSpriteMoveUpEl.src = "Soldier_move_u.gif";
         playerSpriteMoveSideEl.src = "Soldier_move_s.gif";
