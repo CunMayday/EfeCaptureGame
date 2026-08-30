@@ -2520,16 +2520,16 @@
     badwater2Music.volume = 0.3;
     const curtainCallLayer1 = new Audio("curtaincalllayer1.mp4");
     curtainCallLayer1.loop = true;
-    curtainCallLayer1.volume = 0.3;
+    curtainCallLayer1.volume = 1;
     const curtainCallLayer2 = new Audio("curtaincalllayer2.mp4");
     curtainCallLayer2.loop = true;
-    curtainCallLayer2.volume = 0.3;
+    curtainCallLayer2.volume = 1;
     const curtainCallLayer3 = new Audio("curtainscall-layer3.mp4");
     curtainCallLayer3.loop = true;
-    curtainCallLayer3.volume = 0.3;
+    curtainCallLayer3.volume = 1;
     const curtainCallChase = new Audio("curtainscallchase.mp4");
     curtainCallChase.loop = true;
-    curtainCallChase.volume = 0.34;
+    curtainCallChase.volume = 1;
 
     [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, soldierMusic, menuMusic, badwater2Music, curtainCallLayer1, curtainCallLayer2, curtainCallLayer3, curtainCallChase].forEach((track) => {
       track.preload = "auto";
@@ -2546,10 +2546,10 @@
       [soldierMusic, 0.28],
       [menuMusic, 0.3],
       [badwater2Music, 0.3],
-      [curtainCallLayer1, 0.3],
-      [curtainCallLayer2, 0.3],
-      [curtainCallLayer3, 0.3],
-      [curtainCallChase, 0.34]
+      [curtainCallLayer1, 1],
+      [curtainCallLayer2, 1],
+      [curtainCallLayer3, 1],
+      [curtainCallChase, 1]
     ]);
     musicFullVolume.forEach((_, track) => audioCategories.set(track, "music"));
     const musicFadeTimers = new Map();
