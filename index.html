@@ -5085,6 +5085,10 @@
           omegaOneStunTimer = OMEGA_ONE_STUN_DURATION;
           player.moveX = 0;
           player.moveY = 0;
+          soldierAggSound.pause();
+          soldierAggSound.currentTime = 0;
+          soldierJumpScreamSound.pause();
+          soldierJumpScreamSound.currentTime = 0;
           soldierBarkSound.currentTime = 0;
           soldierBarkSound.play().catch(() => {});
         } else if (sprinting && !omegaOneWasSprinting) {
