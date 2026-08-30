@@ -1518,7 +1518,7 @@
       text-transform: uppercase;
       transform: rotate(-8deg);
       pointer-events: none;
-      z-index: 2;
+      z-index: 3;
     }
 
     .character-card.locked.signal-active {
@@ -1633,27 +1633,33 @@
       width: 64px;
     }
 
-    .character-row .character-card.corrupted-card img {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 108px;
-      margin: 0;
-      object-fit: contain;
-      z-index: 0;
-      -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
-      mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+    .character-row .character-card.corrupted-card {
+      justify-content: flex-end;
     }
 
-    .character-row .character-card.corrupted-card {
-      padding-top: 118px;
+    .character-row .character-card.corrupted-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .character-row .character-card.corrupted-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(4, 9, 13, 0.1) 0%, rgba(4, 9, 13, 0.35) 55%, rgba(4, 9, 13, 0.92) 100%);
+      z-index: 1;
     }
 
     .character-row .character-card.corrupted-card .mode-name,
     .character-row .character-card.corrupted-card .mode-desc {
       position: relative;
-      z-index: 1;
+      z-index: 2;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
     }
 
     .scroll-arrow {
