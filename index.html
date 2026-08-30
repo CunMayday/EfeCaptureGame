@@ -2155,6 +2155,10 @@
       soldier: {
         title: "Bad Water 1",
         text: "Restore all power nodes to unlock the exit gate, and survive Soldier stalking the training corridors. He sees you from anywhere and never loses your trail. Once he locks on he charges immediately and only gets faster the longer it goes on — the only way to stop him is to startle him with your call sign while he's charging and close."
+      },
+      badwater2: {
+        title: "Bad Water 2 [TEST]",
+        text: "Internal test build. Restore the power nodes and reach the exit."
       }
     };
 
@@ -2514,8 +2518,20 @@
     const badwater2Music = new Audio("FORSAKEN OST - Milestone 4 Noli Chase Theme (SCRAPPED).mp3");
     badwater2Music.loop = true;
     badwater2Music.volume = 0.3;
+    const curtainCallLayer1 = new Audio("curtaincalllayer1.mp4");
+    curtainCallLayer1.loop = true;
+    curtainCallLayer1.volume = 0.3;
+    const curtainCallLayer2 = new Audio("curtaincalllayer2.mp4");
+    curtainCallLayer2.loop = true;
+    curtainCallLayer2.volume = 0.3;
+    const curtainCallLayer3 = new Audio("curtainscall-layer3.mp4");
+    curtainCallLayer3.loop = true;
+    curtainCallLayer3.volume = 0.3;
+    const curtainCallChase = new Audio("curtainscallchase.mp4");
+    curtainCallChase.loop = true;
+    curtainCallChase.volume = 0.34;
 
-    [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, soldierMusic, menuMusic, badwater2Music].forEach((track) => {
+    [music, chaseMusic, heavyMusic, heavyChaseMusic, pyroMusic, pyroChaseMusic, soldierMusic, menuMusic, badwater2Music, curtainCallLayer1, curtainCallLayer2, curtainCallLayer3, curtainCallChase].forEach((track) => {
       track.preload = "auto";
       track.load();
     });
@@ -2529,7 +2545,11 @@
       [pyroChaseMusic, 0.34],
       [soldierMusic, 0.28],
       [menuMusic, 0.3],
-      [badwater2Music, 0.3]
+      [badwater2Music, 0.3],
+      [curtainCallLayer1, 0.3],
+      [curtainCallLayer2, 0.3],
+      [curtainCallLayer3, 0.3],
+      [curtainCallChase, 0.34]
     ]);
     musicFullVolume.forEach((_, track) => audioCategories.set(track, "music"));
     const musicFadeTimers = new Map();
@@ -2631,6 +2651,90 @@
           track.pause();
         }
       });
+    }
+
+    const CURTAIN_CALL_LAYERS = [curtainCallLayer1, curtainCallLayer2, curtainCallLayer3];
+    const CURTAIN_CALL_TIER_RANGES = [TILE * 12, TILE * 8, TILE * 4];
+    let curtainCallLayersPlaying = false;
+
+    function startCurtainCallLayers() {
+      if (curtainCallLayersPlaying) {
+        return;
+      }
+      curtainCallLayersPlaying = true;
+      CURTAIN_CALL_LAYERS.forEach((track) => {
+        const existingTimer = musicFadeTimers.get(track);
+        if (existingTimer) {
+          clearInterval(existingTimer);
+          musicFadeTimers.delete(track);
+        }
+        track.currentTime = 0;
+        track.volume = 0;
+        track.play().catch(() => {});
+      });
+    }
+
+    function stopCurtainCallLayers(fadeMs) {
+      if (!curtainCallLayersPlaying) {
+        return;
+      }
+      curtainCallLayersPlaying = false;
+      CURTAIN_CALL_LAYERS.forEach((track) => {
+        if (track.paused) {
+          return;
+        }
+        if (fadeMs) {
+          fadeMusicTrack(track, 0, fadeMs, () => track.pause());
+        } else {
+          const existingTimer = musicFadeTimers.get(track);
+          if (existingTimer) {
+            clearInterval(existingTimer);
+            musicFadeTimers.delete(track);
+          }
+          track.pause();
+        }
+      });
+    }
+
+    function updateCurtainCallLayers(enemyDistance) {
+      if (!curtainCallLayersPlaying) {
+        return;
+      }
+      const activeTierCount = CURTAIN_CALL_TIER_RANGES.filter((range) => enemyDistance <= range).length;
+      CURTAIN_CALL_LAYERS.forEach((track, index) => {
+        const targetVolume = index < activeTierCount ? musicFullVolume.get(track) : 0;
+        if (Math.abs(track.volume - targetVolume) < 0.01) {
+          return;
+        }
+        fadeMusicTrack(track, targetVolume, 500);
+      });
+    }
+
+    function playCurtainCallChase() {
+      const existingTimer = musicFadeTimers.get(curtainCallChase);
+      if (existingTimer) {
+        clearInterval(existingTimer);
+        musicFadeTimers.delete(curtainCallChase);
+      }
+      curtainCallChase.currentTime = 0;
+      curtainCallChase.volume = musicFullVolume.get(curtainCallChase);
+      curtainCallChase.play().catch(() => {});
+    }
+
+    function pauseCurtainCallChase(fadeMs) {
+      if (curtainCallChase.paused) {
+        return;
+      }
+      if (fadeMs) {
+        fadeMusicTrack(curtainCallChase, 0, fadeMs, () => curtainCallChase.pause());
+      } else {
+        const existingTimer = musicFadeTimers.get(curtainCallChase);
+        if (existingTimer) {
+          clearInterval(existingTimer);
+          musicFadeTimers.delete(curtainCallChase);
+        }
+        curtainCallChase.pause();
+      }
     }
 
     function playMenuMusic() {
@@ -3016,6 +3120,26 @@
       "##..########################################################",
       "############################################################",
       "############################################################"
+    ];
+
+    const BADWATER2_LEVEL_MAP = [
+      "####################",
+      "#S.................#",
+      "#.###.###.###.###..#",
+      "#.#.....#...#...#..#",
+      "#.#.###.#.#.#.##.#.#",
+      "#...#P..#.#...#..#.#",
+      "###.#####.#####..#.#",
+      "#................#.#",
+      "#.#############..#.#",
+      "#.#...........#..#.#",
+      "#.#.#########.#..#.#",
+      "#.#.#.......#.#....#",
+      "#.#.#.P.....#.######",
+      "#.#.#########......#",
+      "#...................",
+      "#E..................",
+      "####################"
     ];
 
     const PYRO_LEVEL_MAP = [
@@ -4127,7 +4251,7 @@
     }
 
     function buildMap() {
-      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : ((activeCharacter === "heavy" || activeCharacter === "soldier") ? HEAVY_LEVEL_MAP : LEVEL_MAP);
+      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : (activeCharacter === "badwater2" ? BADWATER2_LEVEL_MAP : ((activeCharacter === "heavy" || activeCharacter === "soldier") ? HEAVY_LEVEL_MAP : LEVEL_MAP));
       world.width = MAP[0].length * TILE;
       world.height = MAP.length * TILE;
       solids.length = 0;
@@ -4268,6 +4392,17 @@
           { x: TILE * 6, y: TILE * 27 },
           { x: TILE * 24, y: TILE * 35 }
         ];
+      } else if (activeCharacter === "badwater2") {
+        enemy.patrolPoints = [
+          { x: TILE * 3.5, y: TILE * 1.5 },
+          { x: TILE * 17.5, y: TILE * 1.5 },
+          { x: TILE * 17.5, y: TILE * 7.5 },
+          { x: TILE * 2.5, y: TILE * 7.5 },
+          { x: TILE * 2.5, y: TILE * 14.5 },
+          { x: TILE * 18.5, y: TILE * 14.5 },
+          { x: TILE * 18.5, y: TILE * 15.5 },
+          { x: TILE * 2.5, y: TILE * 15.5 }
+        ];
       } else {
         enemy.patrolPoints = [
           { x: TILE * 13.5, y: TILE * 27.5 },
@@ -4298,7 +4433,8 @@
       medic: { speed: 76, chaseSpeed: 128, chargeSpeed: 210 },
       heavy: { speed: 78, chaseSpeed: 138, chargeSpeed: 185 },
       pyro: { speed: 0, chaseSpeed: 0, chargeSpeed: 0 },
-      soldier: { speed: 58, chaseSpeed: 100, chargeSpeed: 900 }
+      soldier: { speed: 58, chaseSpeed: 100, chargeSpeed: 900 },
+      badwater2: { speed: 76, chaseSpeed: 130, chargeSpeed: 200 }
     };
 
     const SOLDIER_AGGRO_RANGE = 140;
@@ -4366,16 +4502,21 @@
 
       resetPyroState();
 
-      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier") {
+      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier" || activeCharacter === "badwater2") {
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
-        const safeEnemySpawn = findNearestOpenPosition(TILE * 26, TILE * 18, enemy.radius);
+        const enemySpawnTarget = activeCharacter === "badwater2" ? { x: TILE * 14.5, y: TILE * 15.5 } : { x: TILE * 26, y: TILE * 18 };
+        const safeEnemySpawn = findNearestOpenPosition(enemySpawnTarget.x, enemySpawnTarget.y, enemy.radius);
         enemy.x = safeEnemySpawn.x;
         enemy.y = safeEnemySpawn.y;
         enemy.lastKnownX = player.x;
         enemy.lastKnownY = player.y;
         game.state = "playing";
+        if (activeCharacter === "badwater2") {
+          pauseCurtainCallChase();
+          startCurtainCallLayers();
+        }
       } else {
         game.state = "intro";
       }
@@ -5124,6 +5265,10 @@
           keys.clear();
           pauseAmbientMusic(1800);
           pauseChaseMusic(1800);
+          if (activeCharacter === "badwater2") {
+            stopCurtainCallLayers(1800);
+            pauseCurtainCallChase(1800);
+          }
           if (activeCharacter === "soldier") {
             stopAllSoldierSounds();
             clearPyroInstances();
@@ -5299,6 +5444,10 @@
       keys.clear();
       pauseAmbientMusic();
       pauseChaseMusic();
+      if (activeCharacter === "badwater2") {
+        stopCurtainCallLayers();
+        pauseCurtainCallChase();
+      }
       syncEnemyWalkAudio(0, true);
       if (activeCharacter === "pyro") {
         clearPyroInstances();
@@ -5865,7 +6014,19 @@
 
       enemy.hadSightLastFrame = seesPlayer;
       const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      if (activelyChasingPlayer && !enemy.wasChasing) {
+      if (activeCharacter === "badwater2") {
+        if (activelyChasingPlayer && !enemy.wasChasing) {
+          stopCurtainCallLayers();
+          playCurtainCallChase();
+        } else if (!activelyChasingPlayer && enemy.wasChasing) {
+          pauseCurtainCallChase();
+          if (game.state === "playing") {
+            startCurtainCallLayers();
+          }
+        } else if (!activelyChasingPlayer) {
+          updateCurtainCallLayers(distance(enemy.x, enemy.y, player.x, player.y));
+        }
+      } else if (activelyChasingPlayer && !enemy.wasChasing) {
         pauseAmbientMusic();
         playChaseMusic();
       } else if (!activelyChasingPlayer && enemy.wasChasing) {
@@ -7311,7 +7472,7 @@
       }
       devConsoleLog("> " + raw);
       if (command === "?cmnds") {
-        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /close");
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /close");
         playDevConsoleResultSound(true);
         return;
       }
@@ -7319,6 +7480,23 @@
         closeDevConsole();
         playSoldierVictoryCutscene();
         devConsoleLog("playing soldier victory cutscene.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/testbadwater2") {
+        closeDevConsole();
+        activeCharacter = "badwater2";
+        titleScreen.classList.add("hidden");
+        characterSelect.classList.add("hidden");
+        corruptedReadyRoom.classList.add("hidden");
+        titleBgLayer.classList.add("hidden");
+        achievementsButton.classList.add("hidden");
+        settingsButton.classList.add("hidden");
+        overlay.classList.remove("visible");
+        pauseMenuMusic(0);
+        resetGame();
+        gameStarted = true;
+        devConsoleLog("loading badwater2 test level.", "ok");
         playDevConsoleResultSound(true);
         return;
       }
@@ -7459,6 +7637,8 @@
       keys.clear();
       pauseAmbientMusic(800);
       pauseChaseMusic(800);
+      stopCurtainCallLayers(800);
+      pauseCurtainCallChase(800);
       syncEnemyWalkAudio(0, true);
       jumpscare.classList.remove("visible");
       deathScreen.classList.remove("visible");
