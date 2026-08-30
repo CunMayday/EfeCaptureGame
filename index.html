@@ -3113,6 +3113,10 @@
       camera: { x: 0, y: 0 }
     };
     let gameStarted = false;
+    let omegaOneActive = false;
+    let omegaOneWasMoving = false;
+    const OMEGA_ONE_SPEED = 130;
+    const OMEGA_ONE_SPRINT_SPEED = 260;
 
     const player = {
       x: 0,
@@ -5033,11 +5037,11 @@
       moveX /= len;
       moveY /= len;
 
-      let speed = player.speed;
+      let speed = omegaOneActive ? OMEGA_ONE_SPEED : player.speed;
       const sprinting = keys.has("shift") && player.sprint > 0.1 && (moveX || moveY);
       player.isSprinting = sprinting;
       if (sprinting) {
-        speed = player.sprintSpeed;
+        speed = omegaOneActive ? OMEGA_ONE_SPRINT_SPEED : player.sprintSpeed;
         player.sprint = Math.max(0, player.sprint - dt);
       } else {
         player.sprint = Math.min(player.sprintMax, player.sprint + dt * 0.55);
@@ -5051,6 +5055,19 @@
           player.facing = moveX >= 0 ? "right" : "left";
         } else {
           player.facing = moveY >= 0 ? "down" : "up";
+        }
+      }
+
+      if (omegaOneActive) {
+        if (isMoving && !omegaOneWasMoving) {
+          playSoldierAggSound();
+        } else if (!isMoving && omegaOneWasMoving) {
+          soldierBarkSound.currentTime = 0;
+          soldierBarkSound.play().catch(() => {});
+        }
+        omegaOneWasMoving = isMoving;
+        if (sprinting) {
+          startCameraShake(150);
         }
       }
 
@@ -7275,14 +7292,16 @@
         playDevConsoleResultSound(true);
         return;
       }
-      if (command === "omega one") {
+      if (command === "/omegaone") {
+        omegaOneActive = true;
+        omegaOneWasMoving = false;
         playerSpriteIdleDownEl.src = "Soldier_move_d.gif";
         playerSpriteIdleUpEl.src = "Soldier_move_u.gif";
         playerSpriteIdleSideEl.src = "Soldier_move_s.gif";
         playerSpriteMoveDownEl.src = "Soldier_move_d.gif";
         playerSpriteMoveUpEl.src = "Soldier_move_u.gif";
         playerSpriteMoveSideEl.src = "Soldier_move_s.gif";
-        devConsoleLog("subject sprite overridden: soldier.", "ok");
+        devConsoleLog("Command Confirmed, Omega One", "ok");
         playDevConsoleResultSound(true);
         return;
       }
