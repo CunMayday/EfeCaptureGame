@@ -1487,6 +1487,15 @@
       pointer-events: none;
     }
 
+    .character-card.locked.signal-active {
+      border-color: rgba(141, 224, 194, 0.4);
+      color: var(--text);
+    }
+
+    .character-card.locked.signal-active .wip-banner {
+      display: none;
+    }
+
     .character-card.locked .wip-banner.error-banner {
       background: rgba(30, 2, 4, 0.82);
       color: #ff2f3f;
@@ -6400,6 +6409,23 @@
       updateHud();
     }
 
+    function setPlaceholderCardsRevealed(revealed) {
+      characterRow.querySelectorAll(".character-card.locked:not([data-character])").forEach((card) => {
+        const descEl = card.querySelector(".mode-desc");
+        if (revealed) {
+          card.classList.add("signal-active");
+          if (descEl) {
+            descEl.textContent = "Signal active. Subject transferred.";
+          }
+        } else {
+          card.classList.remove("signal-active");
+          if (descEl) {
+            descEl.textContent = "Subject Uncatalogued.";
+          }
+        }
+      });
+    }
+
     function playSoldierVictoryCutscene() {
       gameStarted = false;
       keys.clear();
@@ -6420,9 +6446,11 @@
       setTimeout(() => {
         const scrollTarget = characterRow.scrollWidth - characterRow.clientWidth;
         characterRow.scrollTo({ left: scrollTarget, behavior: "smooth" });
+        setPlaceholderCardsRevealed(true);
       }, 400);
 
       setTimeout(() => {
+        setPlaceholderCardsRevealed(false);
         playCodeTransmissionSequence(() => {
           showCorruptedReadyRoom();
         });
