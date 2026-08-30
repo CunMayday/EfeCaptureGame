@@ -1487,6 +1487,15 @@
       pointer-events: none;
     }
 
+    .character-card.locked .wip-banner.error-banner {
+      background: rgba(30, 2, 4, 0.82);
+      color: #ff2f3f;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 8px rgba(255, 47, 63, 0.8);
+    }
+
     .title-credit {
       margin: 0;
       color: var(--muted);
@@ -1845,12 +1854,6 @@
               <span class="mode-desc">Subject Uncatalogued.</span>
               <span class="wip-banner">Locked</span>
             </button>
-            <button id="charPwrButton" class="character-card locked" type="button" data-character="pwr" data-locked="1">
-              <img src="Tm_hint_engie.png" alt="???">
-              <span class="mode-name">???</span>
-              <span class="mode-desc">Access Restricted.</span>
-              <span class="wip-banner">Locked</span>
-            </button>
           </div>
           <button id="characterScrollRight" class="scroll-arrow" type="button" aria-label="Scroll right">&#10095;</button>
         </div>
@@ -1927,7 +1930,6 @@
     const charMedicButton = document.getElementById("charMedicButton");
     const charPyroButton = document.getElementById("charPyroButton");
     const charSoldierButton = document.getElementById("charSoldierButton");
-    const charPwrButton = document.getElementById("charPwrButton");
     const characterBackButton = document.getElementById("characterBackButton");
     const corruptedReadyRoom = document.getElementById("corruptedReadyRoom");
     const corruptedRow = document.getElementById("corruptedRow");
@@ -6857,11 +6859,16 @@
       characterRow.querySelectorAll(".character-card.locked").forEach((card) => {
         const nameEl = card.querySelector(".mode-name");
         const descEl = card.querySelector(".mode-desc");
+        const bannerEl = card.querySelector(".wip-banner");
         if (nameEl) {
           nameEl.textContent = "ERROR";
         }
         if (descEl) {
           descEl.textContent = "File has exported to another location";
+        }
+        if (bannerEl) {
+          bannerEl.textContent = "Error";
+          bannerEl.classList.add("error-banner");
         }
       });
     }
@@ -6879,16 +6886,8 @@
     });
 
     function unlockPwrButton() {
-      const wasLocked = charPwrButton.classList.contains("locked");
+      const wasLocked = modeBadwater2Button.classList.contains("locked");
       pwrUnlocked = true;
-      charPwrButton.classList.remove("locked");
-      charPwrButton.removeAttribute("data-locked");
-      charPwrButton.querySelector(".mode-name").textContent = "Badwater2";
-      charPwrButton.querySelector(".mode-desc").textContent = "A second signal answers.";
-      const banner = charPwrButton.querySelector(".wip-banner");
-      if (banner) {
-        banner.remove();
-      }
       modeBadwater2Button.classList.remove("locked");
       modeBadwater2Button.removeAttribute("data-locked");
       modeBadwater2Button.querySelector(".mode-desc").textContent = "A second signal answers.";
@@ -6901,13 +6900,6 @@
 
     modeBadwater2Button.addEventListener("click", () => {
       if (modeBadwater2Button.classList.contains("locked")) {
-        return;
-      }
-      startGlitchSequence(700, () => showCorruptedReadyRoom());
-    });
-
-    charPwrButton.addEventListener("click", () => {
-      if (charPwrButton.classList.contains("locked")) {
         return;
       }
       startGlitchSequence(700, () => showCorruptedReadyRoom());
