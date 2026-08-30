@@ -2673,7 +2673,13 @@
         }
         track.currentTime = 0;
         track.volume = 0;
-        track.play().catch(() => {});
+        const attemptPlay = () => track.play().catch(() => {});
+        attemptPlay();
+        setTimeout(() => {
+          if (curtainCallLayersPlaying && track.paused) {
+            attemptPlay();
+          }
+        }, 300);
       });
     }
 
@@ -7656,9 +7662,11 @@
       }
       if (command === "/bw2status") {
         devConsoleLog(`activeCharacter=${activeCharacter} game.state=${game.state} enemy.mode=${enemy.mode}`, "ok");
-        devConsoleLog(`curtainCallLayersPlaying=${curtainCallLayersPlaying} layer volumes=${CURTAIN_CALL_LAYERS.map((t) => t.volume.toFixed(2)).join(",")}`, "ok");
+        devConsoleLog(`curtainCallLayersPlaying=${curtainCallLayersPlaying} layer volumes=${CURTAIN_CALL_LAYERS.map((t) => t.volume.toFixed(2)).join(",")} paused=${CURTAIN_CALL_LAYERS.map((t) => t.paused).join(",")}`, "ok");
+        devConsoleLog(`audioContext.state=${audioContext ? audioContext.state : "null"}`, "ok");
         devConsoleLog(`badwater2Door.locked=${badwater2Door ? badwater2Door.locked : "null"} carriedKeycard=${player.carriedKeycard}`, "ok");
         devConsoleLog(`enemy pos=(${Math.round(enemy.x)},${Math.round(enemy.y)}) player pos=(${Math.round(player.x)},${Math.round(player.y)})`, "ok");
+        devConsoleLog(`cagedMonsters=${badwater2CagedMonsters.length} distances=${badwater2CagedMonsters.map((m) => Math.round(distance(player.x, player.y, m.x, m.y))).join(",")}`, "ok");
         playDevConsoleResultSound(true);
         return;
       }
