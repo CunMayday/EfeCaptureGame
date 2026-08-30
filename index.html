@@ -2183,6 +2183,9 @@
       heavy: {
         idle: heavySpriteIdleEl, up: heavySpriteUpEl, down: heavySpriteDownEl, side: heavySpriteSideEl
       },
+      badwater2: {
+        idle: heavySpriteIdleEl, up: heavySpriteUpEl, down: heavySpriteDownEl, side: heavySpriteSideEl
+      },
       soldier: {
         idle: soldierSpriteIdleEl, up: soldierSpriteUpEl, down: soldierSpriteDownEl, side: soldierSpriteSideEl,
         stunned: soldierSpriteStunnedEl
@@ -2860,7 +2863,7 @@
     });
 
     function activeFootstepSounds() {
-      return (activeCharacter === "heavy" || activeCharacter === "soldier") ? heavyFootstepSounds : enemyFootstepSounds;
+      return (activeCharacter === "heavy" || activeCharacter === "soldier" || activeCharacter === "badwater2") ? heavyFootstepSounds : enemyFootstepSounds;
     }
 
     const soldierAggSound = new Audio("Soldier_agg.wav");
@@ -4525,7 +4528,9 @@
         audioContext.resume().catch(() => {});
       }
       pauseChaseMusic();
-      playAmbientMusic();
+      if (activeCharacter !== "badwater2") {
+        playAmbientMusic();
+      }
       jumpscare.classList.remove("visible");
       deathScreen.classList.remove("visible");
       deathScreen.innerHTML = "";
@@ -4618,7 +4623,7 @@
       }
       const wasAlreadyAlert = enemy.mode === "chase" || enemy.mode === "investigate";
       const wasActivelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      const isHeavy = activeCharacter === "heavy";
+      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
       const seesPlayerNow = distance(enemy.x, enemy.y, player.x, player.y) < sightDistance &&
         hasLineOfSight(enemy.x, enemy.y, player.x, player.y);
@@ -4716,7 +4721,7 @@
       if (Math.random() > loseTargetLineChance) {
         return;
       }
-      const isHeavy = activeCharacter === "heavy";
+      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
       const sounds = isHeavy ? heavyLoseTargetSounds : enemyLoseTargetSounds;
       const sound = sounds[Math.floor(Math.random() * sounds.length)];
       const hearStart = isHeavy ? 320 : 260;
@@ -5794,7 +5799,7 @@
         updateSoldierEnemy(dt);
         return;
       }
-      const isHeavy = activeCharacter === "heavy";
+      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
       const distToPlayer = distance(enemy.x, enemy.y, player.x, player.y);
       const soundLureLocked = enemy.soundLureLockTimer > 0;
@@ -6019,7 +6024,7 @@
           stopCurtainCallLayers();
           playCurtainCallChase();
         } else if (!activelyChasingPlayer && enemy.wasChasing) {
-          pauseCurtainCallChase();
+          pauseCurtainCallChase(1200);
           if (game.state === "playing") {
             startCurtainCallLayers();
           }
@@ -7022,6 +7027,26 @@
       }
     });
 
+    const CURTAIN_CALL_GAIN_BOOST = 2.2;
+    let curtainCallGainReady = false;
+    function boostCurtainCallVolume() {
+      if (curtainCallGainReady || !audioContext || audioContext.state !== "running") {
+        return;
+      }
+      curtainCallGainReady = true;
+      try {
+        [curtainCallLayer1, curtainCallLayer2, curtainCallLayer3, curtainCallChase].forEach((track) => {
+          const source = audioContext.createMediaElementSource(track);
+          const gainNode = audioContext.createGain();
+          gainNode.gain.value = CURTAIN_CALL_GAIN_BOOST;
+          source.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+        });
+      } catch (err) {
+        curtainCallGainReady = false;
+      }
+    }
+
     let audioUnlocked = false;
     function unlockAudioPlayback() {
       if (audioUnlocked) {
@@ -7029,7 +7054,9 @@
       }
       audioUnlocked = true;
       if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume().catch(() => {});
+        audioContext.resume().then(boostCurtainCallVolume).catch(() => {});
+      } else if (audioContext && audioContext.state === "running") {
+        boostCurtainCallVolume();
       }
       if (!gameStarted) {
         playMenuMusic();
