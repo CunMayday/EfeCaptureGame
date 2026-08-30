@@ -7275,6 +7275,17 @@
         playDevConsoleResultSound(true);
         return;
       }
+      if (command === "omega one") {
+        playerSpriteIdleDownEl.src = "Soldier_move_d.gif";
+        playerSpriteIdleUpEl.src = "Soldier_move_u.gif";
+        playerSpriteIdleSideEl.src = "Soldier_move_s.gif";
+        playerSpriteMoveDownEl.src = "Soldier_move_d.gif";
+        playerSpriteMoveUpEl.src = "Soldier_move_u.gif";
+        playerSpriteMoveSideEl.src = "Soldier_move_s.gif";
+        devConsoleLog("subject sprite overridden: soldier.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
       if (command === "/ulockall") {
         Object.values(DEV_UNLOCK_COMMANDS).forEach((id) => unlockCharacterButton(id));
         unlockPwrButton();
