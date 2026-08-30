@@ -5980,7 +5980,9 @@
       const img = locked ? exitClosedImg : exitOpenImg;
       if (img.complete && img.naturalWidth) {
         ctx.drawImage(img, dx, dy, doorSize, doorSize);
-      } else if (locked && gateClosedImg.complete) {
+      } else if (exitClosedImg.complete && exitClosedImg.naturalWidth) {
+        ctx.drawImage(exitClosedImg, dx, dy, doorSize, doorSize);
+      } else if (gateClosedImg.complete && gateClosedImg.naturalWidth) {
         ctx.drawImage(gateClosedImg, dx, dy, doorSize, doorSize);
       }
     }
@@ -6541,6 +6543,11 @@
       codeTransmissionLinesEl.innerHTML = "";
       codeTransmissionEl.classList.remove("hidden");
       codeTransmissionEl.classList.add("visible");
+
+      engieDistortionSound.currentTime = 0;
+      engieDistortionSound.play().catch(() => {});
+      distortionFxEl.classList.add("visible");
+      setTimeout(() => distortionFxEl.classList.remove("visible"), 180 + Math.random() * 200);
 
       let elapsed = 0;
       const lineIntervalMs = 260;
