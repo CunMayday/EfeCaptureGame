@@ -348,6 +348,38 @@
       100% { opacity: 0; }
     }
 
+    .victory-fade {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: #000;
+      z-index: 13;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .victory-fade.visible {
+      display: block;
+    }
+
+    .victory-fade.fading-in {
+      animation: victory-fade-in 2200ms ease-in forwards;
+    }
+
+    .victory-fade.fading-out {
+      animation: victory-fade-out 900ms ease-out forwards;
+    }
+
+    @keyframes victory-fade-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes victory-fade-out {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
     .corrupted-room {
       background: #0a0304;
       border-color: rgba(255, 47, 63, 0.35);
@@ -1712,6 +1744,7 @@
         <div id="codeTransmissionLines" class="code-transmission-lines"></div>
       </div>
       <div id="whiteFlash" class="white-flash"></div>
+      <div id="victoryFade" class="victory-fade"></div>
       <div id="hudOverlay" class="hud-overlay">
         <div class="objective-bar">
           <p id="objectiveText" class="objective-text"></p>
@@ -1959,6 +1992,7 @@
     const codeTransmissionEl = document.getElementById("codeTransmission");
     const codeTransmissionLinesEl = document.getElementById("codeTransmissionLines");
     const whiteFlashEl = document.getElementById("whiteFlash");
+    const victoryFadeEl = document.getElementById("victoryFade");
     const achievementsButton = document.getElementById("achievementsButton");
     const settingsButton = document.getElementById("settingsButton");
     const pauseMenuHeading = document.getElementById("pauseMenuHeading");
@@ -6433,32 +6467,45 @@
     function playSoldierVictoryCutscene() {
       gameStarted = false;
       keys.clear();
-      jumpscare.classList.remove("visible");
-      deathScreen.classList.remove("visible");
-      deathScreen.innerHTML = "";
-      overlay.classList.remove("visible");
       pauseMenuButton.classList.add("hidden");
-      hudOverlayEl.classList.add("hidden");
-      titleScreen.classList.add("hidden");
-      characterSelect.classList.remove("hidden");
-      titleBgLayer.classList.remove("hidden");
-      achievementsButton.classList.remove("hidden");
-      settingsButton.classList.remove("hidden");
-      playMenuMusic();
-      unlockPwrButton();
+
+      victoryFadeEl.classList.remove("visible", "fading-in", "fading-out");
+      void victoryFadeEl.offsetWidth;
+      victoryFadeEl.classList.add("visible", "fading-in");
 
       setTimeout(() => {
-        const scrollTarget = characterRow.scrollWidth - characterRow.clientWidth;
-        characterRow.scrollTo({ left: scrollTarget, behavior: "smooth" });
-        setPlaceholderCardsRevealed(true);
-      }, 400);
+        jumpscare.classList.remove("visible");
+        deathScreen.classList.remove("visible");
+        deathScreen.innerHTML = "";
+        overlay.classList.remove("visible");
+        hudOverlayEl.classList.add("hidden");
+        titleScreen.classList.add("hidden");
+        characterSelect.classList.remove("hidden");
+        titleBgLayer.classList.remove("hidden");
+        achievementsButton.classList.remove("hidden");
+        settingsButton.classList.remove("hidden");
+        playMenuMusic();
+        unlockPwrButton();
 
-      setTimeout(() => {
-        setPlaceholderCardsRevealed(false);
-        playCodeTransmissionSequence(() => {
-          showCorruptedReadyRoom();
-        });
-      }, 1300);
+        victoryFadeEl.classList.remove("fading-in");
+        victoryFadeEl.classList.add("fading-out");
+        setTimeout(() => {
+          victoryFadeEl.classList.remove("visible", "fading-out");
+        }, 900);
+
+        setTimeout(() => {
+          const scrollTarget = characterRow.scrollWidth - characterRow.clientWidth;
+          characterRow.scrollTo({ left: scrollTarget, behavior: "smooth" });
+          setPlaceholderCardsRevealed(true);
+        }, 400);
+
+        setTimeout(() => {
+          setPlaceholderCardsRevealed(false);
+          playCodeTransmissionSequence(() => {
+            showCorruptedReadyRoom();
+          });
+        }, 1300);
+      }, 2200);
     }
 
     const CODE_TRANSMISSION_LINE_POOL = [
