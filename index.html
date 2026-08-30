@@ -7493,7 +7493,10 @@
         achievementsButton.classList.add("hidden");
         settingsButton.classList.add("hidden");
         overlay.classList.remove("visible");
-        pauseMenuMusic(0);
+        pauseMenuMusic(600);
+        pauseBadwater2Music(600);
+        pauseAmbientMusic(600);
+        pauseChaseMusic(600);
         resetGame();
         gameStarted = true;
         devConsoleLog("loading badwater2 test level.", "ok");
