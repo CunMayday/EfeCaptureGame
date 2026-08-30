@@ -7097,6 +7097,17 @@
       return wasLocked;
     }
 
+    function stripAllLockedBanners() {
+      document.querySelectorAll(".character-card.locked, .mode-card.locked").forEach((card) => {
+        card.classList.remove("locked");
+        card.removeAttribute("data-locked");
+        const banner = card.querySelector(".wip-banner");
+        if (banner) {
+          banner.remove();
+        }
+      });
+    }
+
     function refreshCharacterUnlocks() {
       Object.entries(UNLOCKED_BY_VICTORY).forEach(([requiredVictory, unlock]) => {
         if (!beatenCharacters.has(requiredVictory)) {
@@ -7234,6 +7245,7 @@
       if (command === "/ulockall") {
         Object.values(DEV_UNLOCK_COMMANDS).forEach((id) => unlockCharacterButton(id));
         unlockPwrButton();
+        stripAllLockedBanners();
         devConsoleLog("all characters unlocked.", "ok");
         playDevConsoleResultSound(true);
         return;
