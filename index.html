@@ -2184,7 +2184,7 @@
         idle: heavySpriteIdleEl, up: heavySpriteUpEl, down: heavySpriteDownEl, side: heavySpriteSideEl
       },
       badwater2: {
-        idle: heavySpriteIdleEl, up: heavySpriteUpEl, down: heavySpriteDownEl, side: heavySpriteSideEl
+        idle: soldierSpriteIdleEl, up: soldierSpriteUpEl, down: soldierSpriteDownEl, side: soldierSpriteSideEl
       },
       soldier: {
         idle: soldierSpriteIdleEl, up: soldierSpriteUpEl, down: soldierSpriteDownEl, side: soldierSpriteSideEl,
@@ -2699,6 +2699,8 @@
       });
     }
 
+    const CURTAIN_CALL_LAYER_RANGE = TILE * 12;
+
     function updateCurtainCallLayers(enemyDistance) {
       if (!curtainCallLayersPlaying) {
         return;
@@ -2710,6 +2712,25 @@
           return;
         }
         fadeMusicTrack(track, targetVolume, 500);
+      });
+    }
+
+    function updateCurtainCallLayersByMonsters(monsterDistances) {
+      if (!curtainCallLayersPlaying) {
+        return;
+      }
+      CURTAIN_CALL_LAYERS.forEach((track, index) => {
+        const monsterDistance = monsterDistances[index];
+        const fullVolume = musicFullVolume.get(track);
+        let targetVolume = 0;
+        if (typeof monsterDistance === "number") {
+          const closeness = 1 - Math.min(1, Math.max(0, monsterDistance / CURTAIN_CALL_LAYER_RANGE));
+          targetVolume = fullVolume * closeness;
+        }
+        if (Math.abs(track.volume - targetVolume) < 0.01) {
+          return;
+        }
+        fadeMusicTrack(track, targetVolume, 400);
       });
     }
 
@@ -3126,23 +3147,26 @@
     ];
 
     const BADWATER2_LEVEL_MAP = [
-      "####################",
-      "#S.................#",
-      "#.###.###.###.###..#",
-      "#.#.....#...#...#..#",
-      "#.#.###.#.#.#.##.#.#",
-      "#...#P..#.#...#..#.#",
-      "###.#####.#####..#.#",
-      "#................#.#",
-      "#.#############..#.#",
-      "#.#...........#..#.#",
-      "#.#.#########.#..#.#",
-      "#.#.#.......#.#....#",
-      "#.#.#.P.....#.######",
-      "#.#.#########......#",
-      "#...................",
-      "#E..................",
-      "####################"
+      "##########################",
+      "#....................#...#",
+      "#....................#...#",
+      "#....P......J........#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#.S..............R...L.E.#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "#.........Y..........#...#",
+      "#.....N.............P#...#",
+      "#....................#...#",
+      "#....................#...#",
+      "##########################"
     ];
 
     const PYRO_LEVEL_MAP = [
@@ -3215,6 +3239,15 @@
 
     const debrisImg = new Image();
     debrisImg.src = "120px-Bomb_debris.png";
+
+    const CAGED_MONSTER_IMG = {
+      heavy: new Image(),
+      medic: new Image(),
+      pyro: new Image()
+    };
+    CAGED_MONSTER_IMG.heavy.src = "Heavy_move_d.gif";
+    CAGED_MONSTER_IMG.medic.src = "Medic_move_d.gif";
+    CAGED_MONSTER_IMG.pyro.src = "Pyro_move_d.gif";
 
     const TILESET = {
       wall: [48, 16],
@@ -4235,6 +4268,9 @@
     const decor = [];
     const keycardPickups = [];
     const pyroKeycardDoors = [];
+    const badwater2CagedMonsters = [];
+    let badwater2Keycard = null;
+    let badwater2Door = null;
     const pyroDebris = [];
     const pyroRooms = [];
     const PYRO_RUN_TIME_LIMIT = 60;
@@ -4265,6 +4301,9 @@
       keycardPickups.length = 0;
       pyroKeycardDoors.length = 0;
       pyroDebris.length = 0;
+      badwater2CagedMonsters.length = 0;
+      badwater2Keycard = null;
+      badwater2Door = null;
       const doorTiles = [];
       const medicDoorTiles = [];
       const keycardDoorTilesByRow = new Map();
@@ -4343,6 +4382,23 @@
           if (cell === "G") {
             pyroPowerConsole = { x: cx, y: cy, r: 12, active: false };
           }
+          if (cell === "Y") {
+            badwater2Keycard = { x: cx, y: cy, r: 12, collected: false };
+          }
+          if (cell === "L") {
+            const rect = { x: px, y: py, w: TILE, h: TILE };
+            solids.push(rect);
+            badwater2Door = { x: px, y: py, w: TILE, h: TILE, locked: true, tiles: [rect], playedOpenGif: false, lightBrightness: 0.3 };
+          }
+          if (cell === "J") {
+            badwater2CagedMonsters.push({ character: "heavy", x: cx, y: cy });
+          }
+          if (cell === "N") {
+            badwater2CagedMonsters.push({ character: "medic", x: cx, y: cy });
+          }
+          if (cell === "R") {
+            badwater2CagedMonsters.push({ character: "pyro", x: cx, y: cy });
+          }
         });
       });
 
@@ -4397,14 +4453,10 @@
         ];
       } else if (activeCharacter === "badwater2") {
         enemy.patrolPoints = [
-          { x: TILE * 3.5, y: TILE * 1.5 },
-          { x: TILE * 17.5, y: TILE * 1.5 },
-          { x: TILE * 17.5, y: TILE * 7.5 },
-          { x: TILE * 2.5, y: TILE * 7.5 },
-          { x: TILE * 2.5, y: TILE * 14.5 },
-          { x: TILE * 18.5, y: TILE * 14.5 },
-          { x: TILE * 18.5, y: TILE * 15.5 },
-          { x: TILE * 2.5, y: TILE * 15.5 }
+          { x: TILE * 22.5, y: TILE * 2.5 },
+          { x: TILE * 23.5, y: TILE * 9.5 },
+          { x: TILE * 22.5, y: TILE * 16.5 },
+          { x: TILE * 24.5, y: TILE * 10.5 }
         ];
       } else {
         enemy.patrolPoints = [
@@ -4509,7 +4561,7 @@
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
-        const enemySpawnTarget = activeCharacter === "badwater2" ? { x: TILE * 14.5, y: TILE * 15.5 } : { x: TILE * 26, y: TILE * 18 };
+        const enemySpawnTarget = activeCharacter === "badwater2" ? { x: TILE * 22.5, y: TILE * 5.5 } : { x: TILE * 26, y: TILE * 18 };
         const safeEnemySpawn = findNearestOpenPosition(enemySpawnTarget.x, enemySpawnTarget.y, enemy.radius);
         enemy.x = safeEnemySpawn.x;
         enemy.y = safeEnemySpawn.y;
@@ -4517,6 +4569,7 @@
         enemy.lastKnownY = player.y;
         game.state = "playing";
         if (activeCharacter === "badwater2") {
+          enemy.mode = "dormant";
           pauseCurtainCallChase();
           startCurtainCallLayers();
         }
@@ -5163,6 +5216,37 @@
         return;
       }
 
+      if (activeCharacter === "badwater2") {
+        if (badwater2Keycard && !badwater2Keycard.collected &&
+            distance(player.x, player.y, badwater2Keycard.x, badwater2Keycard.y) <= player.radius + badwater2Keycard.r + 10) {
+          badwater2Keycard.collected = true;
+          player.carriedKeycard = "badwater2";
+          keycardPickSound.currentTime = 0;
+          keycardPickSound.play().catch(() => {});
+          showKeycardPickupIndicator();
+        }
+
+        if (badwater2Door && badwater2Door.locked && player.carriedKeycard === "badwater2") {
+          const centerX = badwater2Door.x + badwater2Door.w / 2;
+          const centerY = badwater2Door.y + badwater2Door.h / 2;
+          if (distance(player.x, player.y, centerX, centerY) <= 30) {
+            badwater2Door.locked = false;
+            badwater2Door.playedOpenGif = false;
+            badwater2Door.tiles.forEach((tile) => {
+              const idx = solids.findIndex((rect) => rect.x === tile.x && rect.y === tile.y);
+              if (idx !== -1) {
+                solids.splice(idx, 1);
+              }
+            });
+            player.carriedKeycard = null;
+            hideKeycardPickupIndicator();
+            playObjectiveInteractSound();
+            playDoorOpenSound();
+            enemy.mode = "patrol";
+          }
+        }
+      }
+
       if (player.nodesActive >= player.nodesRequired && exitZone.locked) {
         const centerX = exitZone.x + exitZone.w / 2;
         const centerY = exitZone.y + exitZone.h / 2;
@@ -5799,6 +5883,9 @@
         updateSoldierEnemy(dt);
         return;
       }
+      if (activeCharacter === "badwater2" && enemy.mode === "dormant") {
+        return;
+      }
       const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
       const distToPlayer = distance(enemy.x, enemy.y, player.x, player.y);
@@ -6028,7 +6115,7 @@
           if (game.state === "playing") {
             startCurtainCallLayers();
           }
-        } else if (!activelyChasingPlayer) {
+        } else if (!activelyChasingPlayer && enemy.mode !== "dormant") {
           updateCurtainCallLayers(distance(enemy.x, enemy.y, player.x, player.y));
         }
       } else if (activelyChasingPlayer && !enemy.wasChasing) {
@@ -6041,6 +6128,15 @@
         }
       }
       enemy.wasChasing = activelyChasingPlayer;
+    }
+
+    function updateBadwater2CagedMonsters() {
+      const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
+      if (activelyChasingPlayer || enemy.mode !== "dormant") {
+        return;
+      }
+      const monsterDistances = badwater2CagedMonsters.map((monster) => distance(player.x, player.y, monster.x, monster.y));
+      updateCurtainCallLayersByMonsters(monsterDistances);
     }
 
     let cameraShakeTimer = 0;
@@ -6334,6 +6430,45 @@
 
     }
 
+    function drawBadwater2Scene() {
+      if (activeCharacter !== "badwater2") {
+        return;
+      }
+
+      badwater2CagedMonsters.forEach((monster) => {
+        const cageSize = TILE * 1.6;
+        ctx.strokeStyle = "rgba(255, 47, 63, 0.55)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(monster.x - cageSize / 2, monster.y - cageSize / 2, cageSize, cageSize);
+        ctx.fillStyle = "rgba(255, 47, 63, 0.08)";
+        ctx.fillRect(monster.x - cageSize / 2, monster.y - cageSize / 2, cageSize, cageSize);
+        const img = CAGED_MONSTER_IMG[monster.character];
+        if (img && img.complete && img.naturalWidth) {
+          const portraitSize = cageSize * 0.85;
+          ctx.drawImage(img, monster.x - portraitSize / 2, monster.y - portraitSize / 2, portraitSize, portraitSize);
+        }
+      });
+
+      if (badwater2Door) {
+        drawDoorTiles(badwater2Door);
+      }
+
+      if (badwater2Keycard && !badwater2Keycard.collected) {
+        const card = badwater2Keycard;
+        ctx.beginPath();
+        ctx.arc(card.x, card.y, card.r + 6, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 211, 126, 0.16)";
+        ctx.fill();
+        const cardSize = TILE * 0.8;
+        if (keycardImg.complete && keycardImg.naturalWidth) {
+          ctx.drawImage(keycardImg, card.x - cardSize / 2, card.y - cardSize / 2, cardSize, cardSize);
+        } else {
+          ctx.fillStyle = "#ffd37e";
+          ctx.fillRect(card.x - 9, card.y - 6, 18, 12);
+        }
+      }
+    }
+
     function drawWorld() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
@@ -6348,6 +6483,7 @@
       drawExitDoor(exitZone.x, exitZone.y, exitZone.locked);
       drawIntroScene();
       drawPyroScene();
+      drawBadwater2Scene();
 
       for (const item of interactables) {
         ctx.beginPath();
@@ -6404,7 +6540,8 @@
     }
 
     function updateEnemySpriteElement(dt) {
-      if (activeCharacter === "pyro" || jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped") {
+      if (activeCharacter === "pyro" || jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped" ||
+          (activeCharacter === "badwater2" && enemy.mode === "dormant")) {
         allEnemySpriteEls().forEach((el) => {
           el.style.display = "none";
         });
@@ -6954,6 +7091,9 @@
             updateSoldierPyroBurst(dt);
           }
         }
+        if (activeCharacter === "badwater2") {
+          updateBadwater2CagedMonsters();
+        }
         updatePlayerFootstepAudio(dt);
       } else if (game.state === "intro") {
         updateIntro(dt);
@@ -7027,26 +7167,6 @@
       }
     });
 
-    const CURTAIN_CALL_GAIN_BOOST = 2.2;
-    let curtainCallGainReady = false;
-    function boostCurtainCallVolume() {
-      if (curtainCallGainReady || !audioContext || audioContext.state !== "running") {
-        return;
-      }
-      curtainCallGainReady = true;
-      try {
-        [curtainCallLayer1, curtainCallLayer2, curtainCallLayer3, curtainCallChase].forEach((track) => {
-          const source = audioContext.createMediaElementSource(track);
-          const gainNode = audioContext.createGain();
-          gainNode.gain.value = CURTAIN_CALL_GAIN_BOOST;
-          source.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-        });
-      } catch (err) {
-        curtainCallGainReady = false;
-      }
-    }
-
     let audioUnlocked = false;
     function unlockAudioPlayback() {
       if (audioUnlocked) {
@@ -7054,9 +7174,7 @@
       }
       audioUnlocked = true;
       if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume().then(boostCurtainCallVolume).catch(() => {});
-      } else if (audioContext && audioContext.state === "running") {
-        boostCurtainCallVolume();
+        audioContext.resume().catch(() => {});
       }
       if (!gameStarted) {
         playMenuMusic();
