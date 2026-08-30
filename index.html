@@ -5523,9 +5523,10 @@
     };
 
     let lastDeathCause = null;
+    let devInvincible = false;
 
     function triggerPlayerDeath(cause) {
-      if (game.state === "dead") {
+      if (game.state === "dead" || devInvincible) {
         return;
       }
       lastDeathCause = cause || null;
@@ -7617,7 +7618,7 @@
       }
       devConsoleLog("> " + raw);
       if (command === "?cmnds") {
-        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /close");
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /bw2status /bw2free /invincible /close");
         playDevConsoleResultSound(true);
         return;
       }
@@ -7650,6 +7651,42 @@
       }
       if (command === "/close" || command === "/exit") {
         closeDevConsole();
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/bw2status") {
+        devConsoleLog(`activeCharacter=${activeCharacter} game.state=${game.state} enemy.mode=${enemy.mode}`, "ok");
+        devConsoleLog(`curtainCallLayersPlaying=${curtainCallLayersPlaying} layer volumes=${CURTAIN_CALL_LAYERS.map((t) => t.volume.toFixed(2)).join(",")}`, "ok");
+        devConsoleLog(`badwater2Door.locked=${badwater2Door ? badwater2Door.locked : "null"} carriedKeycard=${player.carriedKeycard}`, "ok");
+        devConsoleLog(`enemy pos=(${Math.round(enemy.x)},${Math.round(enemy.y)}) player pos=(${Math.round(player.x)},${Math.round(player.y)})`, "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/invincible") {
+        devInvincible = !devInvincible;
+        devConsoleLog(`invincibility ${devInvincible ? "on" : "off"}.`, "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/bw2free") {
+        if (activeCharacter === "badwater2") {
+          if (badwater2Door) {
+            badwater2Door.locked = false;
+            badwater2Door.tiles.forEach((tile) => {
+              const idx = solids.findIndex((rect) => rect.x === tile.x && rect.y === tile.y);
+              if (idx !== -1) {
+                solids.splice(idx, 1);
+              }
+            });
+          }
+          const safeSpot = findNearestOpenPosition(player.x + TILE * 3, player.y, enemy.radius);
+          enemy.x = safeSpot.x;
+          enemy.y = safeSpot.y;
+          enemy.mode = "patrol";
+          devConsoleLog("badwater2: door forced open, enemy released near you.", "ok");
+        } else {
+          devConsoleLog("not in the badwater2 test level.", "error");
+        }
         playDevConsoleResultSound(true);
         return;
       }
