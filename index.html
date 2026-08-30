@@ -1518,6 +1518,7 @@
       text-transform: uppercase;
       transform: rotate(-8deg);
       pointer-events: none;
+      z-index: 2;
     }
 
     .character-card.locked.signal-active {
@@ -1633,10 +1634,22 @@
     }
 
     .character-row .character-card.corrupted-card img {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      height: auto;
-      -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 85%);
-      mask-image: radial-gradient(circle, #000 55%, transparent 85%);
+      height: 100%;
+      margin: 0;
+      object-fit: cover;
+      z-index: 0;
+      -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    }
+
+    .character-row .character-card.corrupted-card .mode-name,
+    .character-row .character-card.corrupted-card .mode-desc {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
     }
 
     .scroll-arrow {
