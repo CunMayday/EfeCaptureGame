@@ -5057,8 +5057,10 @@
       moveY /= len;
 
       let speed = omegaOneActive ? OMEGA_ONE_SPEED : player.speed;
-      const sprinting = keys.has("shift") && player.sprint > 0.1 && (moveX || moveY);
+      const wantsSprint = keys.has("shift") && (moveX || moveY);
+      const sprinting = wantsSprint && player.sprint > 0.1;
       player.isSprinting = sprinting;
+      const sprintExhausted = omegaOneActive && wantsSprint && !sprinting && omegaOneWasSprinting;
       if (sprinting) {
         speed = omegaOneActive ? OMEGA_ONE_SPRINT_SPEED : player.sprintSpeed;
         player.sprint = Math.max(0, player.sprint - dt);
@@ -5078,16 +5080,15 @@
       }
 
       if (omegaOneActive) {
-        if (sprinting && !omegaOneWasSprinting) {
-          playSoldierAggSound();
-        }
-        if (omegaOneWasSprinting && player.sprint <= 0) {
+        if (sprintExhausted) {
           omegaOneStunned = true;
           omegaOneStunTimer = OMEGA_ONE_STUN_DURATION;
           player.moveX = 0;
           player.moveY = 0;
           soldierBarkSound.currentTime = 0;
           soldierBarkSound.play().catch(() => {});
+        } else if (sprinting && !omegaOneWasSprinting) {
+          playSoldierAggSound();
         }
         omegaOneWasSprinting = sprinting;
         if (sprinting) {
