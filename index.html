@@ -2730,7 +2730,8 @@
         const fullVolume = musicFullVolume.get(track);
         let targetVolume = 0;
         if (typeof monsterDistance === "number") {
-          const closeness = 1 - Math.min(1, Math.max(0, monsterDistance / CURTAIN_CALL_LAYER_RANGE));
+          const linearCloseness = 1 - Math.min(1, Math.max(0, monsterDistance / CURTAIN_CALL_LAYER_RANGE));
+          const closeness = Math.sqrt(linearCloseness);
           targetVolume = fullVolume * closeness;
         }
         if (Math.abs(track.volume - targetVolume) < 0.01) {
