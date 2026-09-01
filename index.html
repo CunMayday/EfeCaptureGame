@@ -163,6 +163,32 @@
       min-width: 2px;
     }
 
+    .noli-target-found {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      color: #f4e9ff;
+      font-weight: 800;
+      letter-spacing: 0.3em;
+      font-size: 1.1rem;
+      text-shadow: 0 0 14px rgba(155, 93, 229, 0.9), 0 0 28px rgba(155, 93, 229, 0.6);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .noli-target-found.flash {
+      animation: noli-target-found-flash 1100ms ease-out forwards;
+    }
+
+    @keyframes noli-target-found-flash {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
     canvas {
       display: block;
       width: min(100%, 900px);
@@ -1822,6 +1848,7 @@
         <div id="noliVisLeft" class="noli-vis-edge noli-vis-left"></div>
         <div id="noliVisRight" class="noli-vis-edge noli-vis-right"></div>
       </div>
+      <div id="noliTargetFound" class="noli-target-found">TARGET FOUND</div>
       <img id="enemySpriteIdle" class="enemy-sprite" src="Medic_idle.gif" alt="">
       <img id="enemySpriteUp" class="enemy-sprite" src="Medic_move_u.gif" alt="">
       <img id="enemySpriteDown" class="enemy-sprite" src="Medic_move_d.gif" alt="">
@@ -2318,6 +2345,7 @@
     const noliVisBottomEl = document.getElementById("noliVisBottom");
     const noliVisLeftEl = document.getElementById("noliVisLeft");
     const noliVisRightEl = document.getElementById("noliVisRight");
+    const noliTargetFoundEl = document.getElementById("noliTargetFound");
     const pauseMenuButton = document.getElementById("pauseMenuButton");
     const pauseMenu = document.getElementById("pauseMenu");
     const volumeSlider = document.getElementById("volumeSlider");
@@ -4648,6 +4676,7 @@
           enemy.mode = "dormant";
           pauseCurtainCallChase();
           startCurtainCallLayers();
+          deactivateNoliSpotlight();
         }
       } else {
         game.state = "intro";
@@ -5436,6 +5465,7 @@
           if (activeCharacter === "badwater2") {
             stopCurtainCallLayers(1800);
             pauseCurtainCallChase(1800);
+            deactivateNoliSpotlight();
           }
           if (activeCharacter === "soldier") {
             stopAllSoldierSounds();
@@ -5616,6 +5646,7 @@
       if (activeCharacter === "badwater2") {
         stopCurtainCallLayers();
         pauseCurtainCallChase();
+        deactivateNoliSpotlight();
       }
       syncEnemyWalkAudio(0, true);
       if (activeCharacter === "pyro") {
@@ -6190,6 +6221,7 @@
         if (activelyChasingPlayer && !enemy.wasChasing) {
           stopCurtainCallLayers();
           playCurtainCallChase();
+          flashNoliTargetFound();
         } else if (!activelyChasingPlayer && enemy.wasChasing) {
           pauseCurtainCallChase(1200);
           if (game.state === "playing") {
@@ -6210,23 +6242,87 @@
       enemy.wasChasing = activelyChasingPlayer;
     }
 
-    function updateBadwater2CagedMonsters() {
+    const NOLI_SPOTLIGHT_FLY_IN_MS = 500;
+    const noliSpotlight = {
+      active: false,
+      progress: 0,
+      fromX: 0,
+      fromY: 0,
+      targetX: 0,
+      targetY: 0
+    };
+
+    function activateNoliSpotlight(monster) {
+      if (noliSpotlight.active) {
+        return;
+      }
+      noliSpotlight.active = true;
+      noliSpotlight.progress = 0;
+      noliSpotlight.targetX = monster.x;
+      noliSpotlight.targetY = monster.y;
+      const angle = Math.random() * Math.PI * 2;
+      const flyInDistance = Math.max(canvas.width, canvas.height);
+      noliSpotlight.fromX = monster.x + Math.cos(angle) * flyInDistance;
+      noliSpotlight.fromY = monster.y + Math.sin(angle) * flyInDistance;
+      setCameraRumble(true);
+    }
+
+    function deactivateNoliSpotlight() {
+      if (!noliSpotlight.active) {
+        return;
+      }
+      noliSpotlight.active = false;
+      setCameraRumble(false);
+    }
+
+    function updateNoliSpotlight(dt, monster) {
+      if (!noliSpotlight.active) {
+        return;
+      }
+      if (monster) {
+        noliSpotlight.targetX = monster.x;
+        noliSpotlight.targetY = monster.y;
+      }
+      noliSpotlight.progress = Math.min(1, noliSpotlight.progress + dt / (NOLI_SPOTLIGHT_FLY_IN_MS / 1000));
+    }
+
+    function flashNoliTargetFound() {
+      noliTargetFoundEl.classList.remove("flash");
+      void noliTargetFoundEl.offsetWidth;
+      noliTargetFoundEl.classList.add("flash");
+    }
+
+    function updateBadwater2CagedMonsters(dt) {
       const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
       if (activelyChasingPlayer || enemy.mode !== "dormant") {
+        deactivateNoliSpotlight();
         return;
       }
       const cagedMonster = badwater2CagedMonsters[0];
       if (!cagedMonster) {
+        deactivateNoliSpotlight();
         return;
       }
       updateCurtainCallLayers(distance(player.x, player.y, cagedMonster.x, cagedMonster.y));
+      if (curtainCallActiveLayerIndex === 2) {
+        activateNoliSpotlight(cagedMonster);
+      } else {
+        deactivateNoliSpotlight();
+      }
+      updateNoliSpotlight(dt, cagedMonster);
     }
 
     let cameraShakeTimer = 0;
     const cameraShakeStrength = 3;
+    let cameraRumbleActive = false;
+    const cameraRumbleStrength = 1.1;
 
     function startCameraShake(durationMs) {
       cameraShakeTimer = durationMs / 1000;
+    }
+
+    function setCameraRumble(active) {
+      cameraRumbleActive = active;
     }
 
     function updateCamera(dt) {
@@ -6244,6 +6340,9 @@
         cameraShakeTimer = Math.max(0, cameraShakeTimer - dt);
         game.camera.x += (Math.random() - 0.5) * 2 * cameraShakeStrength;
         game.camera.y += (Math.random() - 0.5) * 2 * cameraShakeStrength;
+      } else if (cameraRumbleActive) {
+        game.camera.x += (Math.random() - 0.5) * 2 * cameraRumbleStrength;
+        game.camera.y += (Math.random() - 0.5) * 2 * cameraRumbleStrength;
       }
     }
 
@@ -6609,7 +6708,32 @@
         ctx.fillText(`[E] ${prompt.prompt}`, prompt.x, prompt.y - 20);
       }
 
-      drawVignette();
+      if (activeCharacter === "badwater2" && noliSpotlight.active) {
+        drawNoliSpotlight();
+      } else {
+        drawVignette();
+      }
+      ctx.restore();
+    }
+
+    function drawNoliSpotlight() {
+      const eased = 1 - Math.pow(1 - noliSpotlight.progress, 3);
+      const lightX = noliSpotlight.fromX + (noliSpotlight.targetX - noliSpotlight.fromX) * eased;
+      const lightY = noliSpotlight.fromY + (noliSpotlight.targetY - noliSpotlight.fromY) * eased;
+      const innerR = TILE * 1.6;
+      const outerR = TILE * 3.4;
+      ctx.fillStyle = "rgba(2, 2, 6, 0.86)";
+      ctx.fillRect(game.camera.x, game.camera.y, canvas.width, canvas.height);
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      const gradient = ctx.createRadialGradient(lightX, lightY, innerR * 0.2, lightX, lightY, outerR);
+      gradient.addColorStop(0, "rgba(0,0,0,1)");
+      gradient.addColorStop(0.6, "rgba(0,0,0,0.85)");
+      gradient.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(lightX, lightY, outerR, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
     }
 
@@ -7175,7 +7299,7 @@
           }
         }
         if (activeCharacter === "badwater2") {
-          updateBadwater2CagedMonsters();
+          updateBadwater2CagedMonsters(dt);
         }
         updatePlayerFootstepAudio(dt);
       } else if (game.state === "intro") {
@@ -7979,6 +8103,7 @@
       pauseChaseMusic(800);
       stopCurtainCallLayers(800);
       pauseCurtainCallChase(800);
+      deactivateNoliSpotlight();
       syncEnemyWalkAudio(0, true);
       jumpscare.classList.remove("visible");
       deathScreen.classList.remove("visible");
