@@ -3355,7 +3355,7 @@
       medic: new Image(),
       pyro: new Image()
     };
-    CAGED_MONSTER_IMG.heavy.src = "Heavy_move_d.gif";
+    CAGED_MONSTER_IMG.heavy.src = "200px-Heavy_render.png";
     CAGED_MONSTER_IMG.medic.src = "Medic_move_d.gif";
     CAGED_MONSTER_IMG.pyro.src = "Pyro_move_d.gif";
 
@@ -6243,9 +6243,11 @@
     }
 
     const NOLI_SPOTLIGHT_FLY_IN_MS = 500;
+    const NOLI_SPOTLIGHT_FADE_MS = 500;
     const noliSpotlight = {
       active: false,
       progress: 0,
+      fadeLevel: 0,
       fromX: 0,
       fromY: 0,
       targetX: 0,
@@ -6276,6 +6278,12 @@
     }
 
     function updateNoliSpotlight(dt, monster) {
+      const fadeStep = dt / (NOLI_SPOTLIGHT_FADE_MS / 1000);
+      if (noliSpotlight.active) {
+        noliSpotlight.fadeLevel = Math.min(1, noliSpotlight.fadeLevel + fadeStep);
+      } else {
+        noliSpotlight.fadeLevel = Math.max(0, noliSpotlight.fadeLevel - fadeStep);
+      }
       if (!noliSpotlight.active) {
         return;
       }
@@ -6294,13 +6302,10 @@
 
     function updateBadwater2CagedMonsters(dt) {
       const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      if (activelyChasingPlayer || enemy.mode !== "dormant") {
-        deactivateNoliSpotlight();
-        return;
-      }
       const cagedMonster = badwater2CagedMonsters[0];
-      if (!cagedMonster) {
+      if (activelyChasingPlayer || enemy.mode !== "dormant" || !cagedMonster) {
         deactivateNoliSpotlight();
+        updateNoliSpotlight(dt, null);
         return;
       }
       updateCurtainCallLayers(distance(player.x, player.y, cagedMonster.x, cagedMonster.y));
@@ -6618,17 +6623,38 @@
       }
 
       badwater2CagedMonsters.forEach((monster) => {
-        const cageSize = TILE * 1.6;
-        ctx.strokeStyle = "rgba(255, 47, 63, 0.55)";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(monster.x - cageSize / 2, monster.y - cageSize / 2, cageSize, cageSize);
-        ctx.fillStyle = "rgba(255, 47, 63, 0.08)";
-        ctx.fillRect(monster.x - cageSize / 2, monster.y - cageSize / 2, cageSize, cageSize);
+        const cageSize = TILE * 2.6;
+        const cageLeft = monster.x - cageSize / 2;
+        const cageTop = monster.y - cageSize / 2;
+        ctx.fillStyle = "rgba(4, 2, 8, 0.55)";
+        ctx.fillRect(cageLeft, cageTop, cageSize, cageSize);
+
         const img = CAGED_MONSTER_IMG[monster.character];
         if (img && img.complete && img.naturalWidth) {
-          const portraitSize = cageSize * 0.85;
-          ctx.drawImage(img, monster.x - portraitSize / 2, monster.y - portraitSize / 2, portraitSize, portraitSize);
+          const aspect = img.naturalWidth / img.naturalHeight;
+          const portraitHeight = cageSize * 0.95;
+          const portraitWidth = portraitHeight * aspect;
+          ctx.drawImage(img, monster.x - portraitWidth / 2, monster.y - portraitHeight / 2, portraitWidth, portraitHeight);
         }
+
+        ctx.strokeStyle = "rgba(255, 47, 63, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cageLeft, cageTop, cageSize, cageSize);
+
+        const barCount = 5;
+        ctx.strokeStyle = "rgba(20, 10, 12, 0.92)";
+        ctx.lineWidth = 3;
+        for (let i = 1; i < barCount; i += 1) {
+          const barX = cageLeft + (cageSize / barCount) * i;
+          ctx.beginPath();
+          ctx.moveTo(barX, cageTop - 4);
+          ctx.lineTo(barX, cageTop + cageSize + 4);
+          ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.moveTo(cageLeft - 4, monster.y);
+        ctx.lineTo(cageLeft + cageSize + 4, monster.y);
+        ctx.stroke();
       });
 
       if (badwater2Door) {
@@ -6708,7 +6734,7 @@
         ctx.fillText(`[E] ${prompt.prompt}`, prompt.x, prompt.y - 20);
       }
 
-      if (activeCharacter === "badwater2" && noliSpotlight.active) {
+      if (activeCharacter === "badwater2" && noliSpotlight.fadeLevel > 0.01) {
         drawNoliSpotlight();
       } else {
         drawVignette();
@@ -6722,7 +6748,8 @@
       const lightY = noliSpotlight.fromY + (noliSpotlight.targetY - noliSpotlight.fromY) * eased;
       const innerR = TILE * 1.6;
       const outerR = TILE * 3.4;
-      ctx.fillStyle = "rgba(2, 2, 6, 0.86)";
+      const darkAlpha = 0.86 * noliSpotlight.fadeLevel;
+      ctx.fillStyle = `rgba(2, 2, 6, ${darkAlpha})`;
       ctx.fillRect(game.camera.x, game.camera.y, canvas.width, canvas.height);
       ctx.save();
       ctx.globalCompositeOperation = "destination-out";
@@ -7938,6 +7965,7 @@
         devConsoleLog(`badwater2Door.locked=${badwater2Door ? badwater2Door.locked : "null"} carriedKeycard=${player.carriedKeycard}`, "ok");
         devConsoleLog(`enemy pos=(${Math.round(enemy.x)},${Math.round(enemy.y)}) player pos=(${Math.round(player.x)},${Math.round(player.y)})`, "ok");
         devConsoleLog(`cagedMonsters=${badwater2CagedMonsters.length} distances=${badwater2CagedMonsters.map((m) => Math.round(distance(player.x, player.y, m.x, m.y))).join(",")}`, "ok");
+        devConsoleLog(`curtainCallActiveLayerIndex=${curtainCallActiveLayerIndex} spotlight active=${noliSpotlight.active} fadeLevel=${noliSpotlight.fadeLevel.toFixed(2)} target=(${Math.round(noliSpotlight.targetX)},${Math.round(noliSpotlight.targetY)})`, "ok");
         playDevConsoleResultSound(true);
         return;
       }
