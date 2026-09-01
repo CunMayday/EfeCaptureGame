@@ -1210,6 +1210,80 @@
       background: rgba(141, 224, 194, 0.18);
     }
 
+    .test-menu {
+      position: absolute;
+      inset: 14px;
+      z-index: 51;
+      background: rgba(4, 9, 13, 0.96);
+      border: 1px solid rgba(141, 224, 194, 0.4);
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+      font-family: "Consolas", "Menlo", monospace;
+    }
+
+    .test-menu.hidden {
+      display: none;
+    }
+
+    .test-menu-title {
+      color: #8de0c2;
+      font-size: 0.95rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .test-menu-options {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .test-menu-option {
+      text-align: left;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      border: 1px solid rgba(141, 224, 194, 0.35);
+      background: rgba(141, 224, 194, 0.06);
+      color: #eef7f7;
+      cursor: pointer;
+    }
+
+    .test-menu-option:hover {
+      background: rgba(141, 224, 194, 0.16);
+      border-color: rgba(141, 224, 194, 0.6);
+    }
+
+    .test-menu-option-desc {
+      display: block;
+      margin-top: 3px;
+      color: #9fb0ae;
+      font-size: 0.72rem;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .test-menu-close {
+      margin-top: 12px;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid rgba(255, 107, 107, 0.5);
+      background: rgba(141, 224, 194, 0.08);
+      color: #ff8f8f;
+      cursor: pointer;
+    }
+
+    .test-menu-close:hover {
+      background: rgba(141, 224, 194, 0.18);
+    }
+
     .achievement-icon img {
       width: 100%;
       height: 100%;
@@ -2148,6 +2222,11 @@
         <button id="devConsoleApplyButton" class="dev-console-button apply" type="button">Apply</button>
         <button id="devConsoleDiscardButton" class="dev-console-button discard" type="button">Discard</button>
       </div>
+    </div>
+    <div id="testMenu" class="test-menu hidden">
+      <div id="testMenuTitle" class="test-menu-title"></div>
+      <div id="testMenuOptions" class="test-menu-options"></div>
+      <button id="testMenuCloseButton" class="test-menu-close" type="button">Close</button>
     </div>
   </main>
 
@@ -8355,12 +8434,69 @@
       devConsoleInputEl.blur();
     }
 
+    const testMenuEl = document.getElementById("testMenu");
+    const testMenuTitleEl = document.getElementById("testMenuTitle");
+    const testMenuOptionsEl = document.getElementById("testMenuOptions");
+    const testMenuCloseButton = document.getElementById("testMenuCloseButton");
+
+    function closeTestMenu() {
+      testMenuEl.classList.add("hidden");
+      testMenuOptionsEl.innerHTML = "";
+    }
+
+    function openTestMenu(title, options) {
+      closeDevConsole();
+      testMenuTitleEl.textContent = title;
+      testMenuOptionsEl.innerHTML = "";
+      options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "test-menu-option";
+        const label = document.createElement("span");
+        label.textContent = opt.label;
+        btn.appendChild(label);
+        if (opt.desc) {
+          const desc = document.createElement("span");
+          desc.className = "test-menu-option-desc";
+          desc.textContent = opt.desc;
+          btn.appendChild(desc);
+        }
+        btn.addEventListener("click", () => {
+          closeTestMenu();
+          opt.action();
+        });
+        testMenuOptionsEl.appendChild(btn);
+      });
+      testMenuEl.classList.remove("hidden");
+    }
+
+    testMenuCloseButton.addEventListener("click", closeTestMenu);
+
     const DEV_UNLOCK_COMMANDS = {
       "/ulockheavy": "heavy",
       "/ulockmedic": "medic",
       "/ulockpyro": "pyro",
       "/ulocksoldier": "soldier"
     };
+
+    function launchTestCharacter(character, logMessage) {
+      activeCharacter = character;
+      titleScreen.classList.add("hidden");
+      characterSelect.classList.add("hidden");
+      corruptedReadyRoom.classList.add("hidden");
+      titleBgLayer.classList.add("hidden");
+      achievementsButton.classList.add("hidden");
+      settingsButton.classList.add("hidden");
+      overlay.classList.remove("visible");
+      pauseMenuMusic(600);
+      pauseBadwater2Music(600);
+      pauseAmbientMusic(600);
+      pauseChaseMusic(600);
+      resetGame();
+      gameStarted = true;
+      devConsoleLog(logMessage, "ok");
+      playDevConsoleResultSound(true);
+    }
 
     function runDevCommand(raw) {
       const command = raw.trim().toLowerCase();
@@ -8381,50 +8517,25 @@
         return;
       }
       if (command === "/testbadwater2") {
-        closeDevConsole();
-        activeCharacter = "badwater2";
-        titleScreen.classList.add("hidden");
-        characterSelect.classList.add("hidden");
-        corruptedReadyRoom.classList.add("hidden");
-        titleBgLayer.classList.add("hidden");
-        achievementsButton.classList.add("hidden");
-        settingsButton.classList.add("hidden");
-        overlay.classList.remove("visible");
-        pauseMenuMusic(600);
-        pauseBadwater2Music(600);
-        pauseAmbientMusic(600);
-        pauseChaseMusic(600);
-        resetGame();
-        gameStarted = true;
-        devConsoleLog("loading badwater2 test level.", "ok");
         playDevConsoleResultSound(true);
+        openTestMenu("Bad Water 2 - Select Test", [
+          {
+            label: "Full level",
+            desc: "load the badwater2 test level with both enemies.",
+            action: () => launchTestCharacter("badwater2", "loading badwater2 test level.")
+          }
+        ]);
         return;
       }
       if (command === "/testmassdriver") {
-        devConsoleLog("Mass Driver test scenarios:", "ok");
-        devConsoleLog("  /testmassdriver eye - the watching eye (sweep, catch, chase)", "ok");
-        devConsoleLog("type one of the above to load it.", "ok");
         playDevConsoleResultSound(true);
-        return;
-      }
-      if (command === "/testmassdriver eye") {
-        closeDevConsole();
-        activeCharacter = "massdriver";
-        titleScreen.classList.add("hidden");
-        characterSelect.classList.add("hidden");
-        corruptedReadyRoom.classList.add("hidden");
-        titleBgLayer.classList.add("hidden");
-        achievementsButton.classList.add("hidden");
-        settingsButton.classList.add("hidden");
-        overlay.classList.remove("visible");
-        pauseMenuMusic(600);
-        pauseBadwater2Music(600);
-        pauseAmbientMusic(600);
-        pauseChaseMusic(600);
-        resetGame();
-        gameStarted = true;
-        devConsoleLog("loading mass driver: the eye test scenario.", "ok");
-        playDevConsoleResultSound(true);
+        openTestMenu("Mass Driver - Select Test", [
+          {
+            label: "The eye",
+            desc: "watching eye: sweep, catch, chase.",
+            action: () => launchTestCharacter("massdriver", "loading mass driver: the eye test scenario.")
+          }
+        ]);
         return;
       }
       if (command === "/close" || command === "/exit") {
