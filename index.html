@@ -2521,7 +2521,7 @@
     const badwater2Music = new Audio("FORSAKEN OST - Milestone 4 Noli Chase Theme (SCRAPPED).mp3");
     badwater2Music.loop = true;
     badwater2Music.volume = 0.3;
-    const curtainCallLayer1 = new Audio("curtaincalllayer1.mp4");
+    const curtainCallLayer1 = new Audio("LAYERONENOLI.mp4");
     curtainCallLayer1.loop = true;
     curtainCallLayer1.volume = 1;
     const curtainCallLayer2 = new Audio("curtaincalllayer2.mp4");
@@ -2705,8 +2705,6 @@
       });
     }
 
-    const CURTAIN_CALL_LAYER_RANGE = 288;
-
     function updateCurtainCallLayers(enemyDistance) {
       if (!curtainCallLayersPlaying) {
         return;
@@ -2718,26 +2716,6 @@
           return;
         }
         fadeMusicTrack(track, targetVolume, 500);
-      });
-    }
-
-    function updateCurtainCallLayersByMonsters(monsterDistances) {
-      if (!curtainCallLayersPlaying) {
-        return;
-      }
-      CURTAIN_CALL_LAYERS.forEach((track, index) => {
-        const monsterDistance = monsterDistances[index];
-        const fullVolume = musicFullVolume.get(track);
-        let targetVolume = 0;
-        if (typeof monsterDistance === "number") {
-          const linearCloseness = 1 - Math.min(1, Math.max(0, monsterDistance / CURTAIN_CALL_LAYER_RANGE));
-          const closeness = Math.sqrt(linearCloseness);
-          targetVolume = fullVolume * closeness;
-        }
-        if (Math.abs(track.volume - targetVolume) < 0.01) {
-          return;
-        }
-        fadeMusicTrack(track, targetVolume, 400);
       });
     }
 
@@ -3164,13 +3142,13 @@
       "#....................#...#",
       "#....................#...#",
       "#....................#...#",
-      "#.S..............R...L.E.#",
+      "#.S..................L.E.#",
       "#....................#...#",
       "#....................#...#",
       "#....................#...#",
       "#....................#...#",
       "#.........Y..........#...#",
-      "#.....N.............P#...#",
+      "#...................P#...#",
       "#....................#...#",
       "#....................#...#",
       "##########################"
@@ -4399,12 +4377,6 @@
           }
           if (cell === "J") {
             badwater2CagedMonsters.push({ character: "heavy", x: cx, y: cy });
-          }
-          if (cell === "N") {
-            badwater2CagedMonsters.push({ character: "medic", x: cx, y: cy });
-          }
-          if (cell === "R") {
-            badwater2CagedMonsters.push({ character: "pyro", x: cx, y: cy });
           }
         });
       });
@@ -6146,8 +6118,11 @@
       if (activelyChasingPlayer || enemy.mode !== "dormant") {
         return;
       }
-      const monsterDistances = badwater2CagedMonsters.map((monster) => distance(player.x, player.y, monster.x, monster.y));
-      updateCurtainCallLayersByMonsters(monsterDistances);
+      const cagedMonster = badwater2CagedMonsters[0];
+      if (!cagedMonster) {
+        return;
+      }
+      updateCurtainCallLayers(distance(player.x, player.y, cagedMonster.x, cagedMonster.y));
     }
 
     let cameraShakeTimer = 0;
