@@ -3323,20 +3323,26 @@
     ];
 
     const MASSDRIVER_TEST_MAP = [
-      "####################",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#.S................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "#..................#",
-      "####################"
+      "########################",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#..........###.........#",
+      "#..S.......###.........#",
+      "#..........###.........#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "########################"
     ];
 
     const PYRO_LEVEL_MAP = [
@@ -4852,7 +4858,7 @@
           enemy.speed = CHARACTER_STATS.heavy.speed;
           enemy.chaseSpeed = CHARACTER_STATS.heavy.chaseSpeed;
           enemy.chargeSpeed = CHARACTER_STATS.heavy.chargeSpeed;
-          initMassdriverEye(TILE * 18.5, TILE * 7.5, Math.PI - 0.9, Math.PI + 0.9);
+          initMassdriverEye(TILE * 12.5, TILE * 10.5, TILE * 12.5, TILE * 10.5, TILE * 1.8);
         }
       } else {
         game.state = "intro";
@@ -6448,17 +6454,21 @@
     const MASSDRIVER_EYE_SWEEP_SPEED = 0.6;
     const MASSDRIVER_EYE_CONE_HALF_ANGLE = 0.26;
     const MASSDRIVER_EYE_RANGE = TILE * 16;
-    const MASSDRIVER_EYE_CATCH_DURATION = 0.5;
+    const MASSDRIVER_EYE_CATCH_DURATION = 1.5;
+    const MASSDRIVER_EYE_LOCK_TURN_SPEED = 9;
+    const MASSDRIVER_EYE_TWITCH_STRENGTH = 0.09;
+    const MASSDRIVER_EYE_TOWER_COVER_ANGLE = 0.55;
     const massdriverEye = {
       x: 0,
       y: 0,
       angle: 0,
-      sweepMin: -0.9,
-      sweepMax: 0.9,
       sweepDir: 1,
       active: true,
       caught: false,
-      catchTimer: 0
+      catchTimer: 0,
+      towerX: 0,
+      towerY: 0,
+      towerRadius: 0
     };
 
     function playMassdriverEyeCatchSting() {
@@ -6472,16 +6482,17 @@
       eyeCatchFlashEl.classList.add("pulse");
     }
 
-    function initMassdriverEye(x, y, sweepMin, sweepMax) {
+    function initMassdriverEye(x, y, towerX, towerY, towerRadius) {
       massdriverEye.x = x;
       massdriverEye.y = y;
-      massdriverEye.sweepMin = sweepMin;
-      massdriverEye.sweepMax = sweepMax;
-      massdriverEye.angle = sweepMin;
+      massdriverEye.angle = 0;
       massdriverEye.sweepDir = 1;
       massdriverEye.active = true;
       massdriverEye.caught = false;
       massdriverEye.catchTimer = 0;
+      massdriverEye.towerX = towerX;
+      massdriverEye.towerY = towerY;
+      massdriverEye.towerRadius = towerRadius;
     }
 
     function setMassdriverEyeActive(active) {
@@ -6492,22 +6503,30 @@
       }
     }
 
+    function massdriverPlayerBehindTower() {
+      const dx = player.x - massdriverEye.towerX;
+      const dy = player.y - massdriverEye.towerY;
+      const distFromTower = Math.hypot(dx, dy);
+      if (distFromTower <= massdriverEye.towerRadius + player.radius) {
+        return true;
+      }
+      const angleFromTower = Math.atan2(dy, dx);
+      const eyeToTowerAngle = Math.atan2(massdriverEye.towerY - massdriverEye.y, massdriverEye.towerX - massdriverEye.x);
+      let diff = angleFromTower - eyeToTowerAngle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      return Math.abs(diff) <= MASSDRIVER_EYE_TOWER_COVER_ANGLE;
+    }
+
     function updateMassdriverEye(dt) {
       if (activeCharacter !== "massdriver" || game.state !== "playing") {
         return;
-      }
-      massdriverEye.angle += massdriverEye.sweepDir * MASSDRIVER_EYE_SWEEP_SPEED * dt;
-      if (massdriverEye.angle >= massdriverEye.sweepMax) {
-        massdriverEye.angle = massdriverEye.sweepMax;
-        massdriverEye.sweepDir = -1;
-      } else if (massdriverEye.angle <= massdriverEye.sweepMin) {
-        massdriverEye.angle = massdriverEye.sweepMin;
-        massdriverEye.sweepDir = 1;
       }
 
       if (!massdriverEye.active) {
         massdriverEye.caught = false;
         massdriverEye.catchTimer = 0;
+        massdriverEye.angle += massdriverEye.sweepDir * MASSDRIVER_EYE_SWEEP_SPEED * dt;
         return;
       }
 
@@ -6515,25 +6534,41 @@
       const dy = player.y - massdriverEye.y;
       const dist = Math.hypot(dx, dy);
       const angleToPlayer = Math.atan2(dy, dx);
+      const behindTower = massdriverPlayerBehindTower();
+
+      if (massdriverEye.caught) {
+        let diff = angleToPlayer - massdriverEye.angle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const turn = clamp(diff, -MASSDRIVER_EYE_LOCK_TURN_SPEED * dt, MASSDRIVER_EYE_LOCK_TURN_SPEED * dt);
+        massdriverEye.angle += turn;
+
+        const stillInRange = dist <= MASSDRIVER_EYE_RANGE && !behindTower;
+        if (stillInRange) {
+          massdriverEye.catchTimer += dt;
+          if (massdriverEye.catchTimer >= MASSDRIVER_EYE_CATCH_DURATION) {
+            triggerMassdriverEyeChase();
+          }
+        } else {
+          massdriverEye.caught = false;
+          massdriverEye.catchTimer = 0;
+        }
+        return;
+      }
+
+      massdriverEye.angle += massdriverEye.sweepDir * MASSDRIVER_EYE_SWEEP_SPEED * dt;
+      massdriverEye.angle = ((massdriverEye.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
       let angleDiff = angleToPlayer - massdriverEye.angle;
       while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-      const inGaze = dist <= MASSDRIVER_EYE_RANGE && Math.abs(angleDiff) <= MASSDRIVER_EYE_CONE_HALF_ANGLE;
+      const inGaze = dist <= MASSDRIVER_EYE_RANGE && !behindTower && Math.abs(angleDiff) <= MASSDRIVER_EYE_CONE_HALF_ANGLE;
 
       if (inGaze) {
-        if (!massdriverEye.caught) {
-          massdriverEye.caught = true;
-          massdriverEye.catchTimer = 0;
-          playMassdriverEyeCatchSting();
-          flashMassdriverEyeWarning();
-        }
-        massdriverEye.catchTimer += dt;
-        if (massdriverEye.catchTimer >= MASSDRIVER_EYE_CATCH_DURATION) {
-          triggerMassdriverEyeChase();
-        }
-      } else if (massdriverEye.caught) {
-        massdriverEye.caught = false;
+        massdriverEye.caught = true;
         massdriverEye.catchTimer = 0;
+        playMassdriverEyeCatchSting();
+        flashMassdriverEyeWarning();
       }
     }
 
@@ -6554,29 +6589,44 @@
       if (activeCharacter !== "massdriver") {
         return;
       }
-      const coneColor = massdriverEye.caught ? "rgba(255, 47, 63, 0.35)" : "rgba(155, 93, 229, 0.18)";
-      const edgeColor = massdriverEye.caught ? "rgba(255, 47, 63, 0.9)" : "rgba(155, 93, 229, 0.7)";
+
       ctx.save();
+      ctx.beginPath();
+      ctx.arc(massdriverEye.towerX, massdriverEye.towerY, massdriverEye.towerRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "#0c0a12";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(155, 93, 229, 0.3)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      const jitterX = massdriverEye.caught ? (Math.random() - 0.5) * MASSDRIVER_EYE_TWITCH_STRENGTH : 0;
+      const jitterY = massdriverEye.caught ? (Math.random() - 0.5) * MASSDRIVER_EYE_TWITCH_STRENGTH : 0;
+      const drawAngle = massdriverEye.angle + jitterX;
+      const coneColor = massdriverEye.caught ? "rgba(255, 255, 255, 0.4)" : "rgba(155, 93, 229, 0.18)";
+      const edgeColor = massdriverEye.caught ? "rgba(255, 255, 255, 0.95)" : "rgba(155, 93, 229, 0.7)";
+
       ctx.beginPath();
       ctx.moveTo(massdriverEye.x, massdriverEye.y);
       ctx.arc(
         massdriverEye.x,
         massdriverEye.y,
         MASSDRIVER_EYE_RANGE,
-        massdriverEye.angle - MASSDRIVER_EYE_CONE_HALF_ANGLE,
-        massdriverEye.angle + MASSDRIVER_EYE_CONE_HALF_ANGLE
+        drawAngle - MASSDRIVER_EYE_CONE_HALF_ANGLE,
+        drawAngle + MASSDRIVER_EYE_CONE_HALF_ANGLE
       );
       ctx.closePath();
       ctx.fillStyle = massdriverEye.active ? coneColor : "rgba(120, 120, 130, 0.08)";
       ctx.fill();
 
+      const shakeX = massdriverEye.caught ? (Math.random() - 0.5) * MASSDRIVER_EYE_TWITCH_STRENGTH * 30 : 0;
+      const shakeY = massdriverEye.caught ? (Math.random() - 0.5) * MASSDRIVER_EYE_TWITCH_STRENGTH * 30 : 0;
       ctx.beginPath();
-      ctx.arc(massdriverEye.x, massdriverEye.y, 14, 0, Math.PI * 2);
+      ctx.arc(massdriverEye.x + shakeX, massdriverEye.y + shakeY, 14, 0, Math.PI * 2);
       ctx.fillStyle = massdriverEye.active ? "#1a0a20" : "#1a1a1a";
       ctx.fill();
       ctx.beginPath();
-      const pupilX = massdriverEye.x + Math.cos(massdriverEye.angle) * 5;
-      const pupilY = massdriverEye.y + Math.sin(massdriverEye.angle) * 5;
+      const pupilX = massdriverEye.x + shakeX + Math.cos(drawAngle) * 5;
+      const pupilY = massdriverEye.y + shakeY + Math.sin(drawAngle) * 5;
       ctx.arc(pupilX, pupilY, 6, 0, Math.PI * 2);
       ctx.fillStyle = massdriverEye.active ? edgeColor : "rgba(120, 120, 130, 0.6)";
       ctx.fill();
