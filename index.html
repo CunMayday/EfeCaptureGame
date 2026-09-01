@@ -2659,27 +2659,30 @@
     const CURTAIN_CALL_LAYERS = [curtainCallLayer1, curtainCallLayer2, curtainCallLayer3];
     const CURTAIN_CALL_TIER_RANGES = [288, 192, 96];
     let curtainCallLayersPlaying = false;
+    let curtainCallActiveLayerIndex = -1;
 
-    function startCurtainCallLayers() {
-      if (curtainCallLayersPlaying) {
+    function stopCurtainCallLayerTrack(track, fadeMs) {
+      if (track.paused) {
         return;
       }
-      curtainCallLayersPlaying = true;
-      CURTAIN_CALL_LAYERS.forEach((track) => {
+      if (fadeMs) {
+        fadeMusicTrack(track, 0, fadeMs, () => track.pause());
+      } else {
         const existingTimer = musicFadeTimers.get(track);
         if (existingTimer) {
           clearInterval(existingTimer);
           musicFadeTimers.delete(track);
         }
-        track.currentTime = 0;
+        track.pause();
         track.volume = 0;
-        const attemptPlay = () => track.play().catch(() => {});
-        attemptPlay();
-        setTimeout(() => {
-          if (curtainCallLayersPlaying && track.paused) {
-            attemptPlay();
-          }
-        }, 300);
+      }
+    }
+
+    function startCurtainCallLayers() {
+      curtainCallLayersPlaying = true;
+      curtainCallActiveLayerIndex = -1;
+      CURTAIN_CALL_LAYERS.forEach((track) => {
+        stopCurtainCallLayerTrack(track);
       });
     }
 
@@ -2688,35 +2691,39 @@
         return;
       }
       curtainCallLayersPlaying = false;
+      curtainCallActiveLayerIndex = -1;
       CURTAIN_CALL_LAYERS.forEach((track) => {
-        if (track.paused) {
-          return;
-        }
-        if (fadeMs) {
-          fadeMusicTrack(track, 0, fadeMs, () => track.pause());
-        } else {
-          const existingTimer = musicFadeTimers.get(track);
-          if (existingTimer) {
-            clearInterval(existingTimer);
-            musicFadeTimers.delete(track);
-          }
-          track.pause();
-        }
+        stopCurtainCallLayerTrack(track, fadeMs);
       });
+    }
+
+    function curtainCallLayerIndexForDistance(enemyDistance) {
+      const activeTierCount = CURTAIN_CALL_TIER_RANGES.filter((range) => enemyDistance <= range).length;
+      return activeTierCount - 1;
     }
 
     function updateCurtainCallLayers(enemyDistance) {
       if (!curtainCallLayersPlaying) {
         return;
       }
-      const activeTierCount = CURTAIN_CALL_TIER_RANGES.filter((range) => enemyDistance <= range).length;
-      CURTAIN_CALL_LAYERS.forEach((track, index) => {
-        const targetVolume = index < activeTierCount ? musicFullVolume.get(track) : 0;
-        if (Math.abs(track.volume - targetVolume) < 0.01) {
-          return;
+      const targetIndex = curtainCallLayerIndexForDistance(enemyDistance);
+      if (targetIndex === curtainCallActiveLayerIndex) {
+        return;
+      }
+      const previousIndex = curtainCallActiveLayerIndex;
+      curtainCallActiveLayerIndex = targetIndex;
+      if (previousIndex >= 0) {
+        stopCurtainCallLayerTrack(CURTAIN_CALL_LAYERS[previousIndex], 600);
+      }
+      if (targetIndex >= 0) {
+        const track = CURTAIN_CALL_LAYERS[targetIndex];
+        if (track.paused) {
+          track.currentTime = 0;
+          track.volume = 0;
+          track.play().catch(() => {});
         }
-        fadeMusicTrack(track, targetVolume, 500);
-      });
+        fadeMusicTrack(track, musicFullVolume.get(track), 600);
+      }
     }
 
     function playCurtainCallChase() {
