@@ -189,6 +189,16 @@
       100% { opacity: 0; }
     }
 
+    .noli-watching {
+      transition: opacity 500ms ease;
+      color: #d8bfff;
+      text-shadow: 0 0 10px rgba(155, 93, 229, 0.8), 0 0 20px rgba(155, 93, 229, 0.5);
+    }
+
+    .noli-watching.visible {
+      opacity: 1;
+    }
+
     canvas {
       display: block;
       width: min(100%, 900px);
@@ -1848,7 +1858,8 @@
         <div id="noliVisLeft" class="noli-vis-edge noli-vis-left"></div>
         <div id="noliVisRight" class="noli-vis-edge noli-vis-right"></div>
       </div>
-      <div id="noliTargetFound" class="noli-target-found">TARGET FOUND</div>
+      <div id="noliTargetFound" class="noli-target-found">FOUND YOU</div>
+      <div id="noliWatching" class="noli-target-found noli-watching">???</div>
       <img id="enemySpriteIdle" class="enemy-sprite" src="Medic_idle.gif" alt="">
       <img id="enemySpriteUp" class="enemy-sprite" src="Medic_move_u.gif" alt="">
       <img id="enemySpriteDown" class="enemy-sprite" src="Medic_move_d.gif" alt="">
@@ -2346,6 +2357,7 @@
     const noliVisLeftEl = document.getElementById("noliVisLeft");
     const noliVisRightEl = document.getElementById("noliVisRight");
     const noliTargetFoundEl = document.getElementById("noliTargetFound");
+    const noliWatchingEl = document.getElementById("noliWatching");
     const pauseMenuButton = document.getElementById("pauseMenuButton");
     const pauseMenu = document.getElementById("pauseMenu");
     const volumeSlider = document.getElementById("volumeSlider");
@@ -6406,9 +6418,11 @@
       noliSpotlight.fromX = monster.x + Math.cos(angle) * flyInDistance;
       noliSpotlight.fromY = monster.y + Math.sin(angle) * flyInDistance;
       setCameraRumble(true);
+      noliWatchingEl.classList.add("visible");
     }
 
     function deactivateNoliSpotlight() {
+      noliWatchingEl.classList.remove("visible");
       if (!noliSpotlight.active) {
         return;
       }
