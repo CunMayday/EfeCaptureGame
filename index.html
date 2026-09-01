@@ -84,6 +84,85 @@
       overflow: hidden;
     }
 
+    .noli-visualizer {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+
+    .noli-visualizer.visible {
+      opacity: 1;
+    }
+
+    .noli-vis-edge {
+      position: absolute;
+      display: flex;
+      gap: 2px;
+    }
+
+    .noli-vis-top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 26px;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 0 6px;
+    }
+
+    .noli-vis-bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 26px;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 6px;
+    }
+
+    .noli-vis-left {
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 26px;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 6px 0;
+    }
+
+    .noli-vis-right {
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 26px;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 6px 0;
+    }
+
+    .noli-vis-bar {
+      background: linear-gradient(180deg, #e6d9ff 0%, #9b5de5 55%, #17081f 100%);
+      box-shadow: 0 0 6px rgba(155, 93, 229, 0.7);
+      flex: 0 0 auto;
+    }
+
+    .noli-vis-top .noli-vis-bar,
+    .noli-vis-bottom .noli-vis-bar {
+      width: 3px;
+      min-height: 2px;
+    }
+
+    .noli-vis-left .noli-vis-bar,
+    .noli-vis-right .noli-vis-bar {
+      height: 3px;
+      min-width: 2px;
+    }
+
     canvas {
       display: block;
       width: min(100%, 900px);
@@ -1737,6 +1816,12 @@
   <main class="shell">
     <section class="panel viewport">
       <canvas id="game" width="480" height="320" aria-label="Top-down game view"></canvas>
+      <div id="noliVisualizer" class="noli-visualizer">
+        <div id="noliVisTop" class="noli-vis-edge noli-vis-top"></div>
+        <div id="noliVisBottom" class="noli-vis-edge noli-vis-bottom"></div>
+        <div id="noliVisLeft" class="noli-vis-edge noli-vis-left"></div>
+        <div id="noliVisRight" class="noli-vis-edge noli-vis-right"></div>
+      </div>
       <img id="enemySpriteIdle" class="enemy-sprite" src="Medic_idle.gif" alt="">
       <img id="enemySpriteUp" class="enemy-sprite" src="Medic_move_u.gif" alt="">
       <img id="enemySpriteDown" class="enemy-sprite" src="Medic_move_d.gif" alt="">
@@ -2228,6 +2313,11 @@
     const titleVideoB = document.getElementById("titleVideoB");
     const startButton = document.getElementById("startButton");
     const hudOverlayEl = document.getElementById("hudOverlay");
+    const noliVisualizerEl = document.getElementById("noliVisualizer");
+    const noliVisTopEl = document.getElementById("noliVisTop");
+    const noliVisBottomEl = document.getElementById("noliVisBottom");
+    const noliVisLeftEl = document.getElementById("noliVisLeft");
+    const noliVisRightEl = document.getElementById("noliVisRight");
     const pauseMenuButton = document.getElementById("pauseMenuButton");
     const pauseMenu = document.getElementById("pauseMenu");
     const volumeSlider = document.getElementById("volumeSlider");
@@ -7111,6 +7201,7 @@
         updateCallSignIcon();
         updateObjectiveNoiseIcon(dt);
         updateHud();
+        updateNoliVisualizer();
       }
       requestAnimationFrame(loop);
     }
@@ -7160,6 +7251,101 @@
       }
     });
 
+    const curtainCallAnalysers = new Map();
+    let curtainCallAnalysersReady = false;
+    function setupCurtainCallAnalysers() {
+      if (curtainCallAnalysersReady || !audioContext || audioContext.state !== "running") {
+        return;
+      }
+      curtainCallAnalysersReady = true;
+      [...CURTAIN_CALL_LAYERS, curtainCallChase].forEach((track) => {
+        try {
+          const source = audioContext.createMediaElementSource(track);
+          const analyser = audioContext.createAnalyser();
+          analyser.fftSize = 64;
+          analyser.smoothingTimeConstant = 0.75;
+          source.connect(analyser);
+          analyser.connect(audioContext.destination);
+          curtainCallAnalysers.set(track, analyser);
+        } catch (err) {
+          curtainCallAnalysersReady = false;
+        }
+      });
+    }
+
+    const NOLI_VIS_BAR_COUNT = 24;
+    const noliVisBars = { top: [], bottom: [], left: [], right: [] };
+    function buildNoliVisBars(containerEl, list) {
+      for (let i = 0; i < NOLI_VIS_BAR_COUNT; i += 1) {
+        const bar = document.createElement("div");
+        bar.className = "noli-vis-bar";
+        containerEl.appendChild(bar);
+        list.push(bar);
+      }
+    }
+    buildNoliVisBars(noliVisTopEl, noliVisBars.top);
+    buildNoliVisBars(noliVisBottomEl, noliVisBars.bottom);
+    buildNoliVisBars(noliVisLeftEl, noliVisBars.left);
+    buildNoliVisBars(noliVisRightEl, noliVisBars.right);
+
+    let noliVisVisible = false;
+    const noliVisFreqData = new Uint8Array(32);
+    const NOLI_VIS_SHAKE_THRESHOLD = 210;
+
+    function currentCurtainCallTrack() {
+      if (activeCharacter !== "badwater2") {
+        return null;
+      }
+      if (!curtainCallChase.paused && curtainCallChase.volume > 0.02) {
+        return curtainCallChase;
+      }
+      if (curtainCallActiveLayerIndex >= 0) {
+        const track = CURTAIN_CALL_LAYERS[curtainCallActiveLayerIndex];
+        if (!track.paused && track.volume > 0.02) {
+          return track;
+        }
+      }
+      return null;
+    }
+
+    function updateNoliVisualizer() {
+      const track = currentCurtainCallTrack();
+      const shouldShow = !!track;
+      if (shouldShow !== noliVisVisible) {
+        noliVisVisible = shouldShow;
+        noliVisualizerEl.classList.toggle("visible", shouldShow);
+      }
+      if (!shouldShow) {
+        return;
+      }
+
+      const analyser = curtainCallAnalysers.get(track);
+      if (!analyser) {
+        return;
+      }
+      analyser.getByteFrequencyData(noliVisFreqData);
+
+      let peak = 0;
+      const applyToEdge = (list) => {
+        list.forEach((bar, i) => {
+          const binIndex = Math.floor((i / list.length) * noliVisFreqData.length);
+          const value = noliVisFreqData[binIndex];
+          peak = Math.max(peak, value);
+          const size = 3 + (value / 255) * 21;
+          bar.style.height = `${size}px`;
+          bar.style.width = `${size}px`;
+        });
+      };
+      applyToEdge(noliVisBars.top);
+      applyToEdge(noliVisBars.bottom);
+      applyToEdge(noliVisBars.left);
+      applyToEdge(noliVisBars.right);
+
+      if (peak >= NOLI_VIS_SHAKE_THRESHOLD) {
+        startCameraShake(120);
+      }
+    }
+
     let audioUnlocked = false;
     function unlockAudioPlayback() {
       if (audioUnlocked) {
@@ -7167,7 +7353,9 @@
       }
       audioUnlocked = true;
       if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume().catch(() => {});
+        audioContext.resume().then(setupCurtainCallAnalysers).catch(() => {});
+      } else if (audioContext && audioContext.state === "running") {
+        setupCurtainCallAnalysers();
       }
       if (!gameStarted) {
         playMenuMusic();
