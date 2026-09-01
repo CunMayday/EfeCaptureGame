@@ -280,6 +280,26 @@
       100% { opacity: 0; }
     }
 
+    .eye-catch-flash {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: radial-gradient(circle, rgba(255, 47, 63, 0) 40%, rgba(255, 47, 63, 0.55) 100%);
+      z-index: 9;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .eye-catch-flash.pulse {
+      display: block;
+      animation: eye-catch-flash-pulse 500ms ease-out forwards;
+    }
+
+    @keyframes eye-catch-flash-pulse {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
     .alarm-vignette {
       position: absolute;
       inset: 14px;
@@ -1892,6 +1912,7 @@
       <img id="keycardPickupIcon" class="keycard-pickup-icon hidden" src="78px-Cf_keycard_icon.png" alt="">
       <div id="deathScreen" class="death-screen"></div>
       <div id="deathFlash" class="death-flash"></div>
+      <div id="eyeCatchFlash" class="eye-catch-flash"></div>
       <div id="alarmFlash" class="alarm-vignette"></div>
       <img id="distortionFx" class="distortion-fx" src="120px-Engie_distortion.gif" alt="">
       <div id="glitchOverlay" class="glitch-overlay">
@@ -2340,6 +2361,7 @@
     const jumpscare = document.getElementById("jumpscare");
     const deathScreen = document.getElementById("deathScreen");
     const deathFlash = document.getElementById("deathFlash");
+    const eyeCatchFlashEl = document.getElementById("eyeCatchFlash");
     const alarmFlashEl = document.getElementById("alarmFlash");
     const distortionFxEl = document.getElementById("distortionFx");
     const jumpscareVideo = document.getElementById("jumpscareVideo");
@@ -3025,7 +3047,9 @@
     engieDistortionSound.loop = true;
     const whiteFlashSound = new Audio("half-life-2-white-flash-noise.mp3");
     whiteFlashSound.volume = 0.7;
-    [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound].forEach((sound) => {
+    const eyeCatchStingSound = new Audio("Heavy_alert_1.wav");
+    eyeCatchStingSound.volume = 0.8;
+    [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound, eyeCatchStingSound].forEach((sound) => {
       sound.preload = "auto";
       sound.load();
     });
@@ -3296,6 +3320,23 @@
       "##.......#..............XXXXXXXXX#",
       "##########..............XXXXXXXXX#",
       "##################################"
+    ];
+
+    const MASSDRIVER_TEST_MAP = [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#.S................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
     ];
 
     const PYRO_LEVEL_MAP = [
@@ -4468,7 +4509,7 @@
     }
 
     function buildMap() {
-      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : (activeCharacter === "badwater2" ? BADWATER2_LEVEL_MAP : ((activeCharacter === "heavy" || activeCharacter === "soldier") ? HEAVY_LEVEL_MAP : LEVEL_MAP));
+      MAP = activeCharacter === "pyro" ? PYRO_LEVEL_MAP : (activeCharacter === "badwater2" ? BADWATER2_LEVEL_MAP : (activeCharacter === "massdriver" ? MASSDRIVER_TEST_MAP : ((activeCharacter === "heavy" || activeCharacter === "soldier") ? HEAVY_LEVEL_MAP : LEVEL_MAP)));
       world.width = MAP[0].length * TILE;
       world.height = MAP.length * TILE;
       solids.length = 0;
@@ -4744,11 +4785,11 @@
 
       resetPyroState();
 
-      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier" || activeCharacter === "badwater2") {
+      if (activeCharacter === "heavy" || activeCharacter === "pyro" || activeCharacter === "soldier" || activeCharacter === "badwater2" || activeCharacter === "massdriver") {
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
-        const enemySpawnTarget = activeCharacter === "badwater2" ? (badwater2HeavySpawn || { x: TILE * 17.5, y: TILE * 12.5 }) : { x: TILE * 26, y: TILE * 18 };
+        const enemySpawnTarget = activeCharacter === "badwater2" ? (badwater2HeavySpawn || { x: TILE * 17.5, y: TILE * 12.5 }) : (activeCharacter === "massdriver" ? { x: TILE * 10.5, y: TILE * 7.5 } : { x: TILE * 26, y: TILE * 18 });
         const safeEnemySpawn = findNearestOpenPosition(enemySpawnTarget.x, enemySpawnTarget.y, enemy.radius);
         enemy.x = safeEnemySpawn.x;
         enemy.y = safeEnemySpawn.y;
@@ -4804,6 +4845,14 @@
           pauseCurtainCallChase();
           startCurtainCallLayers();
           deactivateNoliSpotlight();
+        }
+        if (activeCharacter === "massdriver") {
+          enemy.mode = "hidden";
+          enemy.archetype = "heavy";
+          enemy.speed = CHARACTER_STATS.heavy.speed;
+          enemy.chaseSpeed = CHARACTER_STATS.heavy.chaseSpeed;
+          enemy.chargeSpeed = CHARACTER_STATS.heavy.chargeSpeed;
+          initMassdriverEye(TILE * 18.5, TILE * 7.5, Math.PI - 0.9, Math.PI + 0.9);
         }
       } else {
         game.state = "intro";
@@ -5795,6 +5844,9 @@
         pauseCurtainCallChase();
         deactivateNoliSpotlight();
       }
+      if (activeCharacter === "massdriver") {
+        setMassdriverEyeActive(false);
+      }
       syncEnemyWalkAudio(0, true);
       if (activeCharacter === "pyro") {
         clearPyroInstances();
@@ -6393,6 +6445,144 @@
       }
     }
 
+    const MASSDRIVER_EYE_SWEEP_SPEED = 0.6;
+    const MASSDRIVER_EYE_CONE_HALF_ANGLE = 0.26;
+    const MASSDRIVER_EYE_RANGE = TILE * 16;
+    const MASSDRIVER_EYE_CATCH_DURATION = 0.5;
+    const massdriverEye = {
+      x: 0,
+      y: 0,
+      angle: 0,
+      sweepMin: -0.9,
+      sweepMax: 0.9,
+      sweepDir: 1,
+      active: true,
+      caught: false,
+      catchTimer: 0
+    };
+
+    function playMassdriverEyeCatchSting() {
+      eyeCatchStingSound.currentTime = 0;
+      eyeCatchStingSound.play().catch(() => {});
+    }
+
+    function flashMassdriverEyeWarning() {
+      eyeCatchFlashEl.classList.remove("pulse");
+      void eyeCatchFlashEl.offsetWidth;
+      eyeCatchFlashEl.classList.add("pulse");
+    }
+
+    function initMassdriverEye(x, y, sweepMin, sweepMax) {
+      massdriverEye.x = x;
+      massdriverEye.y = y;
+      massdriverEye.sweepMin = sweepMin;
+      massdriverEye.sweepMax = sweepMax;
+      massdriverEye.angle = sweepMin;
+      massdriverEye.sweepDir = 1;
+      massdriverEye.active = true;
+      massdriverEye.caught = false;
+      massdriverEye.catchTimer = 0;
+    }
+
+    function setMassdriverEyeActive(active) {
+      massdriverEye.active = active;
+      if (!active) {
+        massdriverEye.caught = false;
+        massdriverEye.catchTimer = 0;
+      }
+    }
+
+    function updateMassdriverEye(dt) {
+      if (activeCharacter !== "massdriver" || game.state !== "playing") {
+        return;
+      }
+      massdriverEye.angle += massdriverEye.sweepDir * MASSDRIVER_EYE_SWEEP_SPEED * dt;
+      if (massdriverEye.angle >= massdriverEye.sweepMax) {
+        massdriverEye.angle = massdriverEye.sweepMax;
+        massdriverEye.sweepDir = -1;
+      } else if (massdriverEye.angle <= massdriverEye.sweepMin) {
+        massdriverEye.angle = massdriverEye.sweepMin;
+        massdriverEye.sweepDir = 1;
+      }
+
+      if (!massdriverEye.active) {
+        massdriverEye.caught = false;
+        massdriverEye.catchTimer = 0;
+        return;
+      }
+
+      const dx = player.x - massdriverEye.x;
+      const dy = player.y - massdriverEye.y;
+      const dist = Math.hypot(dx, dy);
+      const angleToPlayer = Math.atan2(dy, dx);
+      let angleDiff = angleToPlayer - massdriverEye.angle;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+      const inGaze = dist <= MASSDRIVER_EYE_RANGE && Math.abs(angleDiff) <= MASSDRIVER_EYE_CONE_HALF_ANGLE;
+
+      if (inGaze) {
+        if (!massdriverEye.caught) {
+          massdriverEye.caught = true;
+          massdriverEye.catchTimer = 0;
+          playMassdriverEyeCatchSting();
+          flashMassdriverEyeWarning();
+        }
+        massdriverEye.catchTimer += dt;
+        if (massdriverEye.catchTimer >= MASSDRIVER_EYE_CATCH_DURATION) {
+          triggerMassdriverEyeChase();
+        }
+      } else if (massdriverEye.caught) {
+        massdriverEye.caught = false;
+        massdriverEye.catchTimer = 0;
+      }
+    }
+
+    function triggerMassdriverEyeChase() {
+      massdriverEye.caught = false;
+      massdriverEye.catchTimer = 0;
+      if (enemy.mode !== "chase") {
+        enemy.mode = "chase";
+        enemy.isLured = false;
+        enemy.chasingBySound = false;
+        enemy.lastKnownX = player.x;
+        enemy.lastKnownY = player.y;
+        enemy.alertTimer = Math.max(enemy.alertTimer, 3.2);
+      }
+    }
+
+    function drawMassdriverEye() {
+      if (activeCharacter !== "massdriver") {
+        return;
+      }
+      const coneColor = massdriverEye.caught ? "rgba(255, 47, 63, 0.35)" : "rgba(155, 93, 229, 0.18)";
+      const edgeColor = massdriverEye.caught ? "rgba(255, 47, 63, 0.9)" : "rgba(155, 93, 229, 0.7)";
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(massdriverEye.x, massdriverEye.y);
+      ctx.arc(
+        massdriverEye.x,
+        massdriverEye.y,
+        MASSDRIVER_EYE_RANGE,
+        massdriverEye.angle - MASSDRIVER_EYE_CONE_HALF_ANGLE,
+        massdriverEye.angle + MASSDRIVER_EYE_CONE_HALF_ANGLE
+      );
+      ctx.closePath();
+      ctx.fillStyle = massdriverEye.active ? coneColor : "rgba(120, 120, 130, 0.08)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(massdriverEye.x, massdriverEye.y, 14, 0, Math.PI * 2);
+      ctx.fillStyle = massdriverEye.active ? "#1a0a20" : "#1a1a1a";
+      ctx.fill();
+      ctx.beginPath();
+      const pupilX = massdriverEye.x + Math.cos(massdriverEye.angle) * 5;
+      const pupilY = massdriverEye.y + Math.sin(massdriverEye.angle) * 5;
+      ctx.arc(pupilX, pupilY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = massdriverEye.active ? edgeColor : "rgba(120, 120, 130, 0.6)";
+      ctx.fill();
+      ctx.restore();
+    }
+
     const NOLI_SPOTLIGHT_FLY_IN_MS = 500;
     const NOLI_SPOTLIGHT_FADE_MS = 500;
     const noliSpotlight = {
@@ -6872,6 +7062,7 @@
       drawIntroScene();
       drawPyroScene();
       drawBadwater2Scene();
+      drawMassdriverEye();
 
       for (const item of interactables) {
         ctx.beginPath();
@@ -7067,6 +7258,10 @@
       if (activeCharacter === "badwater2") {
         drawEnemyEntitySprite(dt, enemy, ENEMY_SPRITE_POOLS.heavy, "heavy", keepVisibleEls);
         drawEnemyEntitySprite(dt, enemy2, ENEMY_SPRITE_POOLS.soldier, "soldier", keepVisibleEls);
+      } else if (activeCharacter === "massdriver") {
+        if (enemy.mode === "chase") {
+          drawEnemyEntitySprite(dt, enemy, ENEMY_SPRITE_POOLS.heavy, "heavy", keepVisibleEls);
+        }
       } else {
         const pool = ENEMY_SPRITE_POOLS[activeCharacter] || ENEMY_SPRITE_POOLS.medic;
         drawEnemyEntitySprite(dt, enemy, pool, activeCharacter, keepVisibleEls);
@@ -7513,6 +7708,11 @@
         updatePlayer(dt);
         if (activeCharacter === "pyro") {
           updatePyro(dt);
+        } else if (activeCharacter === "massdriver") {
+          updateMassdriverEye(dt);
+          if (enemy.mode === "chase") {
+            updateEnemyEntity(dt, enemy, true);
+          }
         } else {
           updateEnemy(dt);
           if (activeCharacter === "soldier") {
@@ -8119,7 +8319,7 @@
       }
       devConsoleLog("> " + raw);
       if (command === "?cmnds") {
-        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /bw2status /bw2free /invincible /invisible /close");
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /testmassdriver /bw2status /bw2free /invincible /invisible /close");
         playDevConsoleResultSound(true);
         return;
       }
@@ -8147,6 +8347,33 @@
         resetGame();
         gameStarted = true;
         devConsoleLog("loading badwater2 test level.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/testmassdriver") {
+        devConsoleLog("Mass Driver test scenarios:", "ok");
+        devConsoleLog("  /testmassdriver eye - the watching eye (sweep, catch, chase)", "ok");
+        devConsoleLog("type one of the above to load it.", "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/testmassdriver eye") {
+        closeDevConsole();
+        activeCharacter = "massdriver";
+        titleScreen.classList.add("hidden");
+        characterSelect.classList.add("hidden");
+        corruptedReadyRoom.classList.add("hidden");
+        titleBgLayer.classList.add("hidden");
+        achievementsButton.classList.add("hidden");
+        settingsButton.classList.add("hidden");
+        overlay.classList.remove("visible");
+        pauseMenuMusic(600);
+        pauseBadwater2Music(600);
+        pauseAmbientMusic(600);
+        pauseChaseMusic(600);
+        resetGame();
+        gameStarted = true;
+        devConsoleLog("loading mass driver: the eye test scenario.", "ok");
         playDevConsoleResultSound(true);
         return;
       }
@@ -8331,6 +8558,7 @@
       stopCurtainCallLayers(800);
       pauseCurtainCallChase(800);
       deactivateNoliSpotlight();
+      setMassdriverEyeActive(false);
       syncEnemyWalkAudio(0, true);
       jumpscare.classList.remove("visible");
       deathScreen.classList.remove("visible");
