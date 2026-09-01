@@ -7201,7 +7201,7 @@
         updateCallSignIcon();
         updateObjectiveNoiseIcon(dt);
         updateHud();
-        updateNoliVisualizer();
+        updateNoliVisualizer(dt);
       }
       requestAnimationFrame(loop);
     }
@@ -7251,28 +7251,6 @@
       }
     });
 
-    const curtainCallAnalysers = new Map();
-    let curtainCallAnalysersReady = false;
-    function setupCurtainCallAnalysers() {
-      if (curtainCallAnalysersReady || !audioContext || audioContext.state !== "running") {
-        return;
-      }
-      curtainCallAnalysersReady = true;
-      [...CURTAIN_CALL_LAYERS, curtainCallChase].forEach((track) => {
-        try {
-          const source = audioContext.createMediaElementSource(track);
-          const analyser = audioContext.createAnalyser();
-          analyser.fftSize = 64;
-          analyser.smoothingTimeConstant = 0.75;
-          source.connect(analyser);
-          analyser.connect(audioContext.destination);
-          curtainCallAnalysers.set(track, analyser);
-        } catch (err) {
-          curtainCallAnalysersReady = false;
-        }
-      });
-    }
-
     const NOLI_VIS_BAR_COUNT = 24;
     const noliVisBars = { top: [], bottom: [], left: [], right: [] };
     function buildNoliVisBars(containerEl, list) {
@@ -7289,28 +7267,28 @@
     buildNoliVisBars(noliVisRightEl, noliVisBars.right);
 
     let noliVisVisible = false;
-    const noliVisFreqData = new Uint8Array(32);
-    const NOLI_VIS_SHAKE_THRESHOLD = 210;
+    let noliVisClock = 0;
+    const NOLI_VIS_SHAKE_CHANCE = 0.02;
 
-    function currentCurtainCallTrack() {
+    function currentCurtainCallState() {
       if (activeCharacter !== "badwater2") {
         return null;
       }
       if (!curtainCallChase.paused && curtainCallChase.volume > 0.02) {
-        return curtainCallChase;
+        return { intensity: 1, speed: 2.4 };
       }
       if (curtainCallActiveLayerIndex >= 0) {
         const track = CURTAIN_CALL_LAYERS[curtainCallActiveLayerIndex];
         if (!track.paused && track.volume > 0.02) {
-          return track;
+          return { intensity: 0.35 + curtainCallActiveLayerIndex * 0.2, speed: 1.1 + curtainCallActiveLayerIndex * 0.4 };
         }
       }
       return null;
     }
 
-    function updateNoliVisualizer() {
-      const track = currentCurtainCallTrack();
-      const shouldShow = !!track;
+    function updateNoliVisualizer(dt) {
+      const state = currentCurtainCallState();
+      const shouldShow = !!state;
       if (shouldShow !== noliVisVisible) {
         noliVisVisible = shouldShow;
         noliVisualizerEl.classList.toggle("visible", shouldShow);
@@ -7319,29 +7297,26 @@
         return;
       }
 
-      const analyser = curtainCallAnalysers.get(track);
-      if (!analyser) {
-        return;
-      }
-      analyser.getByteFrequencyData(noliVisFreqData);
-
+      noliVisClock += (dt || 0.016) * state.speed;
       let peak = 0;
-      const applyToEdge = (list) => {
+      const applyToEdge = (list, edgeOffset) => {
         list.forEach((bar, i) => {
-          const binIndex = Math.floor((i / list.length) * noliVisFreqData.length);
-          const value = noliVisFreqData[binIndex];
+          const phase = noliVisClock + i * 0.5 + edgeOffset;
+          const wave = (Math.sin(phase) + Math.sin(phase * 1.9 + 1.3) * 0.6 + 1.6) / 3.2;
+          const jitter = Math.random() * 0.25;
+          const value = Math.max(0, Math.min(1, wave * state.intensity + jitter * state.intensity));
           peak = Math.max(peak, value);
-          const size = 3 + (value / 255) * 21;
+          const size = 3 + value * 21;
           bar.style.height = `${size}px`;
           bar.style.width = `${size}px`;
         });
       };
-      applyToEdge(noliVisBars.top);
-      applyToEdge(noliVisBars.bottom);
-      applyToEdge(noliVisBars.left);
-      applyToEdge(noliVisBars.right);
+      applyToEdge(noliVisBars.top, 0);
+      applyToEdge(noliVisBars.bottom, 1.5);
+      applyToEdge(noliVisBars.left, 3);
+      applyToEdge(noliVisBars.right, 4.5);
 
-      if (peak >= NOLI_VIS_SHAKE_THRESHOLD) {
+      if (peak >= 0.92 || (state.intensity >= 1 && Math.random() < NOLI_VIS_SHAKE_CHANCE)) {
         startCameraShake(120);
       }
     }
@@ -7353,9 +7328,7 @@
       }
       audioUnlocked = true;
       if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume().then(setupCurtainCallAnalysers).catch(() => {});
-      } else if (audioContext && audioContext.state === "running") {
-        setupCurtainCallAnalysers();
+        audioContext.resume().catch(() => {});
       }
       if (!gameStarted) {
         playMenuMusic();
