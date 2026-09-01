@@ -2713,13 +2713,16 @@
       const previousIndex = curtainCallActiveLayerIndex;
       curtainCallActiveLayerIndex = targetIndex;
       if (previousIndex >= 0) {
-        stopCurtainCallLayerTrack(CURTAIN_CALL_LAYERS[previousIndex]);
+        stopCurtainCallLayerTrack(CURTAIN_CALL_LAYERS[previousIndex], 200);
       }
       if (targetIndex >= 0) {
         const track = CURTAIN_CALL_LAYERS[targetIndex];
-        track.currentTime = 0;
-        track.volume = musicFullVolume.get(track);
-        track.play().catch(() => {});
+        if (track.paused) {
+          track.currentTime = 0;
+          track.volume = 0;
+          track.play().catch(() => {});
+        }
+        fadeMusicTrack(track, musicFullVolume.get(track), 200);
       }
     }
 
