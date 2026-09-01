@@ -4090,7 +4090,7 @@
         shadow.repathTimer = Math.max(0, shadow.repathTimer - dt);
         shadow.emergeCooldown = Math.max(0, (shadow.emergeCooldown || 0) - dt);
         const distToPlayer = distance(shadow.x, shadow.y, player.x, player.y);
-        const seesPlayer = distToPlayer < PYRO_SHADOW_SIGHT_DISTANCE && hasLineOfSight(shadow.x, shadow.y, player.x, player.y);
+        const seesPlayer = !devInvisible && distToPlayer < PYRO_SHADOW_SIGHT_DISTANCE && hasLineOfSight(shadow.x, shadow.y, player.x, player.y);
 
         if (shadow.emergeCooldown > 0) {
           shadow.mode = "patrol";
@@ -4924,7 +4924,7 @@
     }
 
     function alertEnemyToSound(x, y) {
-      if (game.state !== "playing") {
+      if (game.state !== "playing" || devInvisible) {
         return;
       }
       if (activeCharacter === "badwater2") {
@@ -5767,6 +5767,7 @@
 
     let lastDeathCause = null;
     let devInvincible = false;
+    let devInvisible = false;
 
     function triggerPlayerDeath(cause) {
       if (game.state === "dead" || devInvincible) {
@@ -6018,7 +6019,7 @@
       enemy.lastKnownX = player.x;
       enemy.lastKnownY = player.y;
 
-      if (!enemy.isCharging && distToPlayer <= SOLDIER_AGGRO_RANGE && hasLineOfSight(enemy.x, enemy.y, player.x, player.y)) {
+      if (!devInvisible && !enemy.isCharging && distToPlayer <= SOLDIER_AGGRO_RANGE && hasLineOfSight(enemy.x, enemy.y, player.x, player.y)) {
         enemy.isCharging = true;
         enemy.chargeRampSpeed = SOLDIER_BURST_SPEED + soldierLockdownSpeedBonus;
         playSoldierAggSound();
@@ -6131,7 +6132,7 @@
       const distToPlayer = distance(entity.x, entity.y, player.x, player.y);
       const soundLureLocked = entity.soundLureLockTimer > 0;
       entity.soundLureLockTimer = Math.max(0, entity.soundLureLockTimer - dt);
-      const seesPlayer = !soundLureLocked && distToPlayer < sightDistance && hasLineOfSight(entity.x, entity.y, player.x, player.y);
+      const seesPlayer = !devInvisible && !soundLureLocked && distToPlayer < sightDistance && hasLineOfSight(entity.x, entity.y, player.x, player.y);
       entity.spotSoundCooldown = Math.max(0, entity.spotSoundCooldown - dt);
 
       if (entity.loseTargetSoundTimer > 0) {
@@ -6143,7 +6144,7 @@
 
       const playerIsMoving = player.moveX !== 0 || player.moveY !== 0;
       const noiseRadius = player.isSprinting ? enemyHearRadius : enemyHearRadius * 0.55;
-      const heardPlayer = !isHeavy && !soundLureLocked && playerIsMoving && distToPlayer < noiseRadius && hasLineOfSight(entity.x, entity.y, player.x, player.y);
+      const heardPlayer = !devInvisible && !isHeavy && !soundLureLocked && playerIsMoving && distToPlayer < noiseRadius && hasLineOfSight(entity.x, entity.y, player.x, player.y);
 
       if (seesPlayer) {
         if ((!entity.hadSightLastFrame && entity.mode !== "chase") || entity.isLured) {
@@ -8104,7 +8105,7 @@
       }
       devConsoleLog("> " + raw);
       if (command === "?cmnds") {
-        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /bw2status /bw2free /invincible /close");
+        devConsoleLog("Available: /ulockheavy /ulockmedic /ulockpyro /ulocksoldier /ulockpwr /ulockall /playcutscene /testbadwater2 /bw2status /bw2free /invincible /invisible /close");
         playDevConsoleResultSound(true);
         return;
       }
@@ -8155,6 +8156,12 @@
       if (command === "/invincible") {
         devInvincible = !devInvincible;
         devConsoleLog(`invincibility ${devInvincible ? "on" : "off"}.`, "ok");
+        playDevConsoleResultSound(true);
+        return;
+      }
+      if (command === "/invisible") {
+        devInvisible = !devInvisible;
+        devConsoleLog(`invisibility ${devInvisible ? "on" : "off"}.`, "ok");
         playDevConsoleResultSound(true);
         return;
       }
