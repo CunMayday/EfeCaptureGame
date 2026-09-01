@@ -2778,6 +2778,7 @@
     const CURTAIN_CALL_TIER_RANGES = [288, 192, 96];
     let curtainCallLayersPlaying = false;
     let curtainCallActiveLayerIndex = -1;
+    let curtainCallChasingLastFrame = false;
 
     function stopCurtainCallLayerTrack(track, fadeMs) {
       if (track.paused) {
@@ -3257,26 +3258,32 @@
     ];
 
     const BADWATER2_LEVEL_MAP = [
-      "##########################",
-      "#....................#...#",
-      "#....................#...#",
-      "#....P......J........#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#.S..................L.E.#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "#.........Y..........#...#",
-      "#...................P#...#",
-      "#....................#...#",
-      "#....................#...#",
-      "##########################"
+      "##################################",
+      "##########..............##########",
+      "##.......#..............#.......##",
+      "##.......#..............#.......##",
+      "##.......#..............#.......##",
+      "##...S......................W...##",
+      "##.......#..............#.......##",
+      "##.......#..............#.......##",
+      "##.......#..............#.......##",
+      "##########..............##########",
+      "#................................#",
+      "#................................#",
+      "#................................#",
+      "#.......P........N.......P.......#",
+      "#................................#",
+      "#................................#",
+      "##########..............XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##...E..................XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##.......#..............XXXXXXXXX#",
+      "##########..............XXXXXXXXX#",
+      "##################################"
     ];
 
     const PYRO_LEVEL_MAP = [
@@ -3453,7 +3460,54 @@
       deliberatelyIdle: false,
       stunTimer: 0,
       isCharging: false,
-      chargeRampSpeed: 0
+      chargeRampSpeed: 0,
+      archetype: null,
+      idleLoseTargetCooldown: 12
+    };
+
+    const enemy2 = {
+      x: 0,
+      y: 0,
+      radius: 9,
+      speed: 76,
+      chaseSpeed: 128,
+      chargeSpeed: 210,
+      chasingBySound: false,
+      soundLureLockTimer: 0,
+      isLured: false,
+      loseTargetSoundTimer: 0,
+      mode: "dormant",
+      alertTimer: 0,
+      patrolIndex: 0,
+      patrolPoints: [],
+      lastKnownX: 0,
+      lastKnownY: 0,
+      path: [],
+      pathIndex: 0,
+      repathTimer: 0,
+      targetKey: "",
+      facing: "down",
+      moveX: 0,
+      moveY: 1,
+      stuckTimer: 0,
+      hadSightLastFrame: false,
+      spotSoundCooldown: 0,
+      wasChasing: false,
+      footstepTimer: 0,
+      footstepVolume: 0,
+      nextFootstepIndex: 0,
+      lightBrightness: 0.3,
+      patrolIdleTimer: 0,
+      patrolIdleCooldown: 6 + Math.random() * 8,
+      spriteIsMoving: false,
+      idleHoldTimer: 0,
+      investigateArrived: false,
+      deliberatelyIdle: false,
+      stunTimer: 0,
+      isCharging: false,
+      chargeRampSpeed: 0,
+      archetype: null,
+      idleLoseTargetCooldown: 12
     };
 
     const pyroLayerEl = document.getElementById("pyroLayer");
@@ -4381,6 +4435,8 @@
     const badwater2CagedMonsters = [];
     let badwater2Keycard = null;
     let badwater2Door = null;
+    let badwater2HeavySpawn = null;
+    let badwater2SoldierSpawn = null;
     const pyroDebris = [];
     const pyroRooms = [];
     const PYRO_RUN_TIME_LIMIT = 60;
@@ -4414,6 +4470,8 @@
       badwater2CagedMonsters.length = 0;
       badwater2Keycard = null;
       badwater2Door = null;
+      badwater2HeavySpawn = null;
+      badwater2SoldierSpawn = null;
       const doorTiles = [];
       const medicDoorTiles = [];
       const keycardDoorTilesByRow = new Map();
@@ -4503,6 +4561,12 @@
           if (cell === "J") {
             badwater2CagedMonsters.push({ character: "heavy", x: cx, y: cy });
           }
+          if (cell === "N") {
+            badwater2HeavySpawn = { x: cx, y: cy };
+          }
+          if (cell === "W") {
+            badwater2SoldierSpawn = { x: cx, y: cy };
+          }
         });
       });
 
@@ -4557,10 +4621,16 @@
         ];
       } else if (activeCharacter === "badwater2") {
         enemy.patrolPoints = [
-          { x: TILE * 22.5, y: TILE * 2.5 },
-          { x: TILE * 23.5, y: TILE * 9.5 },
-          { x: TILE * 22.5, y: TILE * 16.5 },
-          { x: TILE * 24.5, y: TILE * 10.5 }
+          { x: TILE * 10.5, y: TILE * 12.5 },
+          { x: TILE * 17.5, y: TILE * 10.5 },
+          { x: TILE * 24.5, y: TILE * 12.5 },
+          { x: TILE * 17.5, y: TILE * 14.5 }
+        ];
+        enemy2.patrolPoints = [
+          { x: TILE * 26.5, y: TILE * 3.5 },
+          { x: TILE * 30.5, y: TILE * 3.5 },
+          { x: TILE * 30.5, y: TILE * 7.5 },
+          { x: TILE * 26.5, y: TILE * 7.5 }
         ];
       } else {
         enemy.patrolPoints = [
@@ -4595,6 +4665,7 @@
       soldier: { speed: 58, chaseSpeed: 100, chargeSpeed: 900 },
       badwater2: { speed: 76, chaseSpeed: 130, chargeSpeed: 200 }
     };
+    const BADWATER2_SOLDIER_STATS = { speed: 70, chaseSpeed: 140, chargeSpeed: 190 };
 
     const SOLDIER_AGGRO_RANGE = 140;
     const SOLDIER_BURST_SPEED = TILE * 9;
@@ -4665,7 +4736,7 @@
         const safePlayerSpawn = findNearestOpenPosition(spawnPoint.x, spawnPoint.y, player.radius);
         player.x = safePlayerSpawn.x;
         player.y = safePlayerSpawn.y;
-        const enemySpawnTarget = activeCharacter === "badwater2" ? { x: TILE * 22.5, y: TILE * 5.5 } : { x: TILE * 26, y: TILE * 18 };
+        const enemySpawnTarget = activeCharacter === "badwater2" ? (badwater2HeavySpawn || { x: TILE * 17.5, y: TILE * 12.5 }) : { x: TILE * 26, y: TILE * 18 };
         const safeEnemySpawn = findNearestOpenPosition(enemySpawnTarget.x, enemySpawnTarget.y, enemy.radius);
         enemy.x = safeEnemySpawn.x;
         enemy.y = safeEnemySpawn.y;
@@ -4673,7 +4744,51 @@
         enemy.lastKnownY = player.y;
         game.state = "playing";
         if (activeCharacter === "badwater2") {
-          enemy.mode = "dormant";
+          enemy.mode = "patrol";
+          enemy.archetype = "heavy";
+
+          enemy2.mode = "patrol";
+          enemy2.archetype = "soldier";
+          enemy2.patrolIndex = 0;
+          enemy2.path = [];
+          enemy2.pathIndex = 0;
+          enemy2.repathTimer = 0;
+          enemy2.targetKey = "";
+          enemy2.alertTimer = 0;
+          enemy2.isLured = false;
+          enemy2.chasingBySound = false;
+          enemy2.soundLureLockTimer = 0;
+          enemy2.loseTargetSoundTimer = 0;
+          enemy2.stuckTimer = 0;
+          enemy2.spotSoundCooldown = 0;
+          enemy2.patrolIdleTimer = 0;
+          enemy2.patrolIdleCooldown = 6 + Math.random() * 8;
+          enemy2.idleLoseTargetCooldown = 12;
+          enemy2.wasChasing = false;
+          enemy2.hadSightLastFrame = false;
+          enemy2.spriteIsMoving = false;
+          enemy2.idleHoldTimer = 0;
+          enemy2.deliberatelyIdle = false;
+          enemy2.investigateArrived = false;
+          enemy2.stunTimer = 0;
+          enemy2.isCharging = false;
+          enemy2.chargeRampSpeed = 0;
+          enemy2.footstepTimer = 0;
+          enemy2.footstepVolume = 0;
+          enemy2.nextFootstepIndex = 0;
+          enemy2.lightBrightness = 0.3;
+          enemy2.speed = BADWATER2_SOLDIER_STATS.speed;
+          enemy2.chaseSpeed = BADWATER2_SOLDIER_STATS.chaseSpeed;
+          enemy2.chargeSpeed = BADWATER2_SOLDIER_STATS.chargeSpeed;
+          const soldierSpawnTarget = badwater2SoldierSpawn || { x: TILE * 28.5, y: TILE * 5.5 };
+          const safeSoldierSpawn = findNearestOpenPosition(soldierSpawnTarget.x, soldierSpawnTarget.y, enemy2.radius);
+          enemy2.x = safeSoldierSpawn.x;
+          enemy2.y = safeSoldierSpawn.y;
+          enemy2.lastKnownX = player.x;
+          enemy2.lastKnownY = player.y;
+
+          curtainCallActiveLayerIndex = -1;
+          curtainCallChasingLastFrame = false;
           pauseCurtainCallChase();
           startCurtainCallLayers();
           deactivateNoliSpotlight();
@@ -4775,33 +4890,29 @@
       enemyDetectedSound.play().catch(() => {});
     }
 
-    function alertEnemyToSound(x, y) {
-      if (game.state !== "playing") {
+    function alertEntityToSound(entity, x, y, isHeavy) {
+      if (entity.mode === "dormant") {
         return;
       }
-      if (activeCharacter === "badwater2" && enemy.mode === "dormant") {
-        return;
-      }
-      const wasAlreadyAlert = enemy.mode === "chase" || enemy.mode === "investigate";
-      const wasActivelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
+      const wasAlreadyAlert = entity.mode === "chase" || entity.mode === "investigate";
+      const wasActivelyChasingPlayer = entity.mode === "chase" && !entity.isLured;
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
-      const seesPlayerNow = distance(enemy.x, enemy.y, player.x, player.y) < sightDistance &&
-        hasLineOfSight(enemy.x, enemy.y, player.x, player.y);
+      const seesPlayerNow = distance(entity.x, entity.y, player.x, player.y) < sightDistance &&
+        hasLineOfSight(entity.x, entity.y, player.x, player.y);
       const treatAsRealDetection = seesPlayerNow || wasActivelyChasingPlayer;
-      enemy.mode = "chase";
-      enemy.lastKnownX = treatAsRealDetection ? player.x : x;
-      enemy.lastKnownY = treatAsRealDetection ? player.y : y;
+      entity.mode = "chase";
+      entity.lastKnownX = treatAsRealDetection ? player.x : x;
+      entity.lastKnownY = treatAsRealDetection ? player.y : y;
       if (!wasActivelyChasingPlayer) {
-        enemy.chasingBySound = !seesPlayerNow;
-        enemy.isLured = !seesPlayerNow;
-        enemy.soundLureLockTimer = seesPlayerNow ? 0 : 1.2;
+        entity.chasingBySound = !seesPlayerNow;
+        entity.isLured = !seesPlayerNow;
+        entity.soundLureLockTimer = seesPlayerNow ? 0 : 1.2;
       }
-      enemy.alertTimer = Math.max(enemy.alertTimer, 3.2);
+      entity.alertTimer = Math.max(entity.alertTimer, 3.2);
       if (!wasAlreadyAlert) {
-        enemy.spotSoundCooldown = 0;
+        entity.spotSoundCooldown = 0;
         if (seesPlayerNow) {
-          playEnemySpotSound(distance(enemy.x, enemy.y, player.x, player.y));
+          playEnemySpotSound(distance(entity.x, entity.y, player.x, player.y));
           playEnemyDetectedSound();
         } else if (isHeavy) {
           playHeavyAlertSound(0);
@@ -4810,6 +4921,19 @@
           playEnemyDetectedSound();
         }
       }
+    }
+
+    function alertEnemyToSound(x, y) {
+      if (game.state !== "playing") {
+        return;
+      }
+      if (activeCharacter === "badwater2") {
+        alertEntityToSound(enemy, x, y, true);
+        alertEntityToSound(enemy2, x, y, true);
+        return;
+      }
+      const isHeavy = activeCharacter === "heavy";
+      alertEntityToSound(enemy, x, y, isHeavy);
     }
 
     function callForMedic() {
@@ -4896,31 +5020,41 @@
       doorOpenSound.play().catch(() => {});
     }
 
-    function syncEnemyWalkAudio(targetVolume, forceStop = false) {
-      const audibleVolume = Math.max(0, targetVolume);
+    function syncEnemyWalkAudio(entityOrVolume, forceStopOrVolume, maybeForceStop) {
+      let entity = entityOrVolume;
+      let targetVolume = forceStopOrVolume;
+      let forceStop = maybeForceStop;
+      if (typeof entityOrVolume === "number") {
+        entity = enemy;
+        targetVolume = entityOrVolume;
+        forceStop = forceStopOrVolume === true;
+      }
+      forceStop = !!forceStop;
+      const audibleVolume = Math.max(0, targetVolume || 0);
       if (forceStop || audibleVolume <= 0.003) {
-        enemy.footstepTimer = 0;
-        enemy.footstepVolume = 0;
+        entity.footstepTimer = 0;
+        entity.footstepVolume = 0;
         return;
       }
 
-      enemy.footstepVolume = Math.min(enemyWalkLoopMaxVolume, audibleVolume);
+      entity.footstepVolume = Math.min(enemyWalkLoopMaxVolume, audibleVolume);
     }
 
-    function updateEnemyWalkAudio(dt) {
-      if (!enemy.footstepVolume || enemy.footstepVolume <= 0.003) {
+    function updateEnemyWalkAudio(dt, entity) {
+      const target = entity || enemy;
+      if (!target.footstepVolume || target.footstepVolume <= 0.003) {
         return;
       }
 
-      enemy.footstepTimer -= dt;
-      if (enemy.footstepTimer <= 0) {
+      target.footstepTimer -= dt;
+      if (target.footstepTimer <= 0) {
         const sounds = activeFootstepSounds();
-        const step = sounds[enemy.nextFootstepIndex % sounds.length];
-        step.volume = enemy.footstepVolume;
+        const step = sounds[target.nextFootstepIndex % sounds.length];
+        step.volume = target.footstepVolume;
         step.currentTime = 0;
         step.play().catch(() => {});
-        enemy.nextFootstepIndex = (enemy.nextFootstepIndex + 1) % sounds.length;
-        enemy.footstepTimer = enemyFootstepInterval;
+        target.nextFootstepIndex = (target.nextFootstepIndex + 1) % sounds.length;
+        target.footstepTimer = enemyFootstepInterval;
       }
     }
 
@@ -5118,17 +5252,17 @@
       return path;
     }
 
-    function refreshEnemyPath(targetX, targetY) {
+    function refreshEnemyPath(entity, targetX, targetY) {
       const targetTile = worldToTile(targetX, targetY);
       const nextKey = `${targetTile.tx},${targetTile.ty}`;
-      if (enemy.repathTimer > 0 && enemy.targetKey === nextKey && enemy.path.length) {
-        return enemy.path.length > 0;
+      if (entity.repathTimer > 0 && entity.targetKey === nextKey && entity.path.length) {
+        return entity.path.length > 0;
       }
-      enemy.targetKey = nextKey;
-      enemy.path = findPath(enemy.x, enemy.y, targetX, targetY);
-      enemy.pathIndex = 0;
-      enemy.repathTimer = (enemy.mode === "chase" || enemy.mode === "hunt") ? 0.25 : 0.5;
-      return enemy.path.length > 0;
+      entity.targetKey = nextKey;
+      entity.path = findPath(entity.x, entity.y, targetX, targetY);
+      entity.pathIndex = 0;
+      entity.repathTimer = (entity.mode === "chase" || entity.mode === "hunt") ? 0.25 : 0.5;
+      return entity.path.length > 0;
     }
 
     function drawTile(key, dx, dy) {
@@ -5989,219 +6123,217 @@
       enemy.wasChasing = enemy.isCharging;
     }
 
-    function updateEnemy(dt) {
-      if (activeCharacter === "soldier") {
-        updateSoldierEnemy(dt);
+    function updateEnemyEntity(dt, entity, isHeavy) {
+      if (entity.mode === "dormant") {
         return;
       }
-      if (activeCharacter === "badwater2" && enemy.mode === "dormant") {
-        return;
-      }
-      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
       const sightDistance = isHeavy ? heavySightDistance : enemySightDistance;
-      const distToPlayer = distance(enemy.x, enemy.y, player.x, player.y);
-      const soundLureLocked = enemy.soundLureLockTimer > 0;
-      enemy.soundLureLockTimer = Math.max(0, enemy.soundLureLockTimer - dt);
-      const seesPlayer = !soundLureLocked && distToPlayer < sightDistance && hasLineOfSight(enemy.x, enemy.y, player.x, player.y);
-      enemy.spotSoundCooldown = Math.max(0, enemy.spotSoundCooldown - dt);
+      const distToPlayer = distance(entity.x, entity.y, player.x, player.y);
+      const soundLureLocked = entity.soundLureLockTimer > 0;
+      entity.soundLureLockTimer = Math.max(0, entity.soundLureLockTimer - dt);
+      const seesPlayer = !soundLureLocked && distToPlayer < sightDistance && hasLineOfSight(entity.x, entity.y, player.x, player.y);
+      entity.spotSoundCooldown = Math.max(0, entity.spotSoundCooldown - dt);
 
-      if (enemy.loseTargetSoundTimer > 0) {
-        enemy.loseTargetSoundTimer -= dt;
-        if (enemy.loseTargetSoundTimer <= 0) {
+      if (entity.loseTargetSoundTimer > 0) {
+        entity.loseTargetSoundTimer -= dt;
+        if (entity.loseTargetSoundTimer <= 0) {
           playEnemyLoseTargetSound(distToPlayer);
         }
       }
 
       const playerIsMoving = player.moveX !== 0 || player.moveY !== 0;
       const noiseRadius = player.isSprinting ? enemyHearRadius : enemyHearRadius * 0.55;
-      const heardPlayer = !isHeavy && !soundLureLocked && playerIsMoving && distToPlayer < noiseRadius && hasLineOfSight(enemy.x, enemy.y, player.x, player.y);
+      const heardPlayer = !isHeavy && !soundLureLocked && playerIsMoving && distToPlayer < noiseRadius && hasLineOfSight(entity.x, entity.y, player.x, player.y);
 
       if (seesPlayer) {
-        if ((!enemy.hadSightLastFrame && enemy.mode !== "chase") || enemy.isLured) {
+        if ((!entity.hadSightLastFrame && entity.mode !== "chase") || entity.isLured) {
           playEnemySpotSound(distToPlayer);
           playEnemyDetectedSound();
         }
-        enemy.mode = "chase";
-        enemy.chasingBySound = false;
-        enemy.isLured = false;
-        enemy.loseTargetSoundTimer = 0;
-        enemy.alertTimer = isHeavy ? 3 : 2.4;
-        enemy.lastKnownX = player.x;
-        enemy.lastKnownY = player.y;
+        entity.mode = "chase";
+        entity.chasingBySound = false;
+        entity.isLured = false;
+        entity.loseTargetSoundTimer = 0;
+        entity.alertTimer = isHeavy ? 3 : 2.4;
+        entity.lastKnownX = player.x;
+        entity.lastKnownY = player.y;
       } else if (heardPlayer) {
-        if (enemy.mode !== "chase" || enemy.isLured) {
+        if (entity.mode !== "chase" || entity.isLured) {
           playEnemySpotSound(distToPlayer);
           playEnemyDetectedSound();
           showObjectiveNoiseIcon(player.x, player.y, "footstep_heard_icon.png");
         }
-        enemy.mode = "chase";
-        enemy.chasingBySound = true;
-        enemy.isLured = false;
-        enemy.loseTargetSoundTimer = 0;
-        enemy.alertTimer = 2.6;
-        enemy.lastKnownX = player.x;
-        enemy.lastKnownY = player.y;
-      } else if (enemy.mode === "chase") {
-        enemy.alertTimer -= dt;
-        if (enemy.alertTimer <= 0) {
-          enemy.mode = "investigate";
-          enemy.chasingBySound = false;
-          enemy.alertTimer = 4.6;
-          enemy.investigateArrived = false;
-          enemy.loseTargetSoundTimer = 1.2 + Math.random() * 0.8;
+        entity.mode = "chase";
+        entity.chasingBySound = true;
+        entity.isLured = false;
+        entity.loseTargetSoundTimer = 0;
+        entity.alertTimer = 2.6;
+        entity.lastKnownX = player.x;
+        entity.lastKnownY = player.y;
+      } else if (entity.mode === "chase") {
+        entity.alertTimer -= dt;
+        if (entity.alertTimer <= 0) {
+          entity.mode = "investigate";
+          entity.chasingBySound = false;
+          entity.alertTimer = 4.6;
+          entity.investigateArrived = false;
+          entity.loseTargetSoundTimer = 1.2 + Math.random() * 0.8;
         }
-      } else if (enemy.mode === "investigate") {
-        enemy.alertTimer -= dt;
-        if (!enemy.investigateArrived && distance(enemy.x, enemy.y, enemy.lastKnownX, enemy.lastKnownY) < 14) {
-          enemy.investigateArrived = true;
-          enemy.alertTimer = Math.min(enemy.alertTimer, 2.2);
+      } else if (entity.mode === "investigate") {
+        entity.alertTimer -= dt;
+        if (!entity.investigateArrived && distance(entity.x, entity.y, entity.lastKnownX, entity.lastKnownY) < 14) {
+          entity.investigateArrived = true;
+          entity.alertTimer = Math.min(entity.alertTimer, 2.2);
         }
-        if (enemy.alertTimer <= 0) {
-          enemy.mode = "patrol";
+        if (entity.alertTimer <= 0) {
+          entity.mode = "patrol";
         }
-      } else if (enemy.mode === "patrol" && game.state === "playing") {
-        idleLoseTargetCooldown -= dt;
-        if (idleLoseTargetCooldown <= 0) {
+      } else if (entity.mode === "patrol" && game.state === "playing") {
+        entity.idleLoseTargetCooldown -= dt;
+        if (entity.idleLoseTargetCooldown <= 0) {
           playEnemyLoseTargetSound(distToPlayer);
-          idleLoseTargetCooldown = 25 + Math.random() * 20;
+          entity.idleLoseTargetCooldown = 25 + Math.random() * 20;
         }
 
-        if (enemy.patrolIdleTimer > 0) {
-          enemy.patrolIdleTimer -= dt;
+        if (entity.patrolIdleTimer > 0) {
+          entity.patrolIdleTimer -= dt;
         } else {
-          enemy.patrolIdleCooldown -= dt;
-          if (enemy.patrolIdleCooldown <= 0) {
-            enemy.patrolIdleTimer = 1.5 + Math.random() * 2.5;
-            enemy.patrolIdleCooldown = 10 + Math.random() * 14;
+          entity.patrolIdleCooldown -= dt;
+          if (entity.patrolIdleCooldown <= 0) {
+            entity.patrolIdleTimer = 1.5 + Math.random() * 2.5;
+            entity.patrolIdleCooldown = 10 + Math.random() * 14;
           }
         }
       }
 
-      if (enemy.mode === "patrol" && enemy.patrolIdleTimer > 0) {
-        enemy.moveX = 0;
-        enemy.moveY = 0;
-        enemy.stuckTimer = 0;
-        enemy.deliberatelyIdle = true;
-        syncEnemyWalkAudio(0);
+      if (entity.mode === "patrol" && entity.patrolIdleTimer > 0) {
+        entity.moveX = 0;
+        entity.moveY = 0;
+        entity.stuckTimer = 0;
+        entity.deliberatelyIdle = true;
+        syncEnemyWalkAudio(entity, 0);
+        finishUpdateEnemyEntity(dt, entity, seesPlayer, distToPlayer);
         return;
       }
 
-      if (enemy.mode === "investigate" && enemy.investigateArrived) {
-        enemy.moveX = 0;
-        enemy.moveY = 0;
-        enemy.stuckTimer = 0;
-        enemy.deliberatelyIdle = true;
-        syncEnemyWalkAudio(0);
+      if (entity.mode === "investigate" && entity.investigateArrived) {
+        entity.moveX = 0;
+        entity.moveY = 0;
+        entity.stuckTimer = 0;
+        entity.deliberatelyIdle = true;
+        syncEnemyWalkAudio(entity, 0);
+        finishUpdateEnemyEntity(dt, entity, seesPlayer, distToPlayer);
         return;
       }
 
-      enemy.repathTimer = Math.max(0, enemy.repathTimer - dt);
+      entity.repathTimer = Math.max(0, entity.repathTimer - dt);
 
-      let targetX = enemy.x;
-      let targetY = enemy.y;
-      let speed = enemy.speed;
+      let targetX = entity.x;
+      let targetY = entity.y;
+      let speed = entity.speed;
 
-      if (enemy.mode === "chase") {
-        if (enemy.chasingBySound) {
-          targetX = enemy.lastKnownX;
-          targetY = enemy.lastKnownY;
-          speed = enemy.chargeSpeed;
+      if (entity.mode === "chase") {
+        if (entity.chasingBySound) {
+          targetX = entity.lastKnownX;
+          targetY = entity.lastKnownY;
+          speed = entity.chargeSpeed;
         } else {
           targetX = player.x;
           targetY = player.y;
-          speed = enemy.chaseSpeed;
+          speed = entity.chaseSpeed;
         }
-      } else if (enemy.mode === "investigate") {
-        targetX = enemy.lastKnownX;
-        targetY = enemy.lastKnownY;
-        speed = enemy.speed * 0.98;
+      } else if (entity.mode === "investigate") {
+        targetX = entity.lastKnownX;
+        targetY = entity.lastKnownY;
+        speed = entity.speed * 0.98;
       } else {
-        const patrolTarget = enemy.patrolPoints[enemy.patrolIndex];
+        const patrolTarget = entity.patrolPoints[entity.patrolIndex];
         targetX = patrolTarget.x;
         targetY = patrolTarget.y;
-        if (distance(enemy.x, enemy.y, targetX, targetY) < 8) {
-          enemy.patrolIndex = (enemy.patrolIndex + 1) % enemy.patrolPoints.length;
+        if (distance(entity.x, entity.y, targetX, targetY) < 8) {
+          entity.patrolIndex = (entity.patrolIndex + 1) % entity.patrolPoints.length;
         }
       }
 
-      let hasPath = refreshEnemyPath(targetX, targetY);
+      let hasPath = refreshEnemyPath(entity, targetX, targetY);
 
       if (!hasPath) {
-        if (enemy.mode === "patrol") {
-          enemy.patrolIndex = (enemy.patrolIndex + 1) % enemy.patrolPoints.length;
-          const patrolTarget = enemy.patrolPoints[enemy.patrolIndex];
+        if (entity.mode === "patrol") {
+          entity.patrolIndex = (entity.patrolIndex + 1) % entity.patrolPoints.length;
+          const patrolTarget = entity.patrolPoints[entity.patrolIndex];
           targetX = patrolTarget.x;
           targetY = patrolTarget.y;
-          enemy.repathTimer = 0;
-          hasPath = refreshEnemyPath(targetX, targetY);
-        } else if (hasLineOfSight(enemy.x, enemy.y, targetX, targetY)) {
+          entity.repathTimer = 0;
+          hasPath = refreshEnemyPath(entity, targetX, targetY);
+        } else if (hasLineOfSight(entity.x, entity.y, targetX, targetY)) {
           hasPath = true;
         }
       }
 
-      let waypoint = enemy.path[enemy.pathIndex];
+      let waypoint = entity.path[entity.pathIndex];
       if (!waypoint && hasPath) {
         waypoint = { x: targetX, y: targetY };
       }
 
       if (!waypoint) {
-        enemy.moveX = 0;
-        enemy.moveY = 0;
-        enemy.stuckTimer = 0;
-        enemy.deliberatelyIdle = true;
-        syncEnemyWalkAudio(0);
+        entity.moveX = 0;
+        entity.moveY = 0;
+        entity.stuckTimer = 0;
+        entity.deliberatelyIdle = true;
+        syncEnemyWalkAudio(entity, 0);
+        finishUpdateEnemyEntity(dt, entity, seesPlayer, distToPlayer);
         return;
       }
 
-      if (distance(enemy.x, enemy.y, waypoint.x, waypoint.y) < 6 && enemy.pathIndex < enemy.path.length - 1) {
-        enemy.pathIndex += 1;
-        waypoint = enemy.path[enemy.pathIndex];
+      if (distance(entity.x, entity.y, waypoint.x, waypoint.y) < 6 && entity.pathIndex < entity.path.length - 1) {
+        entity.pathIndex += 1;
+        waypoint = entity.path[entity.pathIndex];
       }
 
       // On the final waypoint, steer at the live target instead of the (possibly stale or
       // coincident-with-current-position) tile-center waypoint, so the enemy never freezes
       // when it and its target share a tile.
-      if (enemy.pathIndex >= enemy.path.length - 1 && distance(waypoint.x, waypoint.y, targetX, targetY) > 1) {
+      if (entity.pathIndex >= entity.path.length - 1 && distance(waypoint.x, waypoint.y, targetX, targetY) > 1) {
         waypoint = { x: targetX, y: targetY };
       }
 
-      enemy.deliberatelyIdle = false;
-      const dx = waypoint.x - enemy.x;
-      const dy = waypoint.y - enemy.y;
+      entity.deliberatelyIdle = false;
+      const dx = waypoint.x - entity.x;
+      const dy = waypoint.y - entity.y;
       const len = Math.hypot(dx, dy) || 1;
-      enemy.moveX = dx / len;
-      enemy.moveY = dy / len;
-      if (Math.abs(enemy.moveX) > Math.abs(enemy.moveY)) {
-        enemy.facing = enemy.moveX >= 0 ? "right" : "left";
+      entity.moveX = dx / len;
+      entity.moveY = dy / len;
+      if (Math.abs(entity.moveX) > Math.abs(entity.moveY)) {
+        entity.facing = entity.moveX >= 0 ? "right" : "left";
       } else {
-        enemy.facing = enemy.moveY >= 0 ? "down" : "up";
+        entity.facing = entity.moveY >= 0 ? "down" : "up";
       }
-      const prevX = enemy.x;
-      const prevY = enemy.y;
+      const prevX = entity.x;
+      const prevY = entity.y;
       const stepX = (dx / len) * speed * dt;
       const stepY = (dy / len) * speed * dt;
-      moveWithCollision(enemy, stepX, stepY);
-      const actualMove = distance(prevX, prevY, enemy.x, enemy.y);
+      moveWithCollision(entity, stepX, stepY);
+      const actualMove = distance(prevX, prevY, entity.x, entity.y);
       const intendedMove = Math.hypot(stepX, stepY);
 
       if (intendedMove > 0.4 && actualMove < 0.15) {
-        enemy.stuckTimer += dt;
+        entity.stuckTimer += dt;
       } else {
-        enemy.stuckTimer = 0;
+        entity.stuckTimer = 0;
       }
 
-      if (enemy.stuckTimer > 0.3) {
-        enemy.repathTimer = 0;
-        enemy.path = [];
-        enemy.pathIndex = 0;
-        enemy.stuckTimer = 0;
-        if (enemy.mode === "patrol") {
-          enemy.patrolIndex = (enemy.patrolIndex + 1) % enemy.patrolPoints.length;
+      if (entity.stuckTimer > 0.3) {
+        entity.repathTimer = 0;
+        entity.path = [];
+        entity.pathIndex = 0;
+        entity.stuckTimer = 0;
+        if (entity.mode === "patrol") {
+          entity.patrolIndex = (entity.patrolIndex + 1) % entity.patrolPoints.length;
         }
       }
 
       let walkLoopVolume = 0;
-      if (game.state === "playing" && !jumpscare.classList.contains("visible") && Math.hypot(enemy.moveX, enemy.moveY) > 0.35) {
+      if (game.state === "playing" && !jumpscare.classList.contains("visible") && Math.hypot(entity.moveX, entity.moveY) > 0.35) {
         const hearStart = 220;
         const hearFull = 90;
         if (distToPlayer < hearStart) {
@@ -6209,37 +6341,43 @@
           walkLoopVolume = enemyWalkLoopMaxVolume * Math.sqrt(blend);
         }
       }
-      syncEnemyWalkAudio(walkLoopVolume);
+      syncEnemyWalkAudio(entity, walkLoopVolume);
 
-      if (distance(enemy.x, enemy.y, player.x, player.y) < enemy.radius + player.radius) {
+      if (distance(entity.x, entity.y, player.x, player.y) < entity.radius + player.radius) {
         triggerPlayerDeath();
       }
 
-      enemy.hadSightLastFrame = seesPlayer;
-      const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      if (activeCharacter === "badwater2") {
-        if (activelyChasingPlayer && !enemy.wasChasing) {
-          stopCurtainCallLayers();
-          playCurtainCallChase();
-          flashNoliTargetFound();
-        } else if (!activelyChasingPlayer && enemy.wasChasing) {
-          pauseCurtainCallChase(1200);
+      finishUpdateEnemyEntity(dt, entity, seesPlayer, distToPlayer);
+    }
+
+    function finishUpdateEnemyEntity(dt, entity, seesPlayer, distToPlayer) {
+      entity.hadSightLastFrame = seesPlayer;
+      const activelyChasingPlayer = entity.mode === "chase" && !entity.isLured;
+      if (activeCharacter !== "badwater2") {
+        if (activelyChasingPlayer && !entity.wasChasing) {
+          pauseAmbientMusic();
+          playChaseMusic();
+        } else if (!activelyChasingPlayer && entity.wasChasing) {
+          pauseChaseMusic();
           if (game.state === "playing") {
-            startCurtainCallLayers();
+            playAmbientMusic();
           }
-        } else if (!activelyChasingPlayer && enemy.mode !== "dormant") {
-          updateCurtainCallLayers(distance(enemy.x, enemy.y, player.x, player.y));
-        }
-      } else if (activelyChasingPlayer && !enemy.wasChasing) {
-        pauseAmbientMusic();
-        playChaseMusic();
-      } else if (!activelyChasingPlayer && enemy.wasChasing) {
-        pauseChaseMusic();
-        if (game.state === "playing") {
-          playAmbientMusic();
         }
       }
-      enemy.wasChasing = activelyChasingPlayer;
+      entity.wasChasing = activelyChasingPlayer;
+    }
+
+    function updateEnemy(dt) {
+      if (activeCharacter === "soldier") {
+        updateSoldierEnemy(dt);
+        return;
+      }
+      const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
+      updateEnemyEntity(dt, enemy, isHeavy);
+      if (activeCharacter === "badwater2") {
+        updateEnemyEntity(dt, enemy2, true);
+        updateBadwater2ChaseMusic();
+      }
     }
 
     const NOLI_SPOTLIGHT_FLY_IN_MS = 500;
@@ -6300,21 +6438,48 @@
       noliTargetFoundEl.classList.add("flash");
     }
 
-    function updateBadwater2CagedMonsters(dt) {
-      const activelyChasingPlayer = enemy.mode === "chase" && !enemy.isLured;
-      const cagedMonster = badwater2CagedMonsters[0];
-      if (activelyChasingPlayer || enemy.mode !== "dormant" || !cagedMonster) {
+    function badwater2ActivelyChasing(entity) {
+      return entity.mode === "chase" && !entity.isLured;
+    }
+
+    function updateBadwater2Proximity(dt) {
+      const anyChasing = badwater2ActivelyChasing(enemy) || badwater2ActivelyChasing(enemy2);
+      if (anyChasing) {
         deactivateNoliSpotlight();
         updateNoliSpotlight(dt, null);
         return;
       }
-      updateCurtainCallLayers(distance(player.x, player.y, cagedMonster.x, cagedMonster.y));
+      const distToEnemy = enemy.mode === "dormant" ? Infinity : distance(player.x, player.y, enemy.x, enemy.y);
+      const distToEnemy2 = enemy2.mode === "dormant" ? Infinity : distance(player.x, player.y, enemy2.x, enemy2.y);
+      const nearestEntity = distToEnemy <= distToEnemy2 ? enemy : enemy2;
+      const nearestDist = Math.min(distToEnemy, distToEnemy2);
+      if (!isFinite(nearestDist)) {
+        deactivateNoliSpotlight();
+        updateNoliSpotlight(dt, null);
+        return;
+      }
+      updateCurtainCallLayers(nearestDist);
       if (curtainCallActiveLayerIndex === 2) {
-        activateNoliSpotlight(cagedMonster);
+        activateNoliSpotlight(nearestEntity);
       } else {
         deactivateNoliSpotlight();
       }
-      updateNoliSpotlight(dt, cagedMonster);
+      updateNoliSpotlight(dt, nearestEntity);
+    }
+
+    function updateBadwater2ChaseMusic() {
+      const anyChasing = badwater2ActivelyChasing(enemy) || badwater2ActivelyChasing(enemy2);
+      if (anyChasing && !curtainCallChasingLastFrame) {
+        stopCurtainCallLayers();
+        playCurtainCallChase();
+        flashNoliTargetFound();
+      } else if (!anyChasing && curtainCallChasingLastFrame) {
+        pauseCurtainCallChase(1200);
+        if (game.state === "playing") {
+          startCurtainCallLayers();
+        }
+      }
+      curtainCallChasingLastFrame = anyChasing;
     }
 
     let cameraShakeTimer = 0;
@@ -6773,9 +6938,80 @@
       return state.lightBrightness;
     }
 
+    function drawEnemyEntitySprite(dt, entity, pool, archetypeForSize, keepVisibleEls) {
+      if (entity.mode === "dormant") {
+        return;
+      }
+      const entityDist = distance(player.x, player.y, entity.x, entity.y);
+      const entityLit = entityDist <= player.sightRange && hasLineOfSight(player.x, player.y, entity.x, entity.y);
+      const brightness = easeLightBrightness(entity, entityLit ? 1 : dimBrightness, dt);
+
+      const rawMoving = entity.moveX !== 0 || entity.moveY !== 0;
+      if (rawMoving) {
+        entity.spriteIsMoving = true;
+        entity.idleHoldTimer = 0.25;
+      } else if (entity.deliberatelyIdle) {
+        entity.spriteIsMoving = false;
+        entity.idleHoldTimer = 0;
+      } else if (entity.idleHoldTimer > 0) {
+        entity.idleHoldTimer -= dt;
+        if (entity.idleHoldTimer <= 0) {
+          entity.spriteIsMoving = false;
+        }
+      } else {
+        entity.spriteIsMoving = false;
+      }
+
+      let activeEl = pool.down;
+      if (pool.stunned && entity.stunTimer > 0) {
+        activeEl = pool.stunned;
+      } else if (!entity.spriteIsMoving) {
+        activeEl = pool.idle;
+      } else if (entity.facing === "up") {
+        activeEl = pool.up;
+      } else if (entity.facing === "right") {
+        activeEl = pool.side;
+      } else if (entity.facing === "left") {
+        activeEl = pool.side;
+      }
+
+      let flip = 1;
+      if (entity.facing === "left") {
+        flip = -1;
+      }
+
+      if (!Number.isFinite(entity.x) || !Number.isFinite(entity.y)) {
+        entity.x = clamp(entity.x, 0, world.width) || player.x;
+        entity.y = clamp(entity.y, 0, world.height) || player.y;
+      }
+
+      const drawWidth = archetypeForSize === "heavy" ? 52 : 40;
+      const drawHeight = archetypeForSize === "heavy" ? 52 : 40;
+      const canvasRect = canvas.getBoundingClientRect();
+      const scaleX = canvasRect.width / canvas.width;
+      const scaleY = canvasRect.height / canvas.height;
+      const screenX = (entity.x - game.camera.x - drawWidth / 2) * scaleX;
+      const screenY = (entity.y - game.camera.y - drawHeight / 2 - 2) * scaleY;
+
+      keepVisibleEls.add(activeEl);
+
+      const safeBrightness = Number.isFinite(brightness) ? clamp(brightness, dimBrightness, 1) : 1;
+
+      if (activeEl.style.display !== "block") {
+        activeEl.style.display = "block";
+      }
+      activeEl.style.width = `${drawWidth * scaleX}px`;
+      activeEl.style.height = `${drawHeight * scaleY}px`;
+      if (Number.isFinite(screenX) && Number.isFinite(screenY)) {
+        activeEl.style.left = `${canvas.offsetLeft + screenX}px`;
+        activeEl.style.top = `${canvas.offsetTop + screenY}px`;
+      }
+      activeEl.style.transform = `scaleX(${flip})`;
+      activeEl.style.filter = `brightness(${safeBrightness.toFixed(2)})`;
+    }
+
     function updateEnemySpriteElement(dt) {
-      if (activeCharacter === "pyro" || jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped" ||
-          (activeCharacter === "badwater2" && enemy.mode === "dormant")) {
+      if (activeCharacter === "pyro" || jumpscare.classList.contains("visible") || game.state === "dead" || game.state === "escaped") {
         allEnemySpriteEls().forEach((el) => {
           el.style.display = "none";
         });
@@ -6812,77 +7048,20 @@
         return;
       }
 
-      const enemyDist = distance(player.x, player.y, enemy.x, enemy.y);
-      const enemyLit = enemyDist <= player.sightRange && hasLineOfSight(player.x, player.y, enemy.x, enemy.y);
-      const brightness = easeLightBrightness(enemy, enemyLit ? 1 : dimBrightness, dt);
-
-      const rawMoving = enemy.moveX !== 0 || enemy.moveY !== 0;
-      if (rawMoving) {
-        enemy.spriteIsMoving = true;
-        enemy.idleHoldTimer = 0.25;
-      } else if (enemy.deliberatelyIdle) {
-        enemy.spriteIsMoving = false;
-        enemy.idleHoldTimer = 0;
-      } else if (enemy.idleHoldTimer > 0) {
-        enemy.idleHoldTimer -= dt;
-        if (enemy.idleHoldTimer <= 0) {
-          enemy.spriteIsMoving = false;
-        }
+      const keepVisibleEls = new Set();
+      if (activeCharacter === "badwater2") {
+        drawEnemyEntitySprite(dt, enemy, ENEMY_SPRITE_POOLS.heavy, "heavy", keepVisibleEls);
+        drawEnemyEntitySprite(dt, enemy2, ENEMY_SPRITE_POOLS.soldier, "soldier", keepVisibleEls);
       } else {
-        enemy.spriteIsMoving = false;
+        const pool = ENEMY_SPRITE_POOLS[activeCharacter] || ENEMY_SPRITE_POOLS.medic;
+        drawEnemyEntitySprite(dt, enemy, pool, activeCharacter, keepVisibleEls);
       }
-
-      const pool = ENEMY_SPRITE_POOLS[activeCharacter] || ENEMY_SPRITE_POOLS.medic;
-      let activeEl = pool.down;
-      if (activeCharacter === "soldier" && enemy.stunTimer > 0) {
-        activeEl = pool.stunned;
-      } else if (!enemy.spriteIsMoving) {
-        activeEl = pool.idle;
-      } else if (enemy.facing === "up") {
-        activeEl = pool.up;
-      } else if (enemy.facing === "right") {
-        activeEl = pool.side;
-      } else if (enemy.facing === "left") {
-        activeEl = pool.side;
-      }
-
-      let flip = 1;
-      if (enemy.facing === "left") {
-        flip = -1;
-      }
-
-      if (!Number.isFinite(enemy.x) || !Number.isFinite(enemy.y)) {
-        enemy.x = clamp(enemy.x, 0, world.width) || player.x;
-        enemy.y = clamp(enemy.y, 0, world.height) || player.y;
-      }
-
-      const drawWidth = activeCharacter === "heavy" ? 52 : 40;
-      const drawHeight = activeCharacter === "heavy" ? 52 : 40;
-      const canvasRect = canvas.getBoundingClientRect();
-      const scaleX = canvasRect.width / canvas.width;
-      const scaleY = canvasRect.height / canvas.height;
-      const screenX = (enemy.x - game.camera.x - drawWidth / 2) * scaleX;
-      const screenY = (enemy.y - game.camera.y - drawHeight / 2 - 2) * scaleY;
 
       allEnemySpriteEls().forEach((el) => {
-        if (el !== activeEl && el.style.display !== "none") {
+        if (!keepVisibleEls.has(el) && el.style.display !== "none") {
           el.style.display = "none";
         }
       });
-
-      const safeBrightness = Number.isFinite(brightness) ? clamp(brightness, dimBrightness, 1) : 1;
-
-      if (activeEl.style.display !== "block") {
-        activeEl.style.display = "block";
-      }
-      activeEl.style.width = `${drawWidth * scaleX}px`;
-      activeEl.style.height = `${drawHeight * scaleY}px`;
-      if (Number.isFinite(screenX) && Number.isFinite(screenY)) {
-        activeEl.style.left = `${canvas.offsetLeft + screenX}px`;
-        activeEl.style.top = `${canvas.offsetTop + screenY}px`;
-      }
-      activeEl.style.transform = `scaleX(${flip})`;
-      activeEl.style.filter = `brightness(${safeBrightness.toFixed(2)})`;
     }
 
     function updatePlayerSpriteElement() {
@@ -7326,7 +7505,7 @@
           }
         }
         if (activeCharacter === "badwater2") {
-          updateBadwater2CagedMonsters(dt);
+          updateBadwater2Proximity(dt);
         }
         updatePlayerFootstepAudio(dt);
       } else if (game.state === "intro") {
@@ -7337,7 +7516,10 @@
         syncEnemyWalkAudio(0, true);
       }
 
-      updateEnemyWalkAudio(dt);
+      updateEnemyWalkAudio(dt, enemy);
+      if (activeCharacter === "badwater2") {
+        updateEnemyWalkAudio(dt, enemy2);
+      }
 
       if (!jumpscare.classList.contains("visible")) {
         updateCamera(dt);
@@ -7959,13 +8141,14 @@
         return;
       }
       if (command === "/bw2status") {
-        devConsoleLog(`activeCharacter=${activeCharacter} game.state=${game.state} enemy.mode=${enemy.mode}`, "ok");
-        devConsoleLog(`curtainCallLayersPlaying=${curtainCallLayersPlaying} layer volumes=${CURTAIN_CALL_LAYERS.map((t) => t.volume.toFixed(2)).join(",")} paused=${CURTAIN_CALL_LAYERS.map((t) => t.paused).join(",")}`, "ok");
+        devConsoleLog(`activeCharacter=${activeCharacter} game.state=${game.state}`, "ok");
+        devConsoleLog(`heavy(enemy).mode=${enemy.mode} pos=(${Math.round(enemy.x)},${Math.round(enemy.y)}) dist=${Math.round(distance(player.x, player.y, enemy.x, enemy.y))}`, "ok");
+        devConsoleLog(`soldier(enemy2).mode=${enemy2.mode} pos=(${Math.round(enemy2.x)},${Math.round(enemy2.y)}) dist=${Math.round(distance(player.x, player.y, enemy2.x, enemy2.y))}`, "ok");
+        devConsoleLog(`player pos=(${Math.round(player.x)},${Math.round(player.y)})`, "ok");
+        devConsoleLog(`curtainCallLayersPlaying=${curtainCallLayersPlaying} activeLayerIndex=${curtainCallActiveLayerIndex} chasingLastFrame=${curtainCallChasingLastFrame}`, "ok");
+        devConsoleLog(`layer volumes=${CURTAIN_CALL_LAYERS.map((t) => t.volume.toFixed(2)).join(",")} paused=${CURTAIN_CALL_LAYERS.map((t) => t.paused).join(",")}`, "ok");
         devConsoleLog(`audioContext.state=${audioContext ? audioContext.state : "null"}`, "ok");
-        devConsoleLog(`badwater2Door.locked=${badwater2Door ? badwater2Door.locked : "null"} carriedKeycard=${player.carriedKeycard}`, "ok");
-        devConsoleLog(`enemy pos=(${Math.round(enemy.x)},${Math.round(enemy.y)}) player pos=(${Math.round(player.x)},${Math.round(player.y)})`, "ok");
-        devConsoleLog(`cagedMonsters=${badwater2CagedMonsters.length} distances=${badwater2CagedMonsters.map((m) => Math.round(distance(player.x, player.y, m.x, m.y))).join(",")}`, "ok");
-        devConsoleLog(`curtainCallActiveLayerIndex=${curtainCallActiveLayerIndex} spotlight active=${noliSpotlight.active} fadeLevel=${noliSpotlight.fadeLevel.toFixed(2)} target=(${Math.round(noliSpotlight.targetX)},${Math.round(noliSpotlight.targetY)})`, "ok");
+        devConsoleLog(`spotlight active=${noliSpotlight.active} fadeLevel=${noliSpotlight.fadeLevel.toFixed(2)} target=(${Math.round(noliSpotlight.targetX)},${Math.round(noliSpotlight.targetY)})`, "ok");
         playDevConsoleResultSound(true);
         return;
       }
@@ -7977,20 +8160,15 @@
       }
       if (command === "/bw2free") {
         if (activeCharacter === "badwater2") {
-          if (badwater2Door) {
-            badwater2Door.locked = false;
-            badwater2Door.tiles.forEach((tile) => {
-              const idx = solids.findIndex((rect) => rect.x === tile.x && rect.y === tile.y);
-              if (idx !== -1) {
-                solids.splice(idx, 1);
-              }
-            });
-          }
           const safeSpot = findNearestOpenPosition(player.x + TILE * 3, player.y, enemy.radius);
           enemy.x = safeSpot.x;
           enemy.y = safeSpot.y;
-          enemy.mode = "patrol";
-          devConsoleLog("badwater2: door forced open, enemy released near you.", "ok");
+          enemy.mode = "chase";
+          enemy.isLured = false;
+          enemy.chasingBySound = false;
+          enemy.lastKnownX = player.x;
+          enemy.lastKnownY = player.y;
+          devConsoleLog("badwater2: heavy teleported near you and set to chase.", "ok");
         } else {
           devConsoleLog("not in the badwater2 test level.", "error");
         }
