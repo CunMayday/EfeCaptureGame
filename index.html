@@ -3191,8 +3191,8 @@
       { audio: new Audio("COULDBEAPROBLEM.mp3"), text: "Could be a problem." }
     ];
     const eyeSearchVoiceLine = { audio: new Audio("SOMETHINGSBROKENILLINVESTIGATE.mp3"), text: "Something's broken. I'll investigate." };
-    eyeFoundVoiceSounds.forEach((line) => { line.audio.volume = 0.85; });
-    eyeSearchVoiceLine.audio.volume = 0.85;
+    eyeFoundVoiceSounds.forEach((line) => { line.audio.volume = 0.45; });
+    eyeSearchVoiceLine.audio.volume = 0.45;
     [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound, eyeCatchStingSound, ...eyeFoundVoiceSounds.map((line) => line.audio), eyeSearchVoiceLine.audio].forEach((sound) => {
       sound.preload = "auto";
       sound.load();
@@ -6806,6 +6806,7 @@
         enemy.alertTimer = Math.max(enemy.alertTimer, 3.2);
         showMassdriverEyeBark(MASSDRIVER_EYE_CHASE_LINES);
       }
+      setMassdriverEyeActive(false);
     }
 
     function drawMassdriverEye() {
