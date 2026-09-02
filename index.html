@@ -3237,7 +3237,7 @@
 
     const heavyAlertLineChance = 0.35;
     function playHeavyAlertSound(dist) {
-      if (Math.random() > heavyAlertLineChance) {
+      if (Math.random() > heavyAlertLineChance || activeCharacter === "massdriver") {
         return;
       }
       const sound = heavyAlertSounds[Math.floor(Math.random() * heavyAlertSounds.length)];
@@ -5084,7 +5084,7 @@
     }
 
     function playEnemySpotSound(dist) {
-      if (enemy.spotSoundCooldown > 0) {
+      if (enemy.spotSoundCooldown > 0 || activeCharacter === "massdriver") {
         return;
       }
       if (activeCharacter === "heavy") {
@@ -5097,6 +5097,9 @@
     }
 
     function playEnemyDetectedSound() {
+      if (activeCharacter === "massdriver") {
+        return;
+      }
       enemyDetectedSound.currentTime = 0;
       enemyDetectedSound.play().catch(() => {});
     }
@@ -5214,7 +5217,7 @@
 
     const loseTargetLineChance = 0.35;
     function playEnemyLoseTargetSound(dist) {
-      if (Math.random() > loseTargetLineChance) {
+      if (Math.random() > loseTargetLineChance || activeCharacter === "massdriver") {
         return;
       }
       const isHeavy = activeCharacter === "heavy" || activeCharacter === "badwater2";
