@@ -6738,6 +6738,21 @@
         return;
       }
 
+      if (enemy.mode === "chase") {
+        massdriverEye.caught = true;
+        massdriverEye.catchTimer = 0;
+        massdriverEye.graceTimer = 0;
+        const dxChase = player.x - massdriverEye.x;
+        const dyChase = player.y - massdriverEye.y;
+        const angleToPlayerChase = Math.atan2(dyChase, dxChase);
+        let chaseDiff = angleToPlayerChase - massdriverEye.angle;
+        while (chaseDiff > Math.PI) chaseDiff -= Math.PI * 2;
+        while (chaseDiff < -Math.PI) chaseDiff += Math.PI * 2;
+        const chaseTurn = clamp(chaseDiff, -MASSDRIVER_EYE_LOCK_TURN_SPEED * dt, MASSDRIVER_EYE_LOCK_TURN_SPEED * dt);
+        massdriverEye.angle += chaseTurn;
+        return;
+      }
+
       if (massdriverEye.relockCooldown > 0) {
         massdriverEye.relockCooldown = Math.max(0, massdriverEye.relockCooldown - dt);
       }
@@ -6806,7 +6821,6 @@
         enemy.alertTimer = Math.max(enemy.alertTimer, 3.2);
         showMassdriverEyeBark(MASSDRIVER_EYE_CHASE_LINES);
       }
-      setMassdriverEyeActive(false);
     }
 
     function drawMassdriverEye() {
