@@ -327,6 +327,30 @@
       100% { opacity: 0; }
     }
 
+    .eye-subtitle {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9;
+      max-width: 85%;
+      padding: 6px 16px;
+      background: rgba(4, 9, 13, 0.72);
+      border: 1px solid rgba(255, 47, 63, 0.4);
+      color: #f4e9ff;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-size: 0.85rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
+    .eye-subtitle.visible {
+      opacity: 1;
+    }
+
     .alarm-vignette {
       position: absolute;
       inset: 14px;
@@ -2015,6 +2039,7 @@
       <div id="deathFlash" class="death-flash"></div>
       <div id="eyeCatchFlash" class="eye-catch-flash"></div>
       <div id="eyeBarkLine" class="eye-bark-line"></div>
+      <div id="eyeSubtitle" class="eye-subtitle"></div>
       <div id="alarmFlash" class="alarm-vignette"></div>
       <img id="distortionFx" class="distortion-fx" src="120px-Engie_distortion.gif" alt="">
       <div id="glitchOverlay" class="glitch-overlay">
@@ -2470,6 +2495,7 @@
     const deathFlash = document.getElementById("deathFlash");
     const eyeCatchFlashEl = document.getElementById("eyeCatchFlash");
     const eyeBarkLineEl = document.getElementById("eyeBarkLine");
+    const eyeSubtitleEl = document.getElementById("eyeSubtitle");
     const alarmFlashEl = document.getElementById("alarmFlash");
     const distortionFxEl = document.getElementById("distortionFx");
     const jumpscareVideo = document.getElementById("jumpscareVideo");
@@ -3157,7 +3183,17 @@
     whiteFlashSound.volume = 0.7;
     const eyeCatchStingSound = new Audio("Heavy_alert_1.wav");
     eyeCatchStingSound.volume = 0.8;
-    [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound, eyeCatchStingSound].forEach((sound) => {
+    const eyeFoundVoiceSounds = [
+      { audio: new Audio("TOOMANYMOVINGPARTS.mp3"), text: "Too many moving parts." },
+      { audio: new Audio("REPRODUCEPROBLEM.mp3"), text: "Reproduce the problem." },
+      { audio: new Audio("FACTORYDEFECT.mp3"), text: "Factory defect." },
+      { audio: new Audio("ICANTFIXYOU.mp3"), text: "I can't fix you." },
+      { audio: new Audio("COULDBEAPROBLEM.mp3"), text: "Could be a problem." }
+    ];
+    const eyeSearchVoiceLine = { audio: new Audio("SOMETHINGSBROKENILLINVESTIGATE.mp3"), text: "Something's broken. I'll investigate." };
+    eyeFoundVoiceSounds.forEach((line) => { line.audio.volume = 0.85; });
+    eyeSearchVoiceLine.audio.volume = 0.85;
+    [soldierAggSound, soldierBarkSound, soldierJumpScreamSound, soldierAlarmSound, engieDistortionSound, whiteFlashSound, eyeCatchStingSound, ...eyeFoundVoiceSounds.map((line) => line.audio), eyeSearchVoiceLine.audio].forEach((sound) => {
       sound.preload = "auto";
       sound.load();
     });
@@ -5961,6 +5997,7 @@
       if (activeCharacter === "massdriver") {
         setMassdriverEyeActive(false);
         hideMassdriverEyeBark();
+        hideMassdriverEyeSubtitle();
       }
       syncEnemyWalkAudio(0, true);
       if (activeCharacter === "pyro") {
@@ -6595,7 +6632,6 @@
       eyeCatchFlashEl.classList.add("pulse");
     }
 
-    const MASSDRIVER_EYE_SPOTTED_LINES = ["I SEE YOU", "THERE YOU ARE", "FOUND YOU"];
     const MASSDRIVER_EYE_LOST_LINES = ["...WHERE DID YOU GO", "HIDING WON'T HELP"];
     const MASSDRIVER_EYE_CHASE_LINES = ["NOW I HAVE YOU", "RUN"];
 
@@ -6609,6 +6645,43 @@
 
     function hideMassdriverEyeBark() {
       eyeBarkLineEl.classList.remove("flash");
+    }
+
+    let eyeSubtitleActiveAudio = null;
+
+    function hideMassdriverEyeSubtitle() {
+      eyeSubtitleEl.classList.remove("visible");
+      if (eyeSubtitleActiveAudio) {
+        eyeSubtitleActiveAudio.pause();
+        eyeSubtitleActiveAudio.currentTime = 0;
+      }
+      eyeSubtitleActiveAudio = null;
+    }
+
+    function playMassdriverEyeVoiceLine(line) {
+      [...eyeFoundVoiceSounds, eyeSearchVoiceLine].forEach((entry) => {
+        entry.audio.pause();
+        entry.audio.currentTime = 0;
+      });
+      eyeSubtitleEl.textContent = line.text;
+      eyeSubtitleEl.classList.add("visible");
+      eyeSubtitleActiveAudio = line.audio;
+      line.audio.currentTime = 0;
+      line.audio.play().catch(() => {});
+      line.audio.onended = () => {
+        if (eyeSubtitleActiveAudio === line.audio) {
+          hideMassdriverEyeSubtitle();
+        }
+      };
+    }
+
+    function playMassdriverEyeFoundVoiceLine() {
+      const line = eyeFoundVoiceSounds[Math.floor(Math.random() * eyeFoundVoiceSounds.length)];
+      playMassdriverEyeVoiceLine(line);
+    }
+
+    function playMassdriverEyeSearchVoiceLine() {
+      playMassdriverEyeVoiceLine(eyeSearchVoiceLine);
     }
 
     function initMassdriverEye(x, y, towerX, towerY, towerRadius) {
@@ -6698,6 +6771,7 @@
           massdriverEye.graceTimer = 0;
           massdriverEye.relockCooldown = MASSDRIVER_EYE_RELOCK_COOLDOWN;
           showMassdriverEyeBark(MASSDRIVER_EYE_LOST_LINES);
+          playMassdriverEyeSearchVoiceLine();
         }
         return;
       }
@@ -6716,7 +6790,7 @@
         massdriverEye.graceTimer = MASSDRIVER_EYE_CATCH_GRACE;
         playMassdriverEyeCatchSting();
         flashMassdriverEyeWarning();
-        showMassdriverEyeBark(MASSDRIVER_EYE_SPOTTED_LINES);
+        playMassdriverEyeFoundVoiceLine();
       }
     }
 
@@ -8791,6 +8865,7 @@
       deactivateNoliSpotlight();
       setMassdriverEyeActive(false);
       hideMassdriverEyeBark();
+      hideMassdriverEyeSubtitle();
       syncEnemyWalkAudio(0, true);
       jumpscare.classList.remove("visible");
       deathScreen.classList.remove("visible");
