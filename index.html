@@ -6534,6 +6534,8 @@
     const MASSDRIVER_EYE_CONE_HALF_ANGLE = 0.26;
     const MASSDRIVER_EYE_RANGE = TILE * 16;
     const MASSDRIVER_EYE_CATCH_DURATION = 1.5;
+    const MASSDRIVER_EYE_CATCH_GRACE = 0.3;
+    const MASSDRIVER_EYE_RELOCK_COOLDOWN = 1.5;
     const MASSDRIVER_EYE_LOCK_TURN_SPEED = 9;
     const MASSDRIVER_EYE_TWITCH_STRENGTH = 0.09;
     const MASSDRIVER_EYE_TOWER_COVER_ANGLE = 0.55;
@@ -6545,6 +6547,8 @@
       active: true,
       caught: false,
       catchTimer: 0,
+      graceTimer: 0,
+      relockCooldown: 0,
       towerX: 0,
       towerY: 0,
       towerRadius: 0
@@ -6569,6 +6573,8 @@
       massdriverEye.active = true;
       massdriverEye.caught = false;
       massdriverEye.catchTimer = 0;
+      massdriverEye.graceTimer = 0;
+      massdriverEye.relockCooldown = 0;
       massdriverEye.towerX = towerX;
       massdriverEye.towerY = towerY;
       massdriverEye.towerRadius = towerRadius;
@@ -6579,6 +6585,8 @@
       if (!active) {
         massdriverEye.caught = false;
         massdriverEye.catchTimer = 0;
+        massdriverEye.graceTimer = 0;
+        massdriverEye.relockCooldown = 0;
       }
     }
 
@@ -6605,8 +6613,14 @@
       if (!massdriverEye.active) {
         massdriverEye.caught = false;
         massdriverEye.catchTimer = 0;
+        massdriverEye.graceTimer = 0;
+        massdriverEye.relockCooldown = 0;
         massdriverEye.angle += massdriverEye.sweepDir * MASSDRIVER_EYE_SWEEP_SPEED * dt;
         return;
+      }
+
+      if (massdriverEye.relockCooldown > 0) {
+        massdriverEye.relockCooldown = Math.max(0, massdriverEye.relockCooldown - dt);
       }
 
       const dx = player.x - massdriverEye.x;
@@ -6624,13 +6638,19 @@
 
         const stillInRange = dist <= MASSDRIVER_EYE_RANGE && !behindTower;
         if (stillInRange) {
-          massdriverEye.catchTimer += dt;
-          if (massdriverEye.catchTimer >= MASSDRIVER_EYE_CATCH_DURATION) {
-            triggerMassdriverEyeChase();
+          if (massdriverEye.graceTimer > 0) {
+            massdriverEye.graceTimer -= dt;
+          } else {
+            massdriverEye.catchTimer += dt;
+            if (massdriverEye.catchTimer >= MASSDRIVER_EYE_CATCH_DURATION) {
+              triggerMassdriverEyeChase();
+            }
           }
         } else {
           massdriverEye.caught = false;
           massdriverEye.catchTimer = 0;
+          massdriverEye.graceTimer = 0;
+          massdriverEye.relockCooldown = MASSDRIVER_EYE_RELOCK_COOLDOWN;
         }
         return;
       }
@@ -6643,9 +6663,10 @@
       while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
       const inGaze = dist <= MASSDRIVER_EYE_RANGE && !behindTower && Math.abs(angleDiff) <= MASSDRIVER_EYE_CONE_HALF_ANGLE;
 
-      if (inGaze) {
+      if (inGaze && massdriverEye.relockCooldown <= 0) {
         massdriverEye.caught = true;
         massdriverEye.catchTimer = 0;
+        massdriverEye.graceTimer = MASSDRIVER_EYE_CATCH_GRACE;
         playMassdriverEyeCatchSting();
         flashMassdriverEyeWarning();
       }
