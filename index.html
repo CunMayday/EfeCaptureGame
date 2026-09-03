@@ -3009,12 +3009,22 @@
       }
       if (targetIndex >= 0) {
         const track = CURTAIN_CALL_LAYERS[targetIndex];
+        const enteringFromSilence = previousIndex === -1;
         if (track.paused) {
           track.currentTime = 0;
-          track.volume = 0;
+          track.volume = enteringFromSilence ? musicFullVolume.get(track) : 0;
           track.play().catch(() => {});
         }
-        fadeMusicTrack(track, musicFullVolume.get(track), 200);
+        if (enteringFromSilence) {
+          const existingTimer = musicFadeTimers.get(track);
+          if (existingTimer) {
+            clearInterval(existingTimer);
+            musicFadeTimers.delete(track);
+          }
+          track.volume = musicFullVolume.get(track);
+        } else {
+          fadeMusicTrack(track, musicFullVolume.get(track), 200);
+        }
       }
     }
 
@@ -7027,14 +7037,15 @@
         updateNoliSpotlight(dt, null);
         return;
       }
-      const nearestDist = distance(player.x, player.y, enemy.x, enemy.y);
+      const towerPoint = { x: massdriverEye.towerX, y: massdriverEye.towerY };
+      const nearestDist = distance(player.x, player.y, towerPoint.x, towerPoint.y);
       updateCurtainCallLayers(nearestDist);
       if (curtainCallActiveLayerIndex === 2) {
-        activateNoliSpotlight(enemy);
+        activateNoliSpotlight(towerPoint);
       } else {
         deactivateNoliSpotlight();
       }
-      updateNoliSpotlight(dt, enemy);
+      updateNoliSpotlight(dt, towerPoint);
     }
 
     function updateMassdriverChaseMusic() {
@@ -8186,7 +8197,7 @@
     const NOLI_VIS_SHAKE_CHANCE = 0.02;
 
     function currentCurtainCallState() {
-      if (activeCharacter !== "badwater2") {
+      if (activeCharacter !== "badwater2" && activeCharacter !== "massdriver") {
         return null;
       }
       if (!curtainCallChase.paused && curtainCallChase.volume > 0.02) {
