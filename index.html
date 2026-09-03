@@ -5037,6 +5037,12 @@
           enemy.chaseSpeed = CHARACTER_STATS.heavy.chaseSpeed;
           enemy.chargeSpeed = CHARACTER_STATS.heavy.chargeSpeed;
           initMassdriverEye(TILE * 32.5, TILE * 24.5, TILE * 32.5, TILE * 24.5, TILE * 2.3);
+
+          curtainCallActiveLayerIndex = -1;
+          curtainCallChasingLastFrame = false;
+          pauseCurtainCallChase();
+          startCurtainCallLayers();
+          deactivateNoliSpotlight();
         }
       } else {
         game.state = "intro";
@@ -6035,6 +6041,9 @@
         setMassdriverEyeActive(false);
         hideMassdriverEyeBark();
         hideMassdriverEyeSubtitle();
+        stopCurtainCallLayers();
+        pauseCurtainCallChase();
+        deactivateNoliSpotlight();
       }
       syncEnemyWalkAudio(0, true);
       if (activeCharacter === "pyro") {
@@ -7012,6 +7021,37 @@
       curtainCallChasingLastFrame = anyChasing;
     }
 
+    function updateMassdriverProximity(dt) {
+      if (enemy.mode === "chase") {
+        deactivateNoliSpotlight();
+        updateNoliSpotlight(dt, null);
+        return;
+      }
+      const nearestDist = distance(player.x, player.y, enemy.x, enemy.y);
+      updateCurtainCallLayers(nearestDist);
+      if (curtainCallActiveLayerIndex === 2) {
+        activateNoliSpotlight(enemy);
+      } else {
+        deactivateNoliSpotlight();
+      }
+      updateNoliSpotlight(dt, enemy);
+    }
+
+    function updateMassdriverChaseMusic() {
+      const anyChasing = enemy.mode === "chase";
+      if (anyChasing && !curtainCallChasingLastFrame) {
+        stopCurtainCallLayers();
+        playCurtainCallChase();
+        flashNoliTargetFound();
+      } else if (!anyChasing && curtainCallChasingLastFrame) {
+        pauseCurtainCallChase(1200);
+        if (game.state === "playing") {
+          startCurtainCallLayers();
+        }
+      }
+      curtainCallChasingLastFrame = anyChasing;
+    }
+
     let cameraShakeTimer = 0;
     const cameraShakeStrength = 3;
     let cameraRumbleActive = false;
@@ -7430,7 +7470,7 @@
         ctx.fillText(`[E] ${prompt.prompt}`, prompt.x, prompt.y - 20);
       }
 
-      if (activeCharacter === "badwater2" && noliSpotlight.fadeLevel > 0.01) {
+      if ((activeCharacter === "badwater2" || activeCharacter === "massdriver") && noliSpotlight.fadeLevel > 0.01) {
         drawNoliSpotlight();
       } else {
         drawVignette();
@@ -8038,6 +8078,8 @@
           if (enemy.mode === "chase") {
             updateEnemyEntity(dt, enemy, true);
           }
+          updateMassdriverProximity(dt);
+          updateMassdriverChaseMusic();
         } else {
           updateEnemy(dt);
           if (activeCharacter === "soldier") {
