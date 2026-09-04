@@ -5865,9 +5865,15 @@
             pauseCurtainCallChase(1800);
             deactivateNoliSpotlight();
           }
+          if (activeCharacter === "pyro") {
+            clearPyroInstances();
+            clearPyroReaper();
+            pyroFireAmbienceSound.pause();
+          }
           if (activeCharacter === "soldier") {
             stopAllSoldierSounds();
             clearPyroInstances();
+            clearPyroReaper();
             pyroFireAmbienceSound.pause();
             cameraShakeTimer = 0;
             clearDistortionFlickers();
